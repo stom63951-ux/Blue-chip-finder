@@ -21,6 +21,7 @@ OUT = ROOT / "data.json"
 CHINA = json.loads((ROOT / "scripts" / "china_exclusions.json").read_text())["tickers"]
 CHINA_COUNTRIES = {"china", "hong kong", "macau", "macao"}
 MIN_DROP = -10.0  # % over 3 months; the page slider starts at 10%
+DUPLICATE_CLASSES = {"GOOG", "FOX", "NWS"}  # keep one share class per company
 UA = {"User-Agent": "Mozilla/5.0 (blue-chip-finder data refresh)"}
 
 
@@ -92,6 +93,7 @@ def stats(info, curr):
 
 def main():
     members = sp500()
+    members = [m for m in members if m["t"] not in DUPLICATE_CLASSES]
     tickers = [m["t"] for m in members]
     print(f"S&P 500 members: {len(tickers)}")
 
