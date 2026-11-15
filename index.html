@@ -357,6 +357,56 @@ body.locked .wrap{visibility:hidden}
   #ptbl td input.n{width:78px}
   #ptbl td input.c{width:140px}
 }
+
+/* ---- Buy button and purchase window ---- */
+.buybtn{font:inherit;font-size:.78rem;font-weight:600;color:#fff;background:var(--chip);border:0;border-radius:7px;padding:5px 12px;cursor:pointer;transition:background .2s}
+.buybtn:hover{background:#1a43b8}
+.modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:16px}
+.modal[hidden]{display:none}
+.mback{position:absolute;inset:0;background:rgba(16,24,40,.45);opacity:0;transition:opacity .25s}
+.mbox{position:relative;background:#fff;border-radius:14px;width:min(520px,100%);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;box-shadow:0 24px 48px -12px rgba(16,24,40,.25);opacity:0;transform:translateY(12px);transition:opacity .25s var(--ease),transform .3s var(--ease)}
+.modal.show .mback{opacity:1} .modal.show .mbox{opacity:1;transform:none}
+.mhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px 12px;border-bottom:1px solid var(--edge)}
+.mhead .co{display:flex;align-items:center;gap:10px}
+.mhead h3{margin:0;font-size:1.05rem;font-weight:600}
+.mhead .sub{font-size:.8rem;color:var(--muted);margin-top:2px}
+.mx{font-size:1.5rem;line-height:1;background:none;border:0;color:var(--muted);cursor:pointer;padding:0 4px}
+.mbody{padding:14px 18px;overflow-y:auto}
+.seg2{display:flex;background:var(--bg-2);border-radius:8px;padding:3px;margin-bottom:14px}
+.seg2 button{flex:1;font:inherit;font-size:.82rem;border:0;background:none;padding:7px 8px;border-radius:6px;color:var(--muted);cursor:pointer}
+.seg2 button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.1)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.fgrid label{display:flex;flex-direction:column;gap:4px;font-size:.74rem;color:var(--muted);font-weight:500}
+.fgrid label[hidden]{display:none}
+.fgrid input{font:inherit;font-size:.95rem;padding:8px 10px;border:1px solid var(--edge);border-radius:8px;color:var(--ink);background:#fff;width:100%}
+.fgrid input.n{font-family:var(--font-data);text-align:right}
+.fgrid input:focus{outline:none;border-color:var(--chip);box-shadow:0 0 0 3px color-mix(in srgb,var(--chip) 18%,transparent)}
+.fgrid .hint{font-size:.7rem;color:var(--muted);font-weight:400}
+.fgrid .hint button{font:inherit;color:var(--chip);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.preview{margin-top:16px;border:1px solid var(--edge);border-radius:10px;padding:12px 14px;background:var(--bg-2)}
+.preview .big{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--edge)}
+.preview .big b{font-size:1.4rem}
+.preview dl{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:0;font-size:.86rem}
+.preview dt{color:var(--muted)} .preview dd{margin:0;text-align:right}
+.preview .tot{font-weight:700;border-top:1px solid var(--edge);padding-top:6px;margin-top:2px}
+.preview .warn{color:var(--warn);font-size:.78rem;margin-top:8px}
+.fine{font-size:.74rem;color:var(--muted);margin:12px 0 0}
+.mfoot{display:flex;justify-content:flex-end;gap:10px;padding:12px 18px;border-top:1px solid var(--edge);padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+.mfoot button{font:inherit;font-size:.9rem;font-weight:600;border-radius:8px;padding:9px 16px;cursor:pointer}
+.mfoot .ghost{background:#fff;border:1px solid var(--edge);color:var(--ink)}
+.mfoot .primary{background:var(--chip);border:0;color:#fff}
+.mfoot .primary:disabled{background:#98a2b3;cursor:not-allowed}
+.toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:#fff;font-size:.86rem;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);z-index:110;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{font:inherit;color:#9db6ff;background:none;border:0;margin-left:10px;cursor:pointer;text-decoration:underline}
+body.locked{overflow:hidden}
+@media (max-width:719px){
+  .modal{place-items:end stretch;padding:0}
+  .mbox{width:100%;border-radius:16px 16px 0 0;max-height:92dvh;transform:translateY(40px)}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .fgrid input{font-size:16px}
+  .mfoot button{flex:1}
+}
 </style>
 
 </head>
@@ -410,13 +460,13 @@ body.locked .wrap{visibility:hidden}
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, approval, holdings, purchase date and comment are editable and saved in this browser only. Set Manual approval to Yes to add a share to your Portfolio.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, approval, holdings, purchase date and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
   </div>
 
   <section id="portView" hidden>
     <div class="tallies" id="portTallies"></div>
     <div class="register"><div class="scroller"><table id="ptbl"></table></div></div>
-    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when its <b>Manual approval</b> is set to Yes in the Finder. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only.</p>
+    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when you press <b>Buy</b> or set its <b>Manual approval</b> to Yes in the Finder. Invested includes fees. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only.</p>
   </section>
 
   <div class="book">
@@ -460,6 +510,30 @@ body.locked .wrap{visibility:hidden}
   </div>
   <p class="foot">Not financial advice · Check figures before acting</p>
 </div>
+
+<div class="modal" id="buyModal" hidden>
+  <div class="mback" data-close></div>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="bmTitle">
+    <div class="mhead"><div id="bmHead"></div><button class="mx" data-close aria-label="Close">×</button></div>
+    <div class="mbody">
+      <div class="mode seg2" role="group" aria-label="Buy by">
+        <button type="button" data-mode="shares" aria-pressed="true">Number of shares</button><button type="button" data-mode="amount" aria-pressed="false">Dollar amount</button>
+      </div>
+      <div class="fgrid">
+        <label id="lbShares">Number of shares<input id="bmShares" class="n" type="number" min="1" step="1" inputmode="numeric"></label>
+        <label id="lbAmount" hidden>Amount to spend (USD)<input id="bmAmount" class="n" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Price per share (USD)<input id="bmPrice" class="n" type="number" min="0" step="0.01" inputmode="decimal"><span class="hint" id="bmPriceHint"></span></label>
+        <label>Brokerage fee (USD)<input id="bmBrok" class="n" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label>Currency / other fee (%)<input id="bmFx" class="n" type="number" min="0" step="0.05" inputmode="decimal"></label>
+        <label>Purchase date<input id="bmDate" type="date"></label>
+      </div>
+      <div class="preview" id="bmPreview" aria-live="polite"></div>
+      <p class="fine">This records the purchase in your Portfolio. It does not place a real order with a broker. Fees are remembered for next time.</p>
+    </div>
+    <div class="mfoot"><button class="ghost" data-close>Cancel</button><button class="primary" id="bmConfirm">Confirm buy</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
 let PAYLOAD;
@@ -528,7 +602,7 @@ const state = { tab:"finder", drop: store.get("bcdf.drop",10), view: innerWidth<
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"]]],
+  ["g","Agent",[["agent","Recommends"],["trade","Trade"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"],["graph","5Y graph"]]],
   ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt/EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
@@ -537,7 +611,7 @@ const COLS_FULL = [
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"]]],
+  ["g","Agent",[["agent","Recommends"],["trade","Trade"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"]]],
   ["g","Value",[["pe","P/E","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["held","Current $ held","r"]]],
@@ -568,6 +642,7 @@ function cell(s,key){
     case "shares": return `<td class="r"><input class="n" id="sh-${s.t}" data-k="shares" data-t="${s.t}" type="number" step="1" min="0" value="${e.shares}" aria-label="Number of shares for ${s.t}"></td>`;
     case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v):"—"}</td>`; }
     case "divest": return `<td class="r"><input class="n" id="dv-${s.t}" data-k="divest" data-t="${s.t}" type="number" step="0.01" value="${e.divest}" aria-label="Target divest for ${s.t}"></td>`;
+    case "trade": return `<td><button class="buybtn" data-buy="${s.t}" aria-label="Buy ${esc(s.name)}">Buy</button></td>`;
     case "agent": return `<td class="agentcol">${s.agent?`<span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span> <span class="score">${s.score}/7</span>`:`<span class="pill na">Pending</span>`}${s.steep?` <span class="pill flag" title="Fell 40% or more in 3 months">steep fall</span>`:""}</td>`;
     case "approve": return `<td><select id="ap-${s.t}" data-k="approve" data-t="${s.t}" aria-label="Manual approval for ${s.t}"><option value="" ${e.approve===""?"selected":""}>—</option><option value="yes" ${e.approve==="yes"?"selected":""}>Yes</option><option value="no" ${e.approve==="no"?"selected":""}>No</option></select></td>`;
     case "held": return `<td class="r"><input class="n" id="hd-${s.t}" data-k="held" data-t="${s.t}" type="number" step="0.01" min="0" value="${e.held}" aria-label="Current dollars held in ${s.t}"></td>`;
@@ -598,7 +673,7 @@ function spark(s){
 }
 
 
-const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","held","date","comment","web","graph"];
+const CARD_KEYS = ["name","agent","trade","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
 function cardHTML(s){
   const labels = Object.fromEntries(COLS_FULL.flatMap(g=>g[2]).map(c=>[c[0],c[1]]));
@@ -750,7 +825,7 @@ function toggleRow(tr){
 }
 
 const tbl = document.getElementById("tbl");
-tbl.addEventListener("click", e=>{ if(e.target.closest("input,select,a,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
+tbl.addEventListener("click", e=>{ const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
@@ -777,7 +852,8 @@ function holding(t){
   let shares = num(e.shares); const held = num(e.held);
   const derived = shares==null && held!=null && buy ? held/buy : null;
   const sh = shares ?? derived;
-  const cost = sh!=null && buy!=null ? sh*buy : held;
+  const fees = num(e.fees) ?? 0;
+  const cost = sh!=null && buy!=null ? sh*buy + fees : held;
   const value = sh!=null && curr!=null ? sh*curr : null;
   const gain = value!=null && cost!=null ? value-cost : null;
   return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr, buy, divest, shares, derived, cost, value, gain,
@@ -785,7 +861,7 @@ function holding(t){
     date: e.date||"", comment: e.comment||"", agent: s ? s.agent : null, score: s ? s.score : null };
 }
 function num(v){ if(v===""||v==null) return null; const n=+v; return isNaN(n)?null:n; }
-const PCOLS = [["name","Name"],["value","Value now","r"],["gain","Gain / loss","r"],["gainPct","%","r"],["shares","Shares","r"],["buy","Buy price","r"],["cost","Cost","r"],["curr","Price now","r"],["agent","Agent today"],["divest","Target divest","r"],["toTarget","To target","r"],["date","Purchase date"],["comment","Comment"],["rm",""]];
+const PCOLS = [["name","Name"],["value","Value now","r"],["gain","Gain / loss","r"],["gainPct","%","r"],["shares","Shares","r"],["buy","Buy price","r"],["cost","Cost","r"],["curr","Price now","r"],["agent","Agent today"],["divest","Target divest","r"],["toTarget","To target","r"],["date","Purchase date"],["comment","Comment"],["more",""],["rm",""]];
 function pcell(h,k){
   const tone = v => v==null ? "" : v>=0 ? "gain" : "loss";
   switch(k){
@@ -802,6 +878,7 @@ function pcell(h,k){
     case "toTarget": return `<td class="r num">${h.toTarget==null?"—":h.toTarget<=0?`<span class="pill yes">Reached</span>`:pct(h.toTarget)}</td>`;
     case "date": return `<td><input class="d" data-pk="date" data-t="${h.t}" type="date" value="${h.date}" aria-label="Purchase date for ${h.t}"></td>`;
     case "comment": return `<td><input class="c" data-pk="comment" data-t="${h.t}" type="text" value="${esc(h.comment)}" aria-label="Comment for ${h.t}"></td>`;
+    case "more": return `<td><button class="buybtn" data-buy="${h.t}" aria-label="Buy more ${esc(h.name)}">Buy more</button></td>`;
     case "rm": return `<td><button class="rm" data-rm="${h.t}" aria-label="Remove ${h.t} from portfolio">Remove</button></td>`;
   }
 }
@@ -815,7 +892,7 @@ function renderPortfolio(){
   const reached = list.filter(h=>h.toTarget!=null && h.toTarget<=0).length;
   document.getElementById("portTallies").innerHTML = [
     ["Holdings", list.length, `${reached} at or above target divest`, ""],
-    ["Invested", money(cost), "shares × buy price", ""],
+    ["Invested", money(cost), "including fees", ""],
     ["Value now", money(value), "at latest close", ""],
     ["Gain / loss", (gain>=0?"+":"−")+money(Math.abs(gain)), pcost? pct(gain/pcost*100)+" overall":"enter shares and buy price", gain>=0?"good":"bad"],
   ].map(([k,v,s,c])=>`<div class="tally ${priced.length?c:""}"><div class="v num">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`).join("");
@@ -836,7 +913,7 @@ function snapshot(t){
 }
 const ptbl = document.getElementById("ptbl");
 ptbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.pk) return; setEd(el.dataset.t, el.dataset.pk, el.value); renderPortfolio(); });
-ptbl.addEventListener("click", e=>{ const b=e.target.closest("[data-rm]"); if(!b) return; setEd(b.dataset.rm,"approve",""); renderPortfolio(); render(false); });
+ptbl.addEventListener("click", e=>{ const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } const b=e.target.closest("[data-rm]"); if(!b) return; setEd(b.dataset.rm,"approve",""); renderPortfolio(); render(false); });
 function setTab(tab){
   state.tab = tab; store.set("bcdf.tab",tab);
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
@@ -846,6 +923,102 @@ function setTab(tab){
   if(history.replaceState) history.replaceState(null,"",tab==="portfolio"?"#portfolio":location.pathname+location.search);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
+
+/* ===== Buy window ===== */
+const bm = { el: document.getElementById("buyModal"), t:null, mode:"shares", last:null };
+const fees = Object.assign({brok:0, fx:0}, store.get("bcdf.fees",{}));
+const today = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
+function quoteOf(t){
+  const s = DATA.find(x=>x.t===t), snap = (edits[t]||{}).snap||{};
+  return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr: s ? s.curr : (PRICES[t] ?? snap.curr ?? null) };
+}
+function openBuy(t){
+  const q = quoteOf(t); bm.t = t; bm.q = q; bm.mode = "shares";
+  const e = edits[t]||{}, target = num(e.buy) ?? (q.s ? Math.floor(q.s.curr*0.95*100)/100 : null);
+  document.getElementById("bmHead").innerHTML = `<div class="co">${logo({t,sector:q.sector,name:q.name})}<div><h3 id="bmTitle">Buy ${esc(q.name)}</h3><div class="sub">${t} · latest close ${money(q.curr)}${q.s?` · agent says <span class="pill ${q.s.agent}">${q.s.agent==="yes"?"Yes":"No"}</span>`:""}</div></div></div>`;
+  document.getElementById("bmShares").value = num(e.shares) && e.approve!=="yes" ? e.shares : 10;
+  document.getElementById("bmAmount").value = "";
+  document.getElementById("bmPrice").value = q.curr ?? "";
+  document.getElementById("bmPriceHint").innerHTML = target && q.curr && Math.abs(target-q.curr)>0.005 ? `Latest close. <button type="button" id="bmUseTarget">Use target buy ${money(target)}</button>` : "Latest close; change it to your limit price";
+  document.getElementById("bmBrok").value = fees.brok;
+  document.getElementById("bmFx").value = fees.fx;
+  document.getElementById("bmDate").value = today();
+  setMode("shares");
+  bm.el.hidden = false; document.body.classList.add("locked");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>bm.el.classList.add("show")));
+  const ut = document.getElementById("bmUseTarget"); if(ut) ut.onclick = ()=>{ document.getElementById("bmPrice").value = target; calcBuy(); };
+  bm.opener = document.activeElement;
+  setTimeout(()=>{ if(matchMedia("(pointer:fine)").matches) document.getElementById("bmShares").focus(); }, 50);
+}
+function closeBuy(){
+  bm.el.classList.remove("show"); document.body.classList.remove("locked");
+  setTimeout(()=>{ bm.el.hidden = true; }, RM ? 0 : 280);
+  if(bm.opener && bm.opener.focus) bm.opener.focus();
+}
+function setMode(m){
+  bm.mode = m;
+  bm.el.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.mode===m));
+  document.getElementById("lbShares").hidden = m!=="shares";
+  document.getElementById("lbAmount").hidden = m!=="amount";
+  if(m==="amount" && !document.getElementById("bmAmount").value) document.getElementById("bmAmount").value = 5000;
+  calcBuy();
+}
+function calcBuy(){
+  const price = num(document.getElementById("bmPrice").value), brok = num(document.getElementById("bmBrok").value) ?? 0, fx = num(document.getElementById("bmFx").value) ?? 0;
+  let shares, amount = null;
+  if(bm.mode==="shares") shares = Math.floor(num(document.getElementById("bmShares").value) ?? 0);
+  else { amount = num(document.getElementById("bmAmount").value) ?? 0; shares = price ? Math.max(0, Math.floor((amount - brok) / (price*(1+fx/100)))) : 0; }
+  const sub = shares && price ? shares*price : 0, fxFee = sub*fx/100, total = sub + fxFee + (shares?brok:0);
+  const per = shares ? total/shares : null;
+  const e = edits[bm.t]||{}, own = e.approve==="yes" ? (num(e.shares) ?? 0) : 0;
+  const pt = bm.q.s && bm.q.s.stats ? bm.q.s.stats.pt : null;
+  let warn = "";
+  if(!price) warn = "Enter a price per share.";
+  else if(!shares) warn = bm.mode==="amount" ? "That amount doesn't cover one share plus fees." : "Enter how many shares to buy.";
+  else if(bm.q.curr && price > bm.q.curr*1.05) warn = "This price is more than 5% above the latest close.";
+  bm.last = shares && price ? { shares, price, brok, fxFee, total } : null;
+  document.getElementById("bmPreview").innerHTML = `
+    <div class="big"><span class="muted">You get</span><b class="num">${shares||0} share${shares===1?"":"s"}</b></div>
+    <dl>
+      <dt>${shares||0} × ${money(price)}</dt><dd class="num">${money(sub)}</dd>
+      <dt>Brokerage</dt><dd class="num">${money(shares?brok:0)}</dd>
+      <dt>Currency / other fee (${fmt(fx,2)}%)</dt><dd class="num">${money(fxFee)}</dd>
+      <dt class="tot">Total cost</dt><dd class="tot num">${money(total)}</dd>
+      ${amount!=null?`<dt>Left over from ${money(amount)}</dt><dd class="num">${money(Math.max(0,amount-total))}</dd>`:""}
+      <dt>Cost per share with fees</dt><dd class="num">${money(per)}</dd>
+      ${own?`<dt>Holding after this buy</dt><dd class="num">${own + (shares||0)} shares</dd>`:""}
+      ${pt&&shares?`<dt>Value at analyst target (${money(pt)})</dt><dd class="num">${money(pt*shares)}</dd>`:""}
+    </dl>${warn?`<div class="warn">${warn}</div>`:""}`;
+  document.getElementById("bmConfirm").disabled = !bm.last;
+  document.getElementById("bmConfirm").textContent = bm.last ? `Confirm buy · ${money(total)}` : "Confirm buy";
+}
+function confirmBuy(){
+  const b = bm.last; if(!b) return; const t = bm.t, e = edits[t]||{};
+  fees.brok = num(document.getElementById("bmBrok").value) ?? 0; fees.fx = num(document.getElementById("bmFx").value) ?? 0; store.set("bcdf.fees", fees);
+  const had = e.approve==="yes" ? (num(e.shares) ?? 0) : 0, hadBuy = had ? (num(e.buy) ?? b.price) : 0;
+  const shares = had + b.shares, avg = Math.round(((had*hadBuy) + b.shares*b.price) / shares * 10000) / 10000;
+  const lots = (e.lots||[]).concat([{date: document.getElementById("bmDate").value, shares: b.shares, price: b.price, fees: Math.round((b.brok+b.fxFee)*100)/100}]);
+  if(bm.q.s && !e.snap) snapshot(t);
+  setEd(t,"approve","yes"); setEd(t,"shares",String(shares)); setEd(t,"buy",String(avg));
+  setEd(t,"fees", String(Math.round(((had ? (num(e.fees)??0) : 0) + b.brok + b.fxFee)*100)/100));
+  setEd(t,"held", String(Math.round(shares*avg*100)/100));
+  if(!had || !e.date) setEd(t,"date", document.getElementById("bmDate").value);
+  setEd(t,"lots", lots);
+  if(bm.q.s){ const sn = Object.assign({}, edits[t].snap, {name:bm.q.name, sector:bm.q.sector, curr:bm.q.curr}); setEd(t,"snap",sn); }
+  closeBuy();
+  render(false); renderPortfolio();
+  toast(`Bought ${b.shares} ${t} for ${money(b.total)}. Added to Portfolio.`, state.tab!=="portfolio");
+}
+function toast(msg, link){
+  const el = document.getElementById("toast");
+  el.innerHTML = esc(msg) + (link ? `<button type="button" id="toastGo">View</button>` : "");
+  el.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(()=>el.classList.remove("show"), 4500);
+  const g = document.getElementById("toastGo"); if(g) g.onclick = ()=>{ el.classList.remove("show"); setTab("portfolio"); scrollTo({top:0}); };
+}
+bm.el.addEventListener("click", e=>{ if(e.target.closest("[data-close]")) closeBuy(); const m=e.target.closest("[data-mode]"); if(m) setMode(m.dataset.mode); });
+bm.el.addEventListener("input", calcBuy);
+document.getElementById("bmConfirm").onclick = confirmBuy;
+addEventListener("keydown", e=>{ if(e.key==="Escape" && !bm.el.hidden) closeBuy(); });
 const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target);} }),{threshold:.12}) : null;
 document.querySelectorAll(".reveal").forEach(el=> io ? io.observe(el) : el.classList.add("in"));
 setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add("in")), 2500);
