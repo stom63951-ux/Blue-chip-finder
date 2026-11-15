@@ -426,6 +426,10 @@ body.locked{overflow:hidden}
   #tbl td input.n[data-k="shares"]{width:60px}
   #tbl td.c-name .co span:last-child{max-width:170px}
 }
+
+.deepbtn{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--ink);color:#fff!important;font-weight:600;font-size:.88rem;text-decoration:none}
+.deepbtn:hover{background:#1d2939;text-decoration:none}
+.deephint{font-size:.74rem;color:var(--muted);margin:6px 0 0}
 </style>
 
 </head>
@@ -705,6 +709,25 @@ function cardHTML(s){
   });
   return `<section class="card sumcard">${parts.join("")}</section>`;
 }
+function deepDiveURL(s){
+  const st = s.stats||{}, f = (v,d=2)=> v==null?"n/a":fmt(v,d);
+  const brief = `Deep dive on ${s.name} (${s.t}), an S&P 500 company in ${s.sector}.
+
+Facts from my screener (Yahoo Finance, close ${PAYLOAD.asof||"latest"}): price $${f(s.curr)}; 3-month change ${f(s.pct3m,1)}% (from $${f(s.p3m)}); 1 month ago $${f(s.p1m)}; 1 year ago $${f(s.p1y)}; 2 years ago $${f(s.p2y)}. Market value ${bn(st.mcap)}. Trailing P/E ${f(st.pe,1)}, forward P/E ${f(st.fpe,1)}. Profit margin ${f(st.pm,1)}%. Debt/EBITDA ${f(st.debitda,2)}x. Free cash flow ${bn(st.fcf)}. Analyst average target $${f(st.pt)}. My rule-based screener scored it ${s.score}/7 and said ${s.agent==="yes"?"YES":"NO"}.
+
+Please search the web for the latest news, earnings and filings, then give me:
+1. Why the share price has fallen over the last 3 months (specific events, dates, numbers).
+2. Whether the fall looks temporary or a lasting change to the business.
+3. What could make the price go back up: catalysts, next earnings date, guidance, buybacks.
+4. The main risks and the bear case.
+5. Valuation against its own history and its closest peers.
+6. Recent analyst and insider activity (rating or target changes, insider buying or selling).
+7. Any exposure to China (revenue, suppliers, operations). I avoid China exposure.
+8. Anything else an investor should know.
+
+Finish with a clear conclusion: Buy, Wait or Avoid, your confidence, a sensible buy price range, and what would change your mind. Use plain English, cite sources with dates, and note this is not financial advice.`;
+  return "https://claude.ai/new?q=" + encodeURIComponent(brief);
+}
 function detailHTML(s){
   const st=s.stats, t=s.t.toLowerCase();
   const verdict = !s.agent ? `<p>Fundamentals are still pending, so the agent hasn't scored ${s.t}.</p>`
@@ -722,7 +745,9 @@ function detailHTML(s){
     <dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}</dd></dl>` : `<p class="muted">Pending.</p>`;
   return `<div class="dd-anim"><div><div class="dd">
     ${cardHTML(s)}
-    <section class="card"><h3>Agent analysis</h3>${verdict}<ul class="rules">${rules}</ul></section>
+    <section class="card"><h3>Agent analysis</h3>${verdict}<ul class="rules">${rules}</ul>
+      <a class="deepbtn" href="${deepDiveURL(s)}" target="_blank" rel="noopener">Deep dive with Claude <span>↗</span></a>
+      <p class="deephint">Opens Claude with a research brief on ${esc(s.name)}: why the price fell, what could lift it, the risks, and a Buy, Wait or Avoid conclusion.</p></section>
     <section class="card"><h3>Profit &amp; loss summary</h3>${pl}</section>
     <section class="card"><h3>Price path</h3>${spark(s)}<h3 style="margin-top:14px">Blue-chip test</h3><ul class="rules">${tests}</ul></section>
     <section class="card"><h3>Links</h3><div class="links">
