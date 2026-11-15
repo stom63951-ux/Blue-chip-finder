@@ -332,6 +332,31 @@ body.locked .wrap{visibility:hidden}
   .sumcard .r{text-align:left}
 }
 @media (max-width:719px){.sumcard{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---- Finder / Portfolio tabs ---- */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--edge);margin:-4px 0 14px}
+.tabs button{font:inherit;font-size:.9rem;font-weight:500;color:var(--muted);background:none;border:0;padding:8px 14px 10px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--chip)}
+.tabs .cnt{display:inline-block;min-width:1.6em;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--bg-2);color:var(--muted);font-size:.74rem;text-align:center}
+.tabs button[aria-selected="true"] .cnt{background:#eef3ff;color:var(--chip)}
+#ptbl td.gain{color:var(--good)} #ptbl td.loss{color:var(--bad)}
+#ptbl tfoot td{font-weight:600;border-top:1px solid var(--edge);background:var(--bg-2)}
+#ptbl .rm{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:1px solid var(--edge);border-radius:6px;padding:3px 8px;cursor:pointer}
+#ptbl .rm:hover{color:var(--bad);border-color:var(--bad)}
+#ptbl .note{font-size:.72rem;color:var(--muted);display:block}
+#ptbl td input.c{width:180px}
+.pempty{padding:36px 16px;text-align:center;color:var(--muted);white-space:normal}
+.pempty b{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
+@media (max-width:1024px){
+  #ptbl td.c-name,#ptbl th.c-name{position:sticky;left:0;z-index:1;background:var(--bg)}
+  #ptbl tfoot td.c-name{background:var(--bg-2)}
+}
+@media (max-width:719px){
+  #ptbl th,#ptbl td{padding:8px 8px}
+  #ptbl td.c-name .co span:last-child{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+  #ptbl td input.n{width:78px}
+  #ptbl td input.c{width:140px}
+}
 </style>
 
 </head>
@@ -351,6 +376,12 @@ body.locked .wrap{visibility:hidden}
     </div>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tabFinder" data-tab="finder" aria-selected="true">Finder</button>
+    <button role="tab" id="tabPort" data-tab="portfolio" aria-selected="false">Portfolio <span class="cnt" id="portCnt">0</span></button>
+  </nav>
+
+  <div id="finderView">
   <div class="tallies" id="tallies"></div>
 
   <div class="deck rise" style="animation-delay:.3s" role="region" aria-label="Filters">
@@ -379,7 +410,14 @@ body.locked .wrap{visibility:hidden}
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, approval, holdings, purchase date and comment are editable and saved in this browser only.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, approval, holdings, purchase date and comment are editable and saved in this browser only. Set Manual approval to Yes to add a share to your Portfolio.</p>
+  </div>
+
+  <section id="portView" hidden>
+    <div class="tallies" id="portTallies"></div>
+    <div class="register"><div class="scroller"><table id="ptbl"></table></div></div>
+    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when its <b>Manual approval</b> is set to Yes in the Finder. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only.</p>
+  </section>
 
   <div class="book">
     <section class="reveal">
@@ -486,7 +524,7 @@ function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   held: e.held ?? "", date: e.date ?? "", comment: e.comment ?? "" };}
 function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set("bcdf.edits",edits); }
 
-const state = { drop: store.get("bcdf.drop",10), view: innerWidth<900 ? "high" : "full", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set() };
+const state = { tab:"finder", drop: store.get("bcdf.drop",10), view: innerWidth<900 ? "high" : "full", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set() };
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
@@ -715,6 +753,7 @@ const tbl = document.getElementById("tbl");
 tbl.addEventListener("click", e=>{ if(e.target.closest("input,select,a,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
+  if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
   tbl.querySelectorAll(`[data-k="${el.dataset.k}"][data-t="${el.dataset.t}"]`).forEach(o=>{ if(o!==el) o.value=el.value; });
   if(el.dataset.k==="buy"||el.dataset.k==="shares"){ const x=ed(el.dataset.t); tbl.querySelectorAll(`[data-total="${el.dataset.t}"]`).forEach(c=>{ c.textContent = x.buy&&x.shares?money(x.buy*x.shares):"—"; c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); }); }});
 
@@ -726,6 +765,87 @@ document.getElementById("q").addEventListener("input", e=>{state.q=e.target.valu
 document.getElementById("showFail").addEventListener("change", e=>{state.showFail=e.target.checked;render();});
 addEventListener("resize", ()=>{ const auto = innerWidth<900 ? "high" : "full"; if(!state.viewPicked && auto!==state.view){ state.view=auto; render(); } moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
+
+/* ===== Portfolio ===== */
+const PRICES = (typeof PAYLOAD!=="undefined" && PAYLOAD && PAYLOAD.prices) || {};
+function confirmedTickers(){ return Object.keys(edits).filter(t=>edits[t] && edits[t].approve==="yes"); }
+function holding(t){
+  const s = DATA.find(x=>x.t===t), e = edits[t]||{}, snap = e.snap||{};
+  const curr = s ? s.curr : (PRICES[t] ?? snap.curr ?? null);
+  const buy = num(e.buy) ?? snap.buy ?? (s ? Math.floor(s.curr*0.95*100)/100 : null);
+  const divest = num(e.divest) ?? snap.divest ?? (s&&s.stats&&s.stats.pt ? Math.round(s.stats.pt*100)/100 : null);
+  let shares = num(e.shares); const held = num(e.held);
+  const derived = shares==null && held!=null && buy ? held/buy : null;
+  const sh = shares ?? derived;
+  const cost = sh!=null && buy!=null ? sh*buy : held;
+  const value = sh!=null && curr!=null ? sh*curr : null;
+  const gain = value!=null && cost!=null ? value-cost : null;
+  return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr, buy, divest, shares, derived, cost, value, gain,
+    gainPct: gain!=null && cost ? gain/cost*100 : null, toTarget: divest && curr ? (divest/curr-1)*100 : null,
+    date: e.date||"", comment: e.comment||"", agent: s ? s.agent : null, score: s ? s.score : null };
+}
+function num(v){ if(v===""||v==null) return null; const n=+v; return isNaN(n)?null:n; }
+const PCOLS = [["name","Name"],["value","Value now","r"],["gain","Gain / loss","r"],["gainPct","%","r"],["shares","Shares","r"],["buy","Buy price","r"],["cost","Cost","r"],["curr","Price now","r"],["agent","Agent today"],["divest","Target divest","r"],["toTarget","To target","r"],["date","Purchase date"],["comment","Comment"],["rm",""]];
+function pcell(h,k){
+  const tone = v => v==null ? "" : v>=0 ? "gain" : "loss";
+  switch(k){
+    case "name": return `<td class="c-name"><div class="co">${logo({t:h.t,sector:h.sector,name:h.name})}<span>${esc(h.name)}</span></div></td>`;
+    case "agent": return `<td>${h.agent ? `<span class="pill ${h.agent}">${h.agent==="yes"?"Yes":"No"}</span> <span class="muted">${h.score}/7</span>` : `<span class="muted">Not in dip list</span>`}</td>`;
+    case "shares": return `<td class="r"><input class="n" data-pk="shares" data-t="${h.t}" type="number" step="1" min="0" value="${h.shares??""}" placeholder="${h.derived!=null?fmt(h.derived,2):"—"}" aria-label="Shares held in ${h.t}"></td>`;
+    case "buy": return `<td class="r"><input class="n" data-pk="buy" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.buy??""}" aria-label="Buy price for ${h.t}"></td>`;
+    case "cost": return `<td class="r num">${money(h.cost)}</td>`;
+    case "curr": return `<td class="r num">${money(h.curr)}</td>`;
+    case "value": return `<td class="r num">${money(h.value)}</td>`;
+    case "gain": return `<td class="r num ${tone(h.gain)}">${h.gain==null?"—":(h.gain>=0?"+":"−")+money(Math.abs(h.gain))}</td>`;
+    case "gainPct": return `<td class="r num ${tone(h.gainPct)}">${pct(h.gainPct)}</td>`;
+    case "divest": return `<td class="r"><input class="n" data-pk="divest" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.divest??""}" aria-label="Target divest for ${h.t}"></td>`;
+    case "toTarget": return `<td class="r num">${h.toTarget==null?"—":h.toTarget<=0?`<span class="pill yes">Reached</span>`:pct(h.toTarget)}</td>`;
+    case "date": return `<td><input class="d" data-pk="date" data-t="${h.t}" type="date" value="${h.date}" aria-label="Purchase date for ${h.t}"></td>`;
+    case "comment": return `<td><input class="c" data-pk="comment" data-t="${h.t}" type="text" value="${esc(h.comment)}" aria-label="Comment for ${h.t}"></td>`;
+    case "rm": return `<td><button class="rm" data-rm="${h.t}" aria-label="Remove ${h.t} from portfolio">Remove</button></td>`;
+  }
+}
+function renderPortfolio(){
+  const list = confirmedTickers().map(holding).sort((a,b)=>(b.value??b.cost??0)-(a.value??a.cost??0));
+  document.getElementById("portCnt").textContent = list.length;
+  if(state.tab!=="portfolio") return;
+  const sum = k => list.reduce((a,h)=>a+(h[k]??0),0);
+  const cost = sum("cost"), value = list.filter(h=>h.value!=null).reduce((a,h)=>a+h.value,0);
+  const priced = list.filter(h=>h.gain!=null), gain = priced.reduce((a,h)=>a+h.gain,0), pcost = priced.reduce((a,h)=>a+h.cost,0);
+  const reached = list.filter(h=>h.toTarget!=null && h.toTarget<=0).length;
+  document.getElementById("portTallies").innerHTML = [
+    ["Holdings", list.length, `${reached} at or above target divest`, ""],
+    ["Invested", money(cost), "shares × buy price", ""],
+    ["Value now", money(value), "at latest close", ""],
+    ["Gain / loss", (gain>=0?"+":"−")+money(Math.abs(gain)), pcost? pct(gain/pcost*100)+" overall":"enter shares and buy price", gain>=0?"good":"bad"],
+  ].map(([k,v,s,c])=>`<div class="tally ${priced.length?c:""}"><div class="v num">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`).join("");
+  let h = `<thead><tr>${PCOLS.map(c=>`<th class="${c[2]||""} c-${c[0]}" scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
+  if(!list.length) h += `<tr><td colspan="${PCOLS.length}" class="pempty"><b>No confirmed shares yet</b>In the Finder, set <b style="display:inline;font-size:inherit">Manual approval</b> to Yes on a share and it will appear here.</td></tr>`;
+  for(const x of list) h += `<tr>${PCOLS.map(c=>pcell(x,c[0])).join("")}</tr>`;
+  h += `</tbody>`;
+  const tone = gain>=0?"gain":"loss", gtxt = (gain>=0?"+":"−")+money(Math.abs(gain));
+  const foot = {name:`<td class="c-name">Total</td>`, cost:`<td class="r num">${money(cost)}</td>`, value:`<td class="r num">${money(value)}</td>`, gain:`<td class="r num ${tone}">${gtxt}</td>`, gainPct:`<td class="r num ${tone}">${pcost?pct(gain/pcost*100):"—"}</td>`};
+  if(list.length) h += `<tfoot><tr>${PCOLS.map(c=>foot[c[0]]||"<td></td>").join("")}</tr></tfoot>`;
+  document.getElementById("ptbl").innerHTML = h;
+}
+function snapshot(t){
+  const s = DATA.find(x=>x.t===t); if(!s) return; const e = ed(t);
+  setEd(t,"snap",{name:s.name, sector:s.sector, curr:s.curr, buy:num(e.buy), divest:num(e.divest)});
+  if(edits[t].buy==null) setEd(t,"buy",e.buy);
+  if(edits[t].divest==null && e.divest!=="") setEd(t,"divest",e.divest);
+}
+const ptbl = document.getElementById("ptbl");
+ptbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.pk) return; setEd(el.dataset.t, el.dataset.pk, el.value); renderPortfolio(); });
+ptbl.addEventListener("click", e=>{ const b=e.target.closest("[data-rm]"); if(!b) return; setEd(b.dataset.rm,"approve",""); renderPortfolio(); render(false); });
+function setTab(tab){
+  state.tab = tab; store.set("bcdf.tab",tab);
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
+  document.getElementById("finderView").hidden = tab!=="finder";
+  document.getElementById("portView").hidden = tab!=="portfolio";
+  if(tab==="portfolio") renderPortfolio(); else { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
+  if(history.replaceState) history.replaceState(null,"",tab==="portfolio"?"#portfolio":location.pathname+location.search);
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
 const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target);} }),{threshold:.12}) : null;
 document.querySelectorAll(".reveal").forEach(el=> io ? io.observe(el) : el.classList.add("in"));
 setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add("in")), 2500);
@@ -733,6 +853,7 @@ setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add
 const deck=document.querySelector('.deck'); let deckTop=0; const measure=()=>{deck.classList.remove('compact'); deckTop=deck.getBoundingClientRect().top+scrollY;}; measure();
 addEventListener('scroll',()=>{ if(getComputedStyle(deck).position!=='sticky') return; deck.classList.toggle('compact', scrollY>deckTop+40); },{passive:true});
 buildTallies(); buildHist(); render();
+setTab(location.hash==="#portfolio" ? "portfolio" : (store.get("bcdf.tab","finder")));
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
 (function(){

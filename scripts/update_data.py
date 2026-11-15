@@ -169,6 +169,9 @@ def main():
         "minDrop": abs(MIN_DROP),
         "source": "Yahoo Finance via yfinance (prices, fundamentals); Wikipedia (S&P 500 list)",
         "stocks": sorted(out, key=lambda r: r["pct3m"]),
+        # latest close for every member, so portfolio holdings keep pricing
+        # after a share recovers and leaves the dip list
+        "prices": {k: round(v["curr"], 2) for k, v in sorted(prices.items())},
     }
     OUT.write_text(json.dumps(payload, separators=(",", ":")))
     print(f"Wrote {len(out)} candidates to {OUT}")
