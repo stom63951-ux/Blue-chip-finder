@@ -407,6 +407,25 @@ body.locked{overflow:hidden}
   .fgrid input{font-size:16px}
   .mfoot button{flex:1}
 }
+
+/* ---- wide screens: use the full width and keep columns compact ---- */
+.lk a{margin-right:10px}
+.lk a:last-child{margin-right:0}
+@media (min-width:1025px){
+  .wrap{max-width:2400px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+  #tbl th,#tbl td,#ptbl th,#ptbl td{padding:7px 7px}
+  #tbl thead tr:last-child th,#ptbl thead th{white-space:normal;vertical-align:bottom;line-height:1.25}
+  #tbl td input.n,#ptbl td input.n{width:76px;padding:5px 6px}
+  #tbl td input.d,#ptbl td input.d{width:126px;padding:5px 6px}
+  #tbl td input.c,#ptbl td input.c{width:130px}
+  #tbl td select{padding:5px 4px}
+  #tbl td.c-name .co span:last-child{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+  .dropbar{width:36px}
+  #tbl{font-size:.8rem}
+  #tbl td input.c{width:92px}
+  #tbl td input.n[data-k="shares"]{width:60px}
+  #tbl td.c-name .co span:last-child{max-width:170px}
+}
 </style>
 
 </head>
@@ -460,7 +479,7 @@ body.locked{overflow:hidden}
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, approval, holdings, purchase date and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
   </div>
 
   <section id="portView" hidden>
@@ -544,6 +563,7 @@ const fmtDate = d => d ? new Date(d + (d.length===10?"T12:00:00Z":"")).toLocaleD
 document.getElementById("mAsof").textContent = fmtDate(PAYLOAD.asof);
 document.getElementById("mGen").textContent = PAYLOAD.generated ? new Date(PAYLOAD.generated.replace("Z",":00Z")).toLocaleString("en-AU",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "—";
 const BIG = 20;
+const SHORT_SECTOR = {"Information Technology":"Info Tech","Communication Services":"Communication","Consumer Discretionary":"Consumer Disc.","Consumer Staples":"Cons. Staples"};
 const SECTOR_HUE = {"Semiconductors":222,"Tech hardware":205,"Electronics manufacturing":238,"Software & internet":262,"Networking":190,"Industrial machinery":28,"Aerospace & defence":8,"Electrical equipment":44,"Transport":160,"Building products":90,"Engineering & construction":60,"Industrial automation":120,"Payments & fintech":300,"Media & entertainment":335,"Internet & media":280,"Travel & leisure":180,"Food & beverage":140,"Packaging & materials":75,"Mining":18,"Energy services":0};
 const IG = ["AAA","AA+","AA","AA-","A+","A","A-","BBB+","BBB","BBB-"];
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -603,19 +623,19 @@ const state = { tab:"finder", drop: store.get("bcdf.drop",10), view:"high", view
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","Agent",[["agent","Recommends"]]],
-  ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"],["graph","5Y graph"]]],
-  ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt/EBITDA","r"]]],
+  ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
+  ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["held","Current $ held","r"],["date","Purchase date"],["comment","Comment"]]],
-  ["g","Links",[["web","Website"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["comment","Comment"]]],
+  ["g","Links",[["web","Links"]]],
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","Agent",[["agent","Recommends"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"]]],
   ["g","Value",[["pe","P/E","r"],["buy","Target buy","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["held","Current $ held","r"]]],
-  ["g","Links",[["web","Website"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"]]],
+  ["g","Links",[["web","Links"]]],
 ];
 const maxDrop = Math.max(...DATA.map(s=>-s.pct3m));
 
@@ -634,7 +654,7 @@ function cell(s,key){
     case "p1y": return `<td class="r num">${fmt(s.p1y)}</td>`;
     case "graph": return `<td><a href="https://stockanalysis.com/stocks/${s.t.toLowerCase()}/chart/" target="_blank" rel="noopener">5Y chart ↗</a></td>`;
     case "pe": return `<td class="r num">${s.stats? (s.stats.pe==null?"n/a":fmt(s.stats.pe,1)) : "—"}</td>`;
-    case "sector": return `<td>${s.sector}</td>`;
+    case "sector": return `<td title="${esc(s.sector)}">${SHORT_SECTOR[s.sector]||s.sector}</td>`;
     case "status": return `<td class="status-${s.status}">${s.status}</td>`;
     case "lev": return `<td class="r num">${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":"—"}</td>`;
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
@@ -648,7 +668,7 @@ function cell(s,key){
     case "held": return `<td class="r"><input class="n" id="hd-${s.t}" data-k="held" data-t="${s.t}" type="number" step="0.01" min="0" value="${e.held}" aria-label="Current dollars held in ${s.t}"></td>`;
     case "date": return `<td><input class="d" id="dt-${s.t}" data-k="date" data-t="${s.t}" type="date" value="${e.date}" aria-label="Purchase date for ${s.t}"></td>`;
     case "comment": return `<td><input class="c" id="cm-${s.t}" data-k="comment" data-t="${s.t}" type="text" value="${esc(e.comment)}" placeholder="e.g. wait" aria-label="Comment for ${s.t}"></td>`;
-    case "web": return `<td>${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url.replace(/^https?:\/\/(www\.)?/,"").replace(/\/$/,""))} ↗</a>`:"—"}</td>`;
+    case "web": return `<td class="lk">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.url)}">Website ↗</a>`:""}<a href="https://stockanalysis.com/stocks/${s.t.toLowerCase()}/chart/" target="_blank" rel="noopener">5Y chart ↗</a></td>`;
   }
   return "<td></td>";
 }
