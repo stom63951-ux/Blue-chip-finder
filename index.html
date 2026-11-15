@@ -598,7 +598,7 @@ function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   held: e.held ?? "", date: e.date ?? "", comment: e.comment ?? "" };}
 function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set("bcdf.edits",edits); }
 
-const state = { tab:"finder", drop: store.get("bcdf.drop",10), view: innerWidth<900 ? "high" : "full", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set() };
+const state = { tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set() };
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
@@ -716,9 +716,10 @@ function detailHTML(s){
   </div></div></div>`;
 }
 
+function isBought(t){ const e = edits[t]; return !!e && e.approve==="yes" && ((+e.shares>0) || (e.lots||[]).length>0); }
 function filtered(){
   const q = state.q.trim().toLowerCase();
-  return DATA.filter(s => (state.showFail || s.blue) && s.pct3m <= -state.drop
+  return DATA.filter(s => !isBought(s.t) && (state.showFail || s.blue) && s.pct3m <= -state.drop
     && (state.ag==="all" || s.agent===state.ag)
     && (!q || s.t.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)))
     .sort((a,b)=>a.pct3m-b.pct3m);
@@ -784,7 +785,7 @@ function render(animate=true){
   const rows = filtered();
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
-  document.getElementById("summary").innerHTML = `Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips${state.showFail?` plus ${DATA.length-BLUE.length} that fail the test`:""} · sorted by biggest fall`;
+  document.getElementById("summary").innerHTML = `Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips${state.showFail?` plus ${DATA.length-BLUE.length} that fail the test`:""}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(DATA.filter(s=>isBought(s.t)).length)} · sorted by biggest fall`;
   const key = state.view+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith(state.view+"|");
@@ -838,7 +839,7 @@ document.querySelectorAll("#segView button").forEach(b=>b.onclick=()=>{ state.vi
 document.querySelectorAll("#segAg button").forEach(b=>b.onclick=()=>{ state.ag=b.dataset.ag; render(); });
 document.getElementById("q").addEventListener("input", e=>{state.q=e.target.value;render();});
 document.getElementById("showFail").addEventListener("change", e=>{state.showFail=e.target.checked;render();});
-addEventListener("resize", ()=>{ const auto = innerWidth<900 ? "high" : "full"; if(!state.viewPicked && auto!==state.view){ state.view=auto; render(); } moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
+addEventListener("resize", ()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
 
 /* ===== Portfolio ===== */
