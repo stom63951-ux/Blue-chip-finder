@@ -53,6 +53,23 @@ def num(v):
         return None
 
 
+def first_trade_year(ticker, info):
+    """Year the share first traded, from Yahoo; falls back to the full price history."""
+    ms = info.get("firstTradeDateMilliseconds")
+    if ms:
+        return dt.datetime.fromtimestamp(ms / 1000, dt.timezone.utc).year
+    secs = info.get("firstTradeDateEpochUtc")
+    if secs:
+        return dt.datetime.fromtimestamp(secs, dt.timezone.utc).year
+    try:
+        h = yf.Ticker(ticker).history(period="max", interval="3mo", auto_adjust=False)
+        if len(h):
+            return int(h.index[0].year)
+    except Exception as e:
+        print(f"  {ticker}: history lookup failed ({e})")
+    return None
+
+
 def stats(info, curr):
     B = 1e9
     g = lambda k: num(info.get(k))
@@ -122,8 +139,7 @@ def main():
                 print(f"  {m['t']}: info failed ({e}); retrying")
                 time.sleep(5 * (attempt + 1))
         time.sleep(0.6)
-        first_trade = info.get("firstTradeDateEpochUtc")
-        listed = dt.datetime.utcfromtimestamp(first_trade).year if first_trade else None
+        listed = first_trade_year(m["t"], info)
         country = (info.get("country") or "").strip()
         china_reason = CHINA.get(m["t"])
         if not china_reason and country.lower() in CHINA_COUNTRIES:
