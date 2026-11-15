@@ -602,19 +602,19 @@ const state = { tab:"finder", drop: store.get("bcdf.drop",10), view: innerWidth<
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"],["trade","Trade"]]],
+  ["g","Agent",[["agent","Recommends"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"],["graph","5Y graph"]]],
   ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt/EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["held","Current $ held","r"],["date","Purchase date"],["comment","Comment"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["held","Current $ held","r"],["date","Purchase date"],["comment","Comment"]]],
   ["g","Links",[["web","Website"]]],
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"],["trade","Trade"]]],
+  ["g","Agent",[["agent","Recommends"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"]]],
   ["g","Value",[["pe","P/E","r"],["buy","Target buy","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["held","Current $ held","r"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["held","Current $ held","r"]]],
   ["g","Links",[["web","Website"]]],
 ];
 const maxDrop = Math.max(...DATA.map(s=>-s.pct3m));
@@ -673,7 +673,7 @@ function spark(s){
 }
 
 
-const CARD_KEYS = ["name","agent","trade","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","held","date","comment","web","graph"];
+const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
 function cardHTML(s){
   const labels = Object.fromEntries(COLS_FULL.flatMap(g=>g[2]).map(c=>[c[0],c[1]]));
