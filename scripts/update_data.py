@@ -71,6 +71,13 @@ def first_trade_year(ticker, info):
     return None
 
 
+def weekly_5y(series, end):
+    """Weekly (Friday) closes for the last five years, for the in-page 5Y chart."""
+    w = series[series.index > end - pd.DateOffset(years=5)].resample("W-FRI").last().dropna()
+    return {"start": w.index[0].strftime("%Y-%m-%d"), "end": w.index[-1].strftime("%Y-%m-%d"),
+            "c": [round(float(v), 2) for v in w.values]}
+
+
 def stats(info, curr):
     B = 1e9
     g = lambda k: num(info.get(k))
@@ -97,7 +104,7 @@ def main():
     tickers = [m["t"] for m in members]
     print(f"S&P 500 members: {len(tickers)}")
 
-    px = yf.download(tickers, period="27mo", interval="1d", auto_adjust=False,
+    px = yf.download(tickers, period="63mo", interval="1d", auto_adjust=False,
                      group_by="ticker", threads=True, progress=False)
     last_dates = []
     prices = {}
@@ -118,6 +125,7 @@ def main():
             "p1y": close_on_or_before(s, end - pd.DateOffset(years=1)),
             "p2y": close_on_or_before(s, end - pd.DateOffset(years=2)),
             "first": s.index[0],
+            "series": s,
         }
     if not prices:
         sys.exit("No price data downloaded")
@@ -157,6 +165,7 @@ def main():
             "p1y": round(p["p1y"], 2) if p["p1y"] else None,
             "p2y": round(p["p2y"], 2) if p["p2y"] else None,
             "china": china_reason,
+            "h5": weekly_5y(p["series"], p["asof"]),
             "stats": stats(info, p["curr"]),
         }
         out.append(rec)
