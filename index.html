@@ -303,19 +303,6 @@ html{-webkit-text-size-adjust:100%}
   .book{grid-template-columns:1fr}
 }
 
-/* ---- password screen ---- */
-.gate{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#ffffff;padding:24px max(16px,env(safe-area-inset-left,0px));transition:opacity .4s ease}
-.gate.out{opacity:0;pointer-events:none}
-.gate form{width:min(360px,100%);display:grid;gap:12px;text-align:left}
-.gate h2{font-size:1.4rem}
-.gate p{margin:0;color:var(--muted);font-size:.9rem}
-.gate input{font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--edge);border-radius:10px;color:var(--ink);background:#fff}
-.gate input:focus{outline:none;border-color:var(--chip);box-shadow:0 0 0 3px color-mix(in srgb,var(--chip) 18%,transparent)}
-.gate button{font:inherit;font-weight:600;font-size:1rem;padding:12px;border:0;border-radius:10px;background:var(--chip);color:#fff;cursor:pointer}
-.gate .err{color:var(--bad);font-size:.85rem;min-height:1.2em}
-.gate.shake form{animation:shake .4s}
-@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
-body.locked .wrap{visibility:hidden}
 
 /* ---- card view inside the tap-to-open panel (phones and iPads) ---- */
 .sumcard{display:none}
@@ -507,7 +494,6 @@ body.modal-open{overflow:hidden}
 
 </head>
 <body>
-<div class="gate" id="gate"><form id="gateForm" autocomplete="off"><h2>Blue-Chip Dip Finder</h2><p>Enter the password to view this demo.</p><input id="pw" type="password" placeholder="Password" aria-label="Password" autofocus><div class="err" id="pwErr" aria-live="polite"></div><button type="submit">View demo</button></form></div>
 <div class="wrap">
   <header class="hero">
     <div>
@@ -1362,16 +1348,6 @@ buildTallies(); buildHist(); render();
 setTab(location.hash==="#portfolio" ? "portfolio" : (store.get("bcdf.tab","finder")));
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
-(function(){
-  const gate=document.getElementById("gate"); let ok=false;
-  try{ ok = sessionStorage.getItem("bcdf.ok")==="1" || localStorage.getItem("bcdf.ok")==="1"; }catch(e){}
-  const open=()=>{ document.body.classList.remove("locked"); gate.classList.add("out"); setTimeout(()=>gate.hidden=true,450); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); };
-  if(ok){ gate.hidden=true; return; }
-  document.body.classList.add("locked");
-  document.getElementById("gateForm").addEventListener("submit",e=>{ e.preventDefault();
-    if(document.getElementById("pw").value.trim().toLowerCase()==="tom"){ try{sessionStorage.setItem("bcdf.ok","1");localStorage.setItem("bcdf.ok","1")}catch(_){} open(); }
-    else { document.getElementById("pwErr").textContent="That password isn't right. Try again."; gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake"); } });
-})();
 </script>
 
 </body>
