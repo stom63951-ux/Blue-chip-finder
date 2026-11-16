@@ -399,7 +399,7 @@ body.locked .wrap{visibility:hidden}
 .toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:#fff;font-size:.86rem;padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .3s var(--ease);z-index:110;max-width:calc(100vw - 32px)}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{font:inherit;color:#9db6ff;background:none;border:0;margin-left:10px;cursor:pointer;text-decoration:underline}
-body.locked{overflow:hidden}
+body.modal-open{overflow:hidden}
 @media (max-width:719px){
   .modal{place-items:end stretch;padding:0}
   .mbox{width:100%;border-radius:16px 16px 0 0;max-height:92dvh;transform:translateY(40px)}
@@ -491,6 +491,18 @@ body.locked{overflow:hidden}
 .ctip{position:absolute;top:0;background:var(--ink);color:#fff;border-radius:6px;padding:4px 8px;font-size:.76rem;pointer-events:none;white-space:nowrap;display:flex;gap:8px}
 .ctip[hidden]{display:none}
 @media (max-width:719px){.cstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---- sortable headers, notices, portfolio tools ---- */
+#tbl th[data-sort]{cursor:pointer;user-select:none;-webkit-user-select:none}
+#tbl th[data-sort]:hover{color:var(--ink)}
+#tbl th[aria-sort]{color:var(--ink)}
+#tbl th .sa{font-size:.6rem;margin-left:3px;color:var(--chip)}
+.notice{border:1px solid #fedf89;background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:.86rem;margin:0 0 12px}
+.notice button{font:inherit;color:inherit;background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
+.ptools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 4px 0}
+.ptools button{font:inherit;font-size:.8rem;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--edge);border-radius:8px;padding:6px 12px;cursor:pointer}
+.ptools button:hover{border-color:var(--chip);color:var(--chip)}
+.spark .sl{font-size:10px;fill:var(--muted)} .spark .sv{font-size:10px;fill:var(--ink);font-family:var(--font-data)}
 </style>
 
 </head>
@@ -515,6 +527,8 @@ body.locked{overflow:hidden}
     <button role="tab" id="tabPort" data-tab="portfolio" aria-selected="false">Portfolio <span class="cnt" id="portCnt">0</span></button>
   </nav>
 
+  <div class="notice" id="notice" role="status" hidden></div>
+
   <div id="finderView">
   <div class="tallies" id="tallies"></div>
 
@@ -535,7 +549,7 @@ body.locked{overflow:hidden}
     </div>
     <div>
       <span class="ctl-label">Find</span>
-      <input class="search" id="q" type="search" placeholder="Ticker or name" aria-label="Search ticker or name">
+      <input class="search" id="q" type="search" placeholder="Ticker, name or sector" aria-label="Search ticker, name or sector">
     </div>
     <div class="deck-foot">
       <span id="summary" aria-live="polite"></span>
@@ -544,13 +558,14 @@ body.locked{overflow:hidden}
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a column heading to sort. Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
   </div>
 
   <section id="portView" hidden>
     <div class="tallies" id="portTallies"></div>
     <div class="register"><div class="scroller"><table id="ptbl"></table></div></div>
-    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when you press <b>Buy</b> or set its <b>Manual approval</b> to Yes in the Finder. Invested includes fees. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only.</p>
+    <div class="ptools"><button type="button" id="pCsv">Download as spreadsheet (CSV)</button><button type="button" id="pBackup">Save a backup file</button><button type="button" id="pRestore">Restore from a backup</button><input type="file" id="pFile" accept=".json,application/json" hidden></div>
+    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when you press <b>Buy</b> or set its <b>Manual approval</b> to Yes in the Finder. Invested includes fees. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only, so save a backup file now and then. Restoring a backup on another device, such as your phone, copies your portfolio across.</p>
   </section>
 
   <div class="book">
@@ -560,7 +575,7 @@ body.locked{overflow:hidden}
       <ol>
         <li><b>Index member:</b> in the S&amp;P 500.</li>
         <li><b>Size:</b> market value of at least US$20 billion.</li>
-        <li><b>Financial strength:</b> debt no more than 3.5× yearly cash earnings (EBITDA).</li>
+        <li><b>Financial strength:</b> debt no more than 3.5× yearly cash earnings (EBITDA). Banks, brokers and asset managers are exempt, because the measure does not fit how they are financed.</li>
         <li><b>Profitable:</b> positive net income over the last 12 months.</li>
         <li><b>Track record:</b> trading for at least 10 years.</li>
         <li><b>China-free:</b> not headquartered in China, Hong Kong or Macau, and not on the China-exposure list (about 15%+ of revenue from Greater China, or major operations there).</li>
@@ -568,7 +583,7 @@ body.locked{overflow:hidden}
     </section>
     <section class="reveal">
       <h2>How the agent decides</h2>
-      <p>Seven checks, one point each. <b>Yes</b> needs at least 6 points and a profitable company. A fall of 40% or more in three months costs a point, because a drop that steep usually has a reason worth reading first.</p>
+      <p>Seven checks, one point each. <b>Yes</b> needs at least 6 points and a profitable company. Two things each cost a point: a fall of 40% or more in three months, because a drop that steep usually has a reason worth reading first, and sales down 5% or more on a year earlier, because a cheap share with shrinking sales is often cheap for good reason.</p>
       <ol>
         <li>Profitable over the last 12 months (required).</li>
         <li>Profit margin of 15% or more.</li>
@@ -576,8 +591,9 @@ body.locked{overflow:hidden}
         <li>Forward P/E below trailing P/E (earnings expected to grow).</li>
         <li>Debt no more than 2× yearly cash earnings (EBITDA).</li>
         <li>Free cash flow yield of 3% or more.</li>
-        <li>Analyst average target at least 25% above today's price.</li>
+        <li>Analyst average target at least 25% above today's price, from at least 5 analysts.</li>
       </ol>
+      <p style="margin-top:8px">Banks, brokers and asset managers do not report EBITDA or free cash flow, so checks 5 and 6 become <b>return on equity of 12% or more</b> and <b>earnings yield of 7% or more</b> (profit as a share of the price). The agent reads the numbers only. It does not read the news, so use Deep dive before acting.</p>
     </section>
     <section class="reveal">
       <h2>About this data</h2>
@@ -589,6 +605,7 @@ body.locked{overflow:hidden}
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
         <li><b>Target buy</b> starts 5% under the current price; <b>Target divest</b> starts at the analyst average target.</li>
         <li><b>Coverage:</b> few blue-chips fall hard, so slider values past the deepest fall show nothing.</li>
+        <li><b>Gaps:</b> if Yahoo has no market value or profit figure for a share, it is treated as failing the blue-chip test until the figure returns.</li>
       </ul>
     </section>
   </div>
@@ -634,13 +651,18 @@ body.locked{overflow:hidden}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-let PAYLOAD;
+let PAYLOAD, LOAD_FAILED = false;
 try { PAYLOAD = window.__EMBED__ || await (await fetch("data.json?v=" + Date.now(), {cache:"no-store"})).json(); }
-catch(e){ PAYLOAD = {stocks:[], asof:null, generated:null}; }
+catch(e){ PAYLOAD = null; }
+if(!PAYLOAD || !Array.isArray(PAYLOAD.stocks)){ PAYLOAD = {stocks:[], asof:null, generated:null}; LOAD_FAILED = true; }
 const DATA = PAYLOAD.stocks;
 const fmtDate = d => d ? new Date(d + (d.length===10?"T12:00:00Z":"")).toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short",year:"numeric"}) : "—";
 document.getElementById("mAsof").textContent = fmtDate(PAYLOAD.asof);
 document.getElementById("mGen").textContent = PAYLOAD.generated ? new Date(PAYLOAD.generated.replace("Z",":00Z")).toLocaleString("en-AU",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}) : "—";
+{ const n = document.getElementById("notice");
+  const age = PAYLOAD.asof ? Math.floor((Date.now() - new Date(PAYLOAD.asof+"T21:00:00Z").getTime())/864e5) : 0;
+  if(LOAD_FAILED){ n.innerHTML = `The share data could not be loaded. Check your connection, then <button type="button" id="reload">reload the page</button>.`; n.hidden = false; document.getElementById("reload").onclick = ()=>location.reload(); }
+  else if(age>=5){ n.textContent = `These prices are from ${fmtDate(PAYLOAD.asof)}, ${age} days ago. The daily update may have failed, so check current prices before acting.`; n.hidden = false; } }
 const BIG = 20;
 const SHORT_SECTOR = {"Information Technology":"Info Tech","Communication Services":"Communication","Consumer Discretionary":"Consumer Disc.","Consumer Staples":"Cons. Staples"};
 const SECTOR_HUE = {"Semiconductors":222,"Tech hardware":205,"Electronics manufacturing":238,"Software & internet":262,"Networking":190,"Industrial machinery":28,"Aerospace & defence":8,"Electrical equipment":44,"Transport":160,"Building products":90,"Engineering & construction":60,"Industrial automation":120,"Payments & fintech":300,"Media & entertainment":335,"Internet & media":280,"Travel & leisure":180,"Food & beverage":140,"Packaging & materials":75,"Mining":18,"Energy services":0};
@@ -655,39 +677,50 @@ const pct = (v,d=1)=> v==null ? "—" : (v>0?"+":"")+fmt(v,d)+"%";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function enrich(s){
-  const st = s.stats;
+  const st = s.stats || (s.stats = {});
   const yr = new Date().getFullYear();
-  const strength = st.debitda!=null ? st.debitda<=3.5 : (st.ebitda!=null && st.ebitda>0 ? true : null);
+  const has = st.mcap!=null || st.ni!=null || st.pe!=null || st.fpe!=null;
+  // Banks, brokers and asset managers: Yahoo reports no EBITDA or free cash flow for them
+  const fin = s.fin = s.sector==="Financials" && st.ebitda==null && st.debitda==null;
+  const strength = st.debitda!=null ? st.debitda<=3.5 : fin ? true : (st.ebitda!=null && st.ebitda<=0 && st.debt>0) ? false : (st.ebitda>0 ? true : null);
   s.tests = [
     {k:"Index member (S&P 500)", ok:true},
-    {k:`Market value ≥ US$${BIG}B`, ok: st.mcap!=null ? st.mcap>=BIG : null, v: bn(st.mcap)},
-    {k:"Debt ≤ 3.5× EBITDA", ok: strength, v: st.debitda!=null ? fmt(st.debitda,2)+"×" : (strength?"little or no debt":"not reported")},
-    {k:"Profitable (12 months)", ok: st.ni!=null ? st.ni>0 : null, v: bn(st.ni)},
+    {k:`Market value ≥ US$${BIG}B`, ok: st.mcap!=null && st.mcap>=BIG, v: st.mcap!=null ? bn(st.mcap) : "not reported"},
+    {k:"Debt ≤ 3.5× EBITDA", ok: strength, v: st.debitda!=null ? fmt(st.debitda,2)+"×" : fin ? "not applicable to banks and financials" : strength===true ? "little or no debt" : strength===false ? "no cash earnings to cover its debt" : "not reported"},
+    {k:"Profitable (12 months)", ok: st.ni!=null && st.ni>0, v: st.ni!=null ? bn(st.ni) : "not reported"},
     {k:"Trading ≥ 10 years", ok: s.listed ? yr-s.listed>=10 : null, v: s.listed ? "since "+s.listed : "unknown"},
     {k:"China-free", ok: !s.china, v: s.china || "no China exposure flagged"},
   ];
   s.blue = s.tests.every(t=>t.ok!==false);
-  if(!st) s.status="—";
+  if(st.ni==null) s.status="—";
   else if(st.ni<=0) s.status="Loss-making";
-  else if(st.pe&&st.fpe&&st.fpe<=st.pe*0.9) s.status="Growing";
-  else if(st.pe&&st.fpe&&st.fpe>=st.pe*1.1) s.status="Slowing";
+  else if(st.pe&&st.fpe>0&&st.fpe<=st.pe*0.9) s.status="Growing";
+  else if(st.pe&&st.fpe>0&&st.fpe>=st.pe*1.1) s.status="Slowing";
   else s.status="Level";
-  if(!st){ s.agent=null; s.rules=[]; s.score=null; return; }
-  const fcfY = st.fcf!=null&&st.mcap ? st.fcf/st.mcap*100 : null;
-  const up = st.pt ? (st.pt/s.curr-1)*100 : null;
-  s.rules = [
-    {ok: st.ni>0, t:`Profitable: net income ${bn(st.ni)} over 12 months`},
-    {ok: st.pm>=15, t:`Profit margin ${fmt(st.pm,1)}% (want 15%+)`},
-    {ok: st.fpe!=null && st.fpe<=20, t:`Forward P/E ${fmt(st.fpe,1)} (want 20 or less)`},
-    {ok: st.fpe!=null && st.pe!=null && st.fpe<st.pe, t: st.pe==null?`No trailing P/E (loss-making); forward ${fmt(st.fpe,1)}`:`Forward P/E ${fmt(st.fpe,1)} vs trailing ${fmt(st.pe,1)}: earnings expected to ${st.fpe<st.pe?"grow":"shrink"}`},
-    {ok: st.debitda!=null ? st.debitda<=2 : (st.ebitda>0), t: st.debitda!=null ? `Debt / EBITDA ${fmt(st.debitda,2)}× (want 2× or less)` : `Debt / EBITDA not reported`},
-    {ok: fcfY!=null && fcfY>=3, t:`Free cash flow yield ${fmt(fcfY,1)}% (want 3%+)`},
-    {ok: up!=null && up>=25, t:`Analyst target ${money(st.pt)}, ${pct(up)} from here (want +25%)`},
-  ];
   s.steep = s.pct3m<=-40;
-  s.score = s.rules.filter(r=>r.ok).length - (s.steep?1:0);
+  s.shrink = st.revg!=null && st.revg<=-5;
+  s.month = s.p1m ? (s.curr/s.p1m-1)*100 : null;
+  if(!has){ s.agent=null; s.rules=[]; s.score=null; return; }
+  const fcfY = st.fcf!=null&&st.mcap ? st.fcf/st.mcap*100 : null;
+  const ey = st.pe>0 ? 100/st.pe : null;
+  const up = st.pt ? (st.pt/s.curr-1)*100 : null;
+  const few = st.analysts!=null && st.analysts<5;
+  const nr = (v,d,suf="") => v==null ? "not reported" : fmt(v,d)+suf;
+  s.rules = [
+    {ok: st.ni>0, t: st.ni==null ? "Profit not reported" : `${st.ni>0?"Profitable":"Loss-making"}: net income ${bn(st.ni)} over 12 months`},
+    {ok: st.pm>=15, t:`Profit margin ${nr(st.pm,1,"%")} (want 15%+)`},
+    {ok: st.fpe>0 && st.fpe<=20, t:`Forward P/E ${nr(st.fpe,1)} (want 20 or less)`},
+    {ok: st.fpe>0 && st.pe!=null && st.fpe<st.pe, t: st.pe==null?`No trailing P/E (loss-making); forward ${nr(st.fpe,1)}`:`Forward P/E ${nr(st.fpe,1)} vs trailing ${fmt(st.pe,1)}: earnings expected to ${st.fpe>0&&st.fpe<st.pe?"grow":"shrink"}`},
+    fin ? {ok: st.roe>=12, t:`Return on equity ${nr(st.roe,1,"%")} (want 12%+; used for banks and financials in place of debt / EBITDA)`}
+        : {ok: st.debitda!=null ? st.debitda<=2 : strength===true, t: st.debitda!=null ? `Debt / EBITDA ${fmt(st.debitda,2)}× (want 2× or less)` : strength===true ? "Little or no debt reported" : "Debt / EBITDA not reported"},
+    fin ? {ok: ey!=null && ey>=7, t:`Earnings yield ${nr(ey,1,"%")} (want 7%+; used for banks and financials in place of free cash flow)`}
+        : {ok: fcfY!=null && fcfY>=3, t:`Free cash flow yield ${nr(fcfY,1,"%")} (want 3%+)`},
+    {ok: up!=null && up>=25 && !few, t: up==null ? "No analyst target" : `Analyst target ${money(st.pt)}, ${pct(up)} from here (want +25%)${few?`, but only ${st.analysts} analyst${st.analysts===1?"":"s"} cover it (want 5+)`:st.analysts?`, ${st.analysts} analysts`:""}`},
+  ];
+  s.score = Math.max(0, s.rules.filter(r=>r.ok).length - (s.steep?1:0) - (s.shrink?1:0));
   s.agent = (st.ni>0 && s.score>=6) ? "yes" : "no";
 }
+const agentPill = s => s && s.agent ? `<span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span>` : `<span class="pill na">Pending</span>`;
 DATA.forEach(enrich);
 const BLUE = DATA.filter(s=>s.blue);
 
@@ -697,7 +730,19 @@ function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   held: e.held ?? "", date: e.date ?? "", comment: e.comment ?? "" };}
 function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set("bcdf.edits",edits); }
 
-const state = { tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set() };
+const state = { tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
+const SORTS = {
+  ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
+  pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
+  pe:s=>s.stats.pe, sector:s=>s.sector, status:s=>s.status, lev:s=>s.stats.debitda,
+  buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest),
+};
+function sortRows(rows){
+  const f = SORTS[state.sort.k] || SORTS.pct, d = state.sort.dir;
+  return rows.map(s=>[f(s),s]).sort((a,b)=>{ const x=a[0], y=b[0];
+    if(x==null || y==null) return x==null && y==null ? a[1].pct3m-b[1].pct3m : x==null ? 1 : -1;
+    return (x<y?-1:x>y?1:0)*d || a[1].pct3m-b[1].pct3m; }).map(x=>x[1]);
+}
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
@@ -716,7 +761,7 @@ const COLS_HIGH = [
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"]]],
   ["g","Links",[["web","Links"]]],
 ];
-const maxDrop = Math.max(...DATA.map(s=>-s.pct3m));
+const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
 function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${s.t.slice(0,4)}</span>`; }
 
@@ -735,14 +780,14 @@ function cell(s,key){
     case "pe": return `<td class="r num">${s.stats? (s.stats.pe==null?"n/a":fmt(s.stats.pe,1)) : "—"}</td>`;
     case "sector": return `<td title="${esc(s.sector)}">${SHORT_SECTOR[s.sector]||s.sector}</td>`;
     case "status": return `<td class="status-${s.status}">${s.status}</td>`;
-    case "lev": return `<td class="r num">${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":"—"}</td>`;
+    case "lev": return `<td class="r num"${s.fin?` title="Not used for banks and financials"`:""}>${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":s.fin?"n/a":"—"}</td>`;
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
     case "buy": return `<td class="r"><input class="n" id="buy-${s.t}" data-k="buy" data-t="${s.t}" type="number" step="0.01" value="${e.buy}" aria-label="Target buy for ${s.t}"></td>`;
     case "shares": return `<td class="r"><input class="n" id="sh-${s.t}" data-k="shares" data-t="${s.t}" type="number" step="1" min="0" value="${e.shares}" aria-label="Number of shares for ${s.t}"></td>`;
     case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v):"—"}</td>`; }
     case "divest": return `<td class="r"><input class="n" id="dv-${s.t}" data-k="divest" data-t="${s.t}" type="number" step="0.01" value="${e.divest}" aria-label="Target divest for ${s.t}"></td>`;
     case "trade": return `<td><button class="buybtn" data-buy="${s.t}" aria-label="Buy ${esc(s.name)}">Buy</button></td>`;
-    case "agent": return `<td class="agentcol">${s.agent?`<span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span> <span class="score">${s.score}/7</span>`:`<span class="pill na">Pending</span>`}${s.steep?` <span class="pill flag" title="Fell 40% or more in 3 months">steep fall</span>`:""}</td>`;
+    case "agent": return `<td class="agentcol">${agentPill(s)}${s.agent?` <span class="score">${s.score}/7</span>`:""}${s.steep||s.shrink?` <span class="pill flag" title="${[s.steep?"Fell 40% or more in 3 months":"",s.shrink?"Sales down 5% or more on a year earlier":""].filter(Boolean).join("; ")}: minus ${(s.steep?1:0)+(s.shrink?1:0)} point${s.steep&&s.shrink?"s":""}. Open the row for details.">−${(s.steep?1:0)+(s.shrink?1:0)}</span>`:""}</td>`;
     case "approve": return `<td><select id="ap-${s.t}" data-k="approve" data-t="${s.t}" aria-label="Manual approval for ${s.t}"><option value="" ${e.approve===""?"selected":""}>—</option><option value="yes" ${e.approve==="yes"?"selected":""}>Yes</option><option value="no" ${e.approve==="no"?"selected":""}>No</option></select></td>`;
     case "held": return `<td class="r"><input class="n" id="hd-${s.t}" data-k="held" data-t="${s.t}" type="number" step="0.01" min="0" value="${e.held}" aria-label="Current dollars held in ${s.t}"></td>`;
     case "date": return `<td><input class="d" id="dt-${s.t}" data-k="date" data-t="${s.t}" type="date" value="${e.date}" aria-label="Purchase date for ${s.t}"></td>`;
@@ -758,19 +803,19 @@ function ring(s){
 }
 
 function spark(s){
-  const pts = [["1Y ago",s.p1y],["3M ago",s.p3m],["1M ago",s.p1m],["Now",s.curr]].filter(p=>p[1]!=null);
-  const W=300,H=120,pl=10,pr=10,pt=20,pb=22;
-  const vals=pts.map(p=>p[1]), mn=Math.min(...vals), mx=Math.max(...vals), span=mx-mn||1;
-  const x=i=>pl+(W-pl-pr)*(pts.length===1?.5:i/(pts.length-1)), y=v=>pt+(H-pt-pb)*(1-(v-mn)/span);
-  let len=0; for(let i=1;i<pts.length;i++) len+=Math.hypot(x(i)-x(i-1),y(pts[i][1])-y(pts[i-1][1]));
-  const line=pts.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(" ");
-  const area=line+` L${x(pts.length-1).toFixed(1)},${H-pb} L${x(0).toFixed(1)},${H-pb} Z`;
-  const id="sg"+s.t;
-  const anc=i=>i===0?"start":i===pts.length-1?"end":"middle";
-  const dots=pts.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p[1]).toFixed(1)}" r="${i===pts.length-1?4.5:3}" fill="${i===pts.length-1?"var(--bad)":"var(--chip)"}"/><text x="${x(i).toFixed(1)}" y="${(y(p[1])-8).toFixed(1)}" text-anchor="${anc(i)}" font-size="10" fill="var(--ink)" font-family="Geist Mono, monospace">${fmt(p[1],0)}</text><text x="${x(i).toFixed(1)}" y="${H-5}" text-anchor="${anc(i)}" font-size="10" fill="var(--muted)">${p[0]}</text>`).join("");
-  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Price path for ${s.t}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chip)" stop-opacity=".35"/><stop offset="1" stop-color="var(--chip)" stop-opacity="0"/></linearGradient></defs><path class="area" d="${area}" fill="url(#${id})"/><path class="line" d="${line}" fill="none" stroke="var(--chip)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="--len:${Math.ceil(len)}"/>${dots}</svg>`;
+  const wk = s.h5 && s.h5.c && s.h5.c.length>=8 ? s.h5.c.slice(-53) : null;
+  const vals = wk || [s.p1y,s.p3m,s.p1m,s.curr].filter(v=>v!=null);
+  if(vals.length<2) return `<p class="muted">Price history arrives with the next daily update.</p>`;
+  const W=300,H=120,pl=6,pr=8,pt=10,pb=20, n=vals.length;
+  const mn=Math.min(...vals), mx=Math.max(...vals), span=mx-mn||1;
+  const x=i=>pl+(W-pl-pr)*i/(n-1), y=v=>pt+(H-pt-pb)*(1-(v-mn)/span);
+  let len=0; for(let i=1;i<n;i++) len+=Math.hypot(x(i)-x(i-1),y(vals[i])-y(vals[i-1]));
+  const line=vals.map((v,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const area=line+` L${x(n-1).toFixed(1)},${H-pb} L${x(0).toFixed(1)},${H-pb} Z`;
+  const id="sg"+s.t, first = wk ? (n>=53?"1 year ago":"First trade") : "1 year ago";
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Price of ${s.t} over the last year"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chip)" stop-opacity=".22"/><stop offset="1" stop-color="var(--chip)" stop-opacity="0"/></linearGradient></defs><path class="area" d="${area}" fill="url(#${id})"/><path class="line" d="${line}" fill="none" stroke="var(--chip)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="--len:${Math.ceil(len)}"/><circle cx="${x(n-1).toFixed(1)}" cy="${y(vals[n-1]).toFixed(1)}" r="4" fill="var(--bad)"/><text x="${pl}" y="${H-5}" class="sl">${first}</text><text x="${W-pr}" y="${H-5}" text-anchor="end" class="sl">Now</text></svg>
+  <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx)}, low ${money(mn)}, now ${money(s.curr)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
 }
-
 
 const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
@@ -787,25 +832,27 @@ function cardHTML(s){
 function detailHTML(s){
   const st=s.stats, t=s.t.toLowerCase();
   const verdict = !s.agent ? `<p>Fundamentals are still pending, so the agent hasn't scored ${s.t}.</p>`
-   : `<div class="verdict">${ring(s)}<p><span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span><br>${s.agent==="yes"?"Profitable, reasonably priced and with room to recover on these rules.":(st.ni<=0?"Loss-making over the last 12 months, so the agent won't recommend it.":"Not enough checks passed to recommend buying this dip.")}</p></div>`;
+   : `<div class="verdict">${ring(s)}<p><span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span><br>${s.agent==="yes"?"Profitable, reasonably priced and with room to recover on these rules.":(!(st.ni>0)?"Not profitable over the last 12 months, so the agent won't recommend it.":(s.rules.filter(r=>r.ok).length>=6?"Enough checks passed, but the warning below cost it a point.":"Not enough checks passed to recommend buying this dip."))}</p></div>`;
   let j=0;
-  const rules = s.rules.map(r=>`<li style="--j:${j++}"><span class="mark ${r.ok?"ok":"x"}">${r.ok?"✓":"✕"}</span><span>${r.t}</span></li>`).join("") + (s.steep?`<li style="--j:${j++}"><span class="mark w">!</span><span>Fell ${fmt(-s.pct3m,1)}% in 3 months: minus 1 point. Read the latest news and results before buying.</span></li>`:"");
+  const rules = s.rules.map(r=>`<li style="--j:${j++}"><span class="mark ${r.ok?"ok":"x"}">${r.ok?"✓":"✕"}</span><span>${r.t}</span></li>`).join("") + (s.steep?`<li style="--j:${j++}"><span class="mark w">!</span><span>Fell ${fmt(-s.pct3m,1)}% in 3 months: minus 1 point. Read the latest news and results before buying.</span></li>`:"")
+    + (s.shrink?`<li style="--j:${j++}"><span class="mark w">!</span><span>Sales are down ${fmt(-st.revg,1)}% on a year earlier: minus 1 point. A cheap share with shrinking sales can stay cheap.</span></li>`:"")
+    + (s.agent && s.month!=null && s.month<=-15?`<li style="--j:${j++}"><span class="mark w">!</span><span>Still falling: down ${fmt(-s.month,1)}% in the last month alone. No points lost, but the dip may not be over.</span></li>`:"");
   const tests = s.tests.map(r=>`<li style="--j:${j++}"><span class="mark ${r.ok===null?"w":r.ok?"ok":"x"}">${r.ok===null?"?":r.ok?"✓":"✕"}</span><span>${r.k}${r.v?` <span class="muted">· ${r.v}</span>`:""}</span></li>`).join("");
   const neg = v => v!=null && v<0 ? ' class="neg"' : "";
   const pl = st ? `<dl class="kv">
-    <dt>Revenue (12 months)</dt><dd>${bn(st.rev)}</dd><dt>Operating income</dt><dd${neg(st.opinc)}>${bn(st.opinc)}</dd>
-    <dt>Net income</dt><dd${neg(st.ni)}>${bn(st.ni)}</dd><dt>Profit margin</dt><dd${neg(st.pm)}>${fmt(st.pm,1)}%</dd>
+    <dt>Revenue (12 months)</dt><dd>${bn(st.rev)}</dd>${st.revg!=null?`<dt>Sales growth (on a year earlier)</dt><dd${neg(st.revg)}>${pct(st.revg)}</dd>`:""}<dt>Operating margin</dt><dd${neg(st.om)}>${st.om==null?"n/a":fmt(st.om,1)+"%"}</dd>
+    <dt>Net income</dt><dd${neg(st.ni)}>${bn(st.ni)}</dd><dt>Profit margin</dt><dd${neg(st.pm)}>${st.pm==null?"n/a":fmt(st.pm,1)+"%"}</dd>
     <dt>Earnings per share</dt><dd${neg(st.eps)}>${money(st.eps)}</dd><dt>Free cash flow</dt><dd${neg(st.fcf)}>${bn(st.fcf)}</dd>
-    <dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${fmt(st.debitda,2)}×</dd>
+    <dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
     <dt>Current ratio</dt><dd>${fmt(st.cr,2)}</dd><dt>Dividend yield</dt><dd>${st.div?fmt(st.div,2)+"%":"none"}</dd>
-    <dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}</dd></dl>` : `<p class="muted">Pending.</p>`;
+    ${st.pb!=null?`<dt>Price to book</dt><dd>${fmt(st.pb,2)}×</dd>`:""}<dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}${st.analysts?` (${st.analysts})`:""}</dd></dl>${s.statsAsof&&PAYLOAD.asof&&s.statsAsof!==PAYLOAD.asof?`<p class="deephint">Company figures are from ${fmtDate(s.statsAsof)}, because today's update for this share failed.</p>`:""}` : `<p class="muted">Pending.</p>`;
   return `<div class="dd-anim"><div><div class="dd">
     ${cardHTML(s)}
     <section class="card"><h3>Agent analysis</h3>${verdict}<ul class="rules">${rules}</ul>
       <button type="button" class="deepbtn" data-deep="${s.t}">Deep dive</button>
       <p class="deephint">Claude researches ${esc(s.name)} in depth: why the price fell, what could lift it, the risks, and a Buy, Wait or Avoid conclusion.</p></section>
     <section class="card"><h3>Profit &amp; loss summary</h3>${pl}</section>
-    <section class="card"><h3>Price path</h3>${spark(s)}<h3 style="margin-top:14px">Blue-chip test</h3><ul class="rules">${tests}</ul></section>
+    <section class="card"><h3>Price, last 12 months</h3>${spark(s)}<h3 style="margin-top:14px">Blue-chip test</h3><ul class="rules">${tests}</ul></section>
     <section class="card"><h3>Links</h3><div class="links">
       ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Company website <span>↗</span></a>`:""}
       <a href="https://stockanalysis.com/stocks/${t}/financials/" target="_blank" rel="noopener">Income statement (P&amp;L) <span>↗</span></a>
@@ -822,8 +869,7 @@ function filtered(){
   const q = state.q.trim().toLowerCase();
   return DATA.filter(s => !isBought(s.t) && (state.showFail || s.blue) && s.pct3m <= -state.drop
     && (state.ag==="all" || s.agent===state.ag)
-    && (!q || s.t.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)))
-    .sort((a,b)=>a.pct3m-b.pct3m);
+    && (!q || s.t.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.sector||"").toLowerCase().includes(q) || (s.industry||"").toLowerCase().includes(q)));
 }
 
 /* animated numbers */
@@ -846,10 +892,10 @@ function buildTallies(){
 function updateTallies(rows){
   const yes = rows.filter(s=>s.agent==="yes");
   countTo(document.getElementById("tv1"), rows.length);
-  document.getElementById("tv1s").textContent = `of ${BLUE.length} researched blue-chips`;
+  document.getElementById("tv1s").textContent = `of ${BLUE.length} blue-chips down ${PAYLOAD.minDrop||10}%+`;
   countTo(document.getElementById("tv2"), yes.length);
   document.getElementById("tv2s").textContent = yes.length ? yes.slice(0,4).map(s=>s.t).join(" · ")+(yes.length>4?" …":"") : "none in this view";
-  const deepest = rows.length ? rows[0] : null;
+  const deepest = rows.length ? rows.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : null;
   countTo(document.getElementById("tv3"), deepest? deepest.pct3m : 0, {dec:1,suf:"%"});
   document.getElementById("tv3s").textContent = deepest ? deepest.name : "nothing in view";
   const avg = rows.length ? rows.reduce((a,s)=>a+s.pct3m,0)/rows.length : 0;
@@ -883,21 +929,23 @@ function render(animate=true){
   updateHist();
   const groups = state.view==="full" ? COLS_FULL : COLS_HIGH;
   const cols = groups.flatMap(g=>g[2].map((c,i)=>({key:c[0],label:c[1],cls:((c[2]||"")+(i===0&&g[0]==="g"?" gl":"")).trim()})));
-  const rows = filtered();
+  const rows = sortRows(filtered());
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
-  document.getElementById("summary").innerHTML = `Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips${state.showFail?` plus ${DATA.length-BLUE.length} that fail the test`:""}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(DATA.filter(s=>isBought(s.t)).length)} · sorted by biggest fall`;
+  document.getElementById("summary").innerHTML = `${state.showFail?`Showing <b>${rows.length}</b> of ${DATA.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${DATA.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(DATA.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"agent score":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
   const key = state.view+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith(state.view+"|");
-  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}">${g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>`<th class="${c.cls} c-${c.key}" scope="col">${c.label}</th>`).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}">${g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
-    h += `<tr><td colspan="${cols.length}" class="empty"><div class="e1">No blue-chip fell ${state.drop}% or more</div>The deepest fall in this list is ${esc(deepestBlue.name)} at ${pct(deepestBlue.pct3m)}. Slide left to bring shares back.</td></tr>`;
+    h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
+      : (state.q.trim() || state.ag!=="all") && DATA.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
+      : `<div class="e1">No blue-chip fell ${state.drop}% or more</div>The deepest fall in this list is ${esc(deepestBlue.name)} at ${pct(deepestBlue.pct3m)}. Slide left to bring shares back.`}</td></tr>`;
   }
   let i=0;
   for(const s of rows){
     const isNew = first || viewChanged || !prevRows.has(s.t);
-    h += `<tr class="row${state.open.has(s.t)?" open":""}${s.blue?"":" fail"}${isNew&&animate?" enter":""}" style="--i:${isNew?i++:0}" data-row="${s.t}" tabindex="0" aria-expanded="${state.open.has(s.t)}">` +
+    h += `<tr class="row${state.open.has(s.t)?" open":""}${s.blue?"":" fail"}${isNew&&animate?" enter":""}" style="--i:${isNew?Math.min(i++,12):0}" data-row="${s.t}" tabindex="0" aria-expanded="${state.open.has(s.t)}">` +
       cols.map(c=>{ let td=cell(s,c.key); const cls=("c-"+c.key+(c.cls.includes("gl")?" gl":"")); td = td.replace(/^<td( class=")?/, (m,a)=> (a?`<td data-label="${c.label}" class="${cls} `:`<td data-label="${c.label}" class="${cls}"`)); return td; }).join("") + `</tr>`;
     if(state.open.has(s.t)) h += `<tr class="detail" data-for="${s.t}"><td colspan="${cols.length}">${detailHTML(s)}</td></tr>`;
   }
@@ -927,7 +975,7 @@ function toggleRow(tr){
 }
 
 const tbl = document.getElementById("tbl");
-tbl.addEventListener("click", e=>{ const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
+tbl.addEventListener("click", e=>{ const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
@@ -1015,7 +1063,36 @@ function snapshot(t){
 }
 const ptbl = document.getElementById("ptbl");
 ptbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.pk) return; setEd(el.dataset.t, el.dataset.pk, el.value); renderPortfolio(); });
-ptbl.addEventListener("click", e=>{ const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } const b=e.target.closest("[data-rm]"); if(!b) return; setEd(b.dataset.rm,"approve",""); renderPortfolio(); render(false); });
+ptbl.addEventListener("click", e=>{ const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } const b=e.target.closest("[data-rm]"); if(!b) return;
+  const t = b.dataset.rm, prev = JSON.parse(JSON.stringify(edits[t]||{})), cur = edits[t]||{};
+  cur.approve = ""; ["shares","lots","fees","held","date","buy"].forEach(k=>delete cur[k]); edits[t] = cur; store.set("bcdf.edits",edits);
+  renderPortfolio(); render(false);
+  toast(`Removed ${t} from your Portfolio.`, {label:"Undo", fn:()=>{ edits[t] = prev; store.set("bcdf.edits",edits); renderPortfolio(); render(false); }}); });
+function download(name, text, type){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text],{type})); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+document.getElementById("pCsv").onclick = ()=>{
+  const list = confirmedTickers().map(holding); if(!list.length){ toast("There are no holdings to download yet."); return; }
+  const q = v => v==null ? "" : /[",\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v), r2 = v => v==null ? "" : Math.round(v*100)/100;
+  const rows = [["Ticker","Name","Shares","Buy price (USD)","Cost incl. fees","Price now","Value now","Gain / loss","Gain %","Target divest","Purchase date","Comment"]]
+    .concat(list.map(h=>[h.t,h.name,h.shares??r2(h.derived),r2(h.buy),r2(h.cost),r2(h.curr),r2(h.value),r2(h.gain),r2(h.gainPct),r2(h.divest),h.date,h.comment]));
+  download(`portfolio-${today()}.csv`, "\ufeff"+rows.map(r=>r.map(q).join(",")).join("\r\n"), "text/csv");
+};
+document.getElementById("pBackup").onclick = ()=> download(`blue-chip-finder-backup-${today()}.json`, JSON.stringify({app:"blue-chip-dip-finder", saved:new Date().toISOString(), edits, fees}), "application/json");
+document.getElementById("pRestore").onclick = ()=> document.getElementById("pFile").click();
+document.getElementById("pFile").addEventListener("change", async e=>{
+  const f = e.target.files[0]; e.target.value = ""; if(!f) return;
+  try{
+    const d = JSON.parse(await f.text());
+    if(!d || d.app!=="blue-chip-dip-finder" || !d.edits || typeof d.edits!=="object" || Array.isArray(d.edits)) throw 0;
+    const prev = JSON.parse(JSON.stringify(edits));
+    const put = o => { Object.keys(edits).forEach(k=>delete edits[k]); Object.assign(edits,o); store.set("bcdf.edits",edits); renderPortfolio(); render(false); };
+    put(d.edits);
+    if(d.fees && typeof d.fees==="object"){ Object.assign(fees,{brok:num(d.fees.brok)??0, fx:num(d.fees.fx)??0}); store.set("bcdf.fees",fees); }
+    toast(`Backup restored: ${confirmedTickers().length} holding${confirmedTickers().length===1?"":"s"}.`, {label:"Undo", fn:()=>put(prev)});
+  }catch(x){ toast("That file isn't a Blue-Chip Dip Finder backup."); }
+});
 function setTab(tab){
   state.tab = tab; store.set("bcdf.tab",tab);
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
@@ -1037,7 +1114,7 @@ function quoteOf(t){
 function openBuy(t){
   const q = quoteOf(t); bm.t = t; bm.q = q; bm.mode = "shares";
   const e = edits[t]||{}, target = num(e.buy) ?? (q.s ? Math.floor(q.s.curr*0.95*100)/100 : null);
-  document.getElementById("bmHead").innerHTML = `<div class="co">${logo({t,sector:q.sector,name:q.name})}<div><h3 id="bmTitle">Buy ${esc(q.name)}</h3><div class="sub">${t} · latest close ${money(q.curr)}${q.s?` · agent says <span class="pill ${q.s.agent}">${q.s.agent==="yes"?"Yes":"No"}</span>`:""}</div></div></div>`;
+  document.getElementById("bmHead").innerHTML = `<div class="co">${logo({t,sector:q.sector,name:q.name})}<div><h3 id="bmTitle">Buy ${esc(q.name)}</h3><div class="sub">${t} · latest close ${money(q.curr)}${q.s?` · agent says ${agentPill(q.s)}`:""}</div></div></div>`;
   document.getElementById("bmShares").value = num(e.shares) && e.approve!=="yes" ? e.shares : 10;
   document.getElementById("bmAmount").value = "";
   document.getElementById("bmPrice").value = q.curr ?? "";
@@ -1046,14 +1123,14 @@ function openBuy(t){
   document.getElementById("bmFx").value = fees.fx;
   document.getElementById("bmDate").value = today();
   setMode("shares");
-  bm.el.hidden = false; document.body.classList.add("locked");
+  bm.el.hidden = false; document.body.classList.add("modal-open");
   requestAnimationFrame(()=>requestAnimationFrame(()=>bm.el.classList.add("show")));
   const ut = document.getElementById("bmUseTarget"); if(ut) ut.onclick = ()=>{ document.getElementById("bmPrice").value = target; calcBuy(); };
   bm.opener = document.activeElement;
   setTimeout(()=>{ if(matchMedia("(pointer:fine)").matches) document.getElementById("bmShares").focus(); }, 50);
 }
 function closeBuy(){
-  bm.el.classList.remove("show"); document.body.classList.remove("locked");
+  bm.el.classList.remove("show"); document.body.classList.remove("modal-open");
   setTimeout(()=>{ bm.el.hidden = true; }, RM ? 0 : 280);
   if(bm.opener && bm.opener.focus) bm.opener.focus();
 }
@@ -1111,11 +1188,11 @@ function confirmBuy(){
   render(false); renderPortfolio();
   toast(`Bought ${b.shares} ${t} for ${money(b.total)}. Added to Portfolio.`, state.tab!=="portfolio");
 }
-function toast(msg, link){
-  const el = document.getElementById("toast");
-  el.innerHTML = esc(msg) + (link ? `<button type="button" id="toastGo">View</button>` : "");
-  el.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(()=>el.classList.remove("show"), 4500);
-  const g = document.getElementById("toastGo"); if(g) g.onclick = ()=>{ el.classList.remove("show"); setTab("portfolio"); scrollTo({top:0}); };
+function toast(msg, action){
+  const el = document.getElementById("toast"), act = action===true ? {label:"View", fn:()=>{ setTab("portfolio"); scrollTo({top:0}); }} : action;
+  el.innerHTML = esc(msg) + (act ? `<button type="button" id="toastGo">${esc(act.label)}</button>` : "");
+  el.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(()=>el.classList.remove("show"), act ? 7000 : 4500);
+  const g = document.getElementById("toastGo"); if(g) g.onclick = ()=>{ el.classList.remove("show"); act.fn(); };
 }
 bm.el.addEventListener("click", e=>{ if(e.target.closest("[data-close]")) closeBuy(); const m=e.target.closest("[data-mode]"); if(m) setMode(m.dataset.mode); });
 bm.el.addEventListener("input", calcBuy);
@@ -1133,7 +1210,7 @@ function deepBrief(s){
   const st = s.stats||{}, f = (v,d=2)=> v==null?"n/a":fmt(v,d);
   return `Deep dive on ${s.name} (${s.t}), an S&P 500 company in ${s.sector}.
 
-Facts from my screener (Yahoo Finance, close ${PAYLOAD.asof||"latest"}): price $${f(s.curr)}; 3-month change ${f(s.pct3m,1)}% (from $${f(s.p3m)}); 1 month ago $${f(s.p1m)}; 1 year ago $${f(s.p1y)}; 2 years ago $${f(s.p2y)}. Market value ${bn(st.mcap)}. Trailing P/E ${f(st.pe,1)}, forward P/E ${f(st.fpe,1)}. Profit margin ${f(st.pm,1)}%. Debt/EBITDA ${f(st.debitda,2)}x. Free cash flow ${bn(st.fcf)}. Analyst average target $${f(st.pt)}. My rule-based screener scored it ${s.score}/7 and said ${s.agent==="yes"?"YES":"NO"}.
+Facts from my screener (Yahoo Finance, close ${PAYLOAD.asof||"latest"}): price $${f(s.curr)}; 3-month change ${f(s.pct3m,1)}% (from $${f(s.p3m)}); 1 month ago $${f(s.p1m)}; 1 year ago $${f(s.p1y)}; 2 years ago $${f(s.p2y)}. Market value ${bn(st.mcap)}. Trailing P/E ${f(st.pe,1)}, forward P/E ${f(st.fpe,1)}. Profit margin ${f(st.pm,1)}%. Debt/EBITDA ${f(st.debitda,2)}x. Free cash flow ${bn(st.fcf)}.${st.revg!=null?` Sales growth on a year earlier ${f(st.revg,1)}%.`:""} Return on equity ${f(st.roe,1)}%. Analyst average target $${f(st.pt)}${st.analysts?` from ${st.analysts} analysts`:""}. My rule-based screener scored it ${s.score??"n/a"}/7 and said ${s.agent==="yes"?"YES":"NO"}.
 
 Please search the web for the latest news, earnings and filings, then give me:
 1. Why the share price has fallen over the last 3 months (specific events, dates, numbers).
@@ -1176,15 +1253,15 @@ function reportHTML(r, s){
 }
 function openDeep(t){
   const s = DATA.find(x=>x.t===t); if(!s) return; dp.t = t; dp.s = s;
-  document.getElementById("dpHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="dpTitle">Deep dive · ${esc(s.name)}</h3><div class="sub">${s.t} · ${money(s.curr)} · ${pct(s.pct3m)} in 3 months · screener says <span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span></div></div></div>`;
+  document.getElementById("dpHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="dpTitle">Deep dive · ${esc(s.name)}</h3><div class="sub">${s.t} · ${money(s.curr)} · ${pct(s.pct3m)} in 3 months · screener says ${agentPill(s)}</div></div></div>`;
   const cached = deepCache[t];
   if(cached) showReport(cached);
   else if(DEEP_DIVE_API) runDeep();
   else showStart();
-  dp.el.hidden = false; document.body.classList.add("locked");
+  dp.el.hidden = false; document.body.classList.add("modal-open");
   requestAnimationFrame(()=>requestAnimationFrame(()=>dp.el.classList.add("show")));
 }
-function closeDeep(){ dp.el.classList.remove("show"); document.body.classList.remove("locked"); setTimeout(()=>{ dp.el.hidden = true; }, RM?0:320); }
+function closeDeep(){ dp.el.classList.remove("show"); document.body.classList.remove("modal-open"); setTimeout(()=>{ dp.el.hidden = true; }, RM?0:320); }
 function showStart(){
   const url = "https://claude.ai/new?q=" + encodeURIComponent(deepBrief(dp.s));
   document.getElementById("dpBody").innerHTML = `
@@ -1269,10 +1346,10 @@ function openChart(t){
     svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
     svg.addEventListener("pointerleave", ()=>{ hov.style.display = "none"; tip.hidden = true; });
   }
-  cm.el.hidden = false; document.body.classList.add("locked");
+  cm.el.hidden = false; document.body.classList.add("modal-open");
   requestAnimationFrame(()=>requestAnimationFrame(()=>cm.el.classList.add("show")));
 }
-function closeChart(){ cm.el.classList.remove("show"); document.body.classList.remove("locked"); setTimeout(()=>{ cm.el.hidden = true; }, RM?0:280); }
+function closeChart(){ cm.el.classList.remove("show"); document.body.classList.remove("modal-open"); setTimeout(()=>{ cm.el.hidden = true; }, RM?0:280); }
 cm.el.addEventListener("click", e=>{ if(e.target.closest("[data-cclose]")) closeChart(); });
 addEventListener("keydown", e=>{ if(e.key==="Escape" && !cm.el.hidden) closeChart(); });
 const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target);} }),{threshold:.12}) : null;
@@ -1287,12 +1364,12 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveI
 
 (function(){
   const gate=document.getElementById("gate"); let ok=false;
-  try{ ok = sessionStorage.getItem("bcdf.ok")==="1"; }catch(e){}
+  try{ ok = sessionStorage.getItem("bcdf.ok")==="1" || localStorage.getItem("bcdf.ok")==="1"; }catch(e){}
   const open=()=>{ document.body.classList.remove("locked"); gate.classList.add("out"); setTimeout(()=>gate.hidden=true,450); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); };
   if(ok){ gate.hidden=true; return; }
   document.body.classList.add("locked");
   document.getElementById("gateForm").addEventListener("submit",e=>{ e.preventDefault();
-    if(document.getElementById("pw").value.trim().toLowerCase()==="tom"){ try{sessionStorage.setItem("bcdf.ok","1")}catch(_){} open(); }
+    if(document.getElementById("pw").value.trim().toLowerCase()==="tom"){ try{sessionStorage.setItem("bcdf.ok","1");localStorage.setItem("bcdf.ok","1")}catch(_){} open(); }
     else { document.getElementById("pwErr").textContent="That password isn't right. Try again."; gate.classList.remove("shake"); void gate.offsetWidth; gate.classList.add("shake"); } });
 })();
 </script>

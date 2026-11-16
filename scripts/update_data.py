@@ -23,6 +23,17 @@ CHINA_COUNTRIES = {"china", "hong kong", "macau", "macao"}
 MIN_DROP = -10.0  # % over 3 months; the page slider starts at 10%
 DUPLICATE_CLASSES = {"GOOG", "FOX", "NWS"}  # keep one share class per company
 UA = {"User-Agent": "Mozilla/5.0 (blue-chip-finder data refresh)"}
+MIN_COVERAGE = 0.9   # stop if fewer than 90% of members have prices (keeps yesterday's file)
+MAX_INFO_MISSES = 0.25  # stop if more than a quarter of the fallers have no fundamentals
+
+
+def previous():
+    """Yesterday's records by ticker, used when Yahoo returns no fundamentals for a share."""
+    try:
+        old = json.loads(OUT.read_text())
+        return {r["t"]: r for r in old.get("stocks", [])}, old.get("asof")
+    except Exception:
+        return {}, None
 
 
 def sp500():
@@ -95,6 +106,7 @@ def stats(info, curr):
         "div": round(div_rate / curr * 100, 2) if div_rate and curr else 0,
         "pt": g("targetMeanPrice"), "cons": (info.get("recommendationKey") or "").replace("_", " ").title() or None,
         "analysts": g("numberOfAnalystOpinions"),
+        "revg": pct(g("revenueGrowth")), "pb": g("priceToBook"),
     }
 
 
@@ -127,12 +139,14 @@ def main():
             "first": s.index[0],
             "series": s,
         }
-    if not prices:
-        sys.exit("No price data downloaded")
+    if len(prices) < MIN_COVERAGE * len(tickers):
+        sys.exit(f"Only {len(prices)} of {len(tickers)} members have prices; keeping the existing data.json")
     asof = max(last_dates)
     print(f"Prices for {len(prices)} tickers, as of {asof.date()}")
 
-    out = []
+    prev, prev_asof = previous()
+    asof_str = asof.strftime("%Y-%m-%d")
+    out, misses = [], 0
     for m in members:
         p = prices.get(m["t"])
         if not p or not p["p3m"]:
@@ -149,6 +163,20 @@ def main():
                 print(f"  {m['t']}: info failed ({e}); retrying")
                 time.sleep(5 * (attempt + 1))
         time.sleep(0.6)
+        old = prev.get(m["t"])
+        if not num(info.get("marketCap")):
+            misses += 1
+            if old and (old.get("stats") or {}).get("mcap"):
+                # No fundamentals today: carry yesterday's forward with fresh prices, and say so
+                print(f"  {m['t']}: no fundamentals from Yahoo; reusing figures from {old.get('statsAsof') or prev_asof}")
+                p3 = lambda v: round(v, 2) if v else None
+                out.append({**old, "sector": m["sector"], "hq": m["hq"],
+                            "pct3m": round(pct3m, 2), "curr": round(p["curr"], 2),
+                            "p1m": p3(p["p1m"]), "p3m": p3(p["p3m"]), "p1y": p3(p["p1y"]), "p2y": p3(p["p2y"]),
+                            "china": CHINA.get(m["t"]) or (old.get("china") if m["t"] not in CHINA and str(old.get("china") or "").startswith("Headquartered") else None),
+                            "h5": weekly_5y(p["series"], p["asof"]),
+                            "statsAsof": old.get("statsAsof") or prev_asof})
+                continue
         listed = first_trade_year(m["t"], info)
         country = (info.get("country") or "").strip()
         china_reason = CHINA.get(m["t"])
@@ -167,13 +195,17 @@ def main():
             "china": china_reason,
             "h5": weekly_5y(p["series"], p["asof"]),
             "stats": stats(info, p["curr"]),
+            "statsAsof": asof_str,
         }
         out.append(rec)
         print(f"  {m['t']:6} {pct3m:7.1f}%  {'CHINA' if china_reason else ''}")
 
+    if len(out) >= 8 and misses > MAX_INFO_MISSES * len(out):
+        sys.exit(f"Yahoo returned no fundamentals for {misses} of {len(out)} shares; keeping the existing data.json")
+
     payload = {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
-        "asof": asof.strftime("%Y-%m-%d"),
+        "asof": asof_str,
         "universe": len(prices),
         "minDrop": abs(MIN_DROP),
         "source": "Yahoo Finance via yfinance (prices, fundamentals); Wikipedia (S&P 500 list)",
