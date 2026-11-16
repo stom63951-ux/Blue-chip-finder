@@ -326,23 +326,23 @@ html{-webkit-text-size-adjust:100%}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--chip)}
 .tabs .cnt{display:inline-block;min-width:1.6em;padding:0 6px;margin-left:4px;border-radius:999px;background:var(--bg-2);color:var(--muted);font-size:.74rem;text-align:center}
 .tabs button[aria-selected="true"] .cnt{background:#eef3ff;color:var(--chip)}
-#ptbl td.gain{color:var(--good)} #ptbl td.loss{color:var(--bad)}
-#ptbl tfoot td{font-weight:600;border-top:1px solid var(--edge);background:var(--bg-2)}
-#ptbl .rm{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:1px solid var(--edge);border-radius:6px;padding:3px 8px;cursor:pointer}
-#ptbl .rm:hover{color:var(--bad);border-color:var(--bad)}
-#ptbl .note{font-size:.72rem;color:var(--muted);display:block}
-#ptbl td input.c{width:180px}
+.pt td.gain{color:var(--good)} .pt td.loss{color:var(--bad)}
+.pt tfoot td{font-weight:600;border-top:1px solid var(--edge);background:var(--bg-2)}
+.pt .rm{font:inherit;font-size:.76rem;color:var(--muted);background:none;border:1px solid var(--edge);border-radius:6px;padding:3px 8px;cursor:pointer}
+.pt .rm:hover{color:var(--bad);border-color:var(--bad)}
+.pt .note{font-size:.72rem;color:var(--muted);display:block}
+.pt td input.c{width:180px}
 .pempty{padding:36px 16px;text-align:center;color:var(--muted);white-space:normal}
 .pempty b{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
 @media (max-width:1024px){
-  #ptbl td.c-name,#ptbl th.c-name{position:sticky;left:0;z-index:1;background:var(--bg)}
-  #ptbl tfoot td.c-name{background:var(--bg-2)}
+  .pt td.c-name,.pt th.c-name{position:sticky;left:0;z-index:1;background:var(--bg)}
+  .pt tfoot td.c-name{background:var(--bg-2)}
 }
 @media (max-width:719px){
-  #ptbl th,#ptbl td{padding:8px 8px}
-  #ptbl td.c-name .co span:last-child{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
-  #ptbl td input.n{width:78px}
-  #ptbl td input.c{width:140px}
+  .pt th,.pt td{padding:8px 8px}
+  .pt td.c-name .co span:last-child{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+  .pt td input.n{width:78px}
+  .pt td input.c{width:140px}
 }
 
 /* ---- Buy button and purchase window ---- */
@@ -400,11 +400,11 @@ body.modal-open{overflow:hidden}
 .lk a:last-child{margin-right:0}
 @media (min-width:1025px){
   .wrap{max-width:2400px;padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
-  #tbl th,#tbl td,#ptbl th,#ptbl td{padding:7px 7px}
-  #tbl thead tr:last-child th,#ptbl thead th{white-space:normal;vertical-align:bottom;line-height:1.25}
-  #tbl td input.n,#ptbl td input.n{width:76px;padding:5px 6px}
-  #tbl td input.d,#ptbl td input.d{width:126px;padding:5px 6px}
-  #tbl td input.c,#ptbl td input.c{width:130px}
+  #tbl th,#tbl td,.pt th,.pt td{padding:7px 7px}
+  #tbl thead tr:last-child th,.pt thead th{white-space:normal;vertical-align:bottom;line-height:1.25}
+  #tbl td input.n,.pt td input.n{width:76px;padding:5px 6px}
+  #tbl td input.d,.pt td input.d{width:126px;padding:5px 6px}
+  #tbl td input.c,.pt td input.c{width:130px}
   #tbl td select{padding:5px 4px}
   #tbl td.c-name .co span:last-child{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
   .dropbar{width:36px}
@@ -489,6 +489,14 @@ body.modal-open{overflow:hidden}
 .ptools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 4px 0}
 .ptools button{font:inherit;font-size:.8rem;font-weight:500;color:var(--ink);background:#fff;border:1px solid var(--edge);border-radius:8px;padding:6px 12px;cursor:pointer}
 .ptools button:hover{border-color:var(--chip);color:var(--chip)}
+#tbl[data-view="full"] .dropbar{display:none}
+@media (min-width:1025px){#tbl[data-view="full"] td input.c{width:80px}}
+.wbtn{font:inherit;font-size:.78rem;font-weight:600;line-height:1.2;color:var(--muted);background:#fff;border:1px solid var(--edge);border-radius:7px;padding:4px 8px;cursor:pointer;white-space:nowrap;transition:color .2s,border-color .2s,background .2s}
+.wbtn:hover{border-color:var(--chip);color:var(--chip)}
+.wbtn.on{color:var(--chip);border-color:#b2c5f8;background:#eef3ff}
+.wbtn .wl{display:none;margin-left:5px}
+.sumcard .wbtn .wl,.wbtn.full .wl{display:inline}
+.sumcard .wbtn{padding:6px 12px}
 .spark .sl{font-size:10px;fill:var(--muted)} .spark .sv{font-size:10px;fill:var(--ink);font-family:var(--font-data)}
 </style>
 
@@ -510,6 +518,7 @@ body.modal-open{overflow:hidden}
 
   <nav class="tabs" role="tablist" aria-label="Sections">
     <button role="tab" id="tabFinder" data-tab="finder" aria-selected="true">Finder</button>
+    <button role="tab" id="tabWatch" data-tab="watchlist" aria-selected="false">Watchlist <span class="cnt" id="watchCnt">0</span></button>
     <button role="tab" id="tabPort" data-tab="portfolio" aria-selected="false">Portfolio <span class="cnt" id="portCnt">0</span></button>
   </nav>
 
@@ -544,12 +553,18 @@ body.modal-open{overflow:hidden}
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a column heading to sort. Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a column heading to sort. Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press the star to add a share to your Watchlist. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
   </div>
+
+  <section id="watchView" hidden>
+    <div class="tallies" id="watchTallies"></div>
+    <div class="register"><div class="scroller"><table id="wtbl" class="pt"></table></div></div>
+    <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Press the star in the Finder's <b>Watch</b> column to add a share here. <b>Since added</b> compares today's price with the price on the day you added it. <b>To target buy</b> shows how far the price is above your target, and turns to Reached once it gets there. A share stays here after it recovers and leaves the Finder list, and moves to the Portfolio when you buy it. The watchlist is saved in this browser only and is included in the Portfolio backup file.</p>
+  </section>
 
   <section id="portView" hidden>
     <div class="tallies" id="portTallies"></div>
-    <div class="register"><div class="scroller"><table id="ptbl"></table></div></div>
+    <div class="register"><div class="scroller"><table id="ptbl" class="pt"></table></div></div>
     <div class="ptools"><button type="button" id="pCsv">Download as spreadsheet (CSV)</button><button type="button" id="pBackup">Save a backup file</button><button type="button" id="pRestore">Restore from a backup</button><input type="file" id="pFile" accept=".json,application/json" hidden></div>
     <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when you press <b>Buy</b> or set its <b>Manual approval</b> to Yes in the Finder. Invested includes fees. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only, so save a backup file now and then. Restoring a backup on another device, such as your phone, copies your portfolio across.</p>
   </section>
@@ -736,7 +751,7 @@ const COLS_FULL = [
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
   ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["comment","Comment"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
   ["g","Links",[["web","Links"]]],
 ];
 const COLS_HIGH = [
@@ -744,7 +759,7 @@ const COLS_HIGH = [
   ["g","Agent",[["agent","Recommends"]]],
   ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"]]],
   ["g","Value",[["pe","P/E","r"],["buy","Target buy","r"]]],
-  ["g","Decision",[["approve","Manual approval"],["trade","Buy"]]],
+  ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
@@ -772,6 +787,7 @@ function cell(s,key){
     case "shares": return `<td class="r"><input class="n" id="sh-${s.t}" data-k="shares" data-t="${s.t}" type="number" step="1" min="0" value="${e.shares}" aria-label="Number of shares for ${s.t}"></td>`;
     case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v):"—"}</td>`; }
     case "divest": return `<td class="r"><input class="n" id="dv-${s.t}" data-k="divest" data-t="${s.t}" type="number" step="0.01" value="${e.divest}" aria-label="Target divest for ${s.t}"></td>`;
+    case "watch": return `<td>${watchBtn(s.t, s.name)}</td>`;
     case "trade": return `<td><button class="buybtn" data-buy="${s.t}" aria-label="Buy ${esc(s.name)}">Buy</button></td>`;
     case "agent": return `<td class="agentcol">${agentPill(s)}${s.agent?` <span class="score">${s.score}/7</span>`:""}${s.steep||s.shrink?` <span class="pill flag" title="${[s.steep?"Fell 40% or more in 3 months":"",s.shrink?"Sales down 5% or more on a year earlier":""].filter(Boolean).join("; ")}: minus ${(s.steep?1:0)+(s.shrink?1:0)} point${s.steep&&s.shrink?"s":""}. Open the row for details.">−${(s.steep?1:0)+(s.shrink?1:0)}</span>`:""}</td>`;
     case "approve": return `<td><select id="ap-${s.t}" data-k="approve" data-t="${s.t}" aria-label="Manual approval for ${s.t}"><option value="" ${e.approve===""?"selected":""}>—</option><option value="yes" ${e.approve==="yes"?"selected":""}>Yes</option><option value="no" ${e.approve==="no"?"selected":""}>No</option></select></td>`;
@@ -803,7 +819,7 @@ function spark(s){
   <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx)}, low ${money(mn)}, now ${money(s.curr)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
 }
 
-const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","held","date","comment","web","graph"];
+const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
 function cardHTML(s){
   const labels = Object.fromEntries(COLS_FULL.flatMap(g=>g[2]).map(c=>[c[0],c[1]]));
@@ -850,6 +866,9 @@ function detailHTML(s){
   </div></div></div>`;
 }
 
+function isWatched(t){ return !!(edits[t] && edits[t].watch); }
+function watchBtn(t, name, full){ const on = isWatched(t);
+  return `<button type="button" class="wbtn${on?" on":""}${full?" full":""}" data-watch="${t}" aria-pressed="${on}" title="${on?"On your Watchlist. Press to remove":"Add to your Watchlist"}" aria-label="${on?"Remove":"Add"} ${esc(name)} ${on?"from":"to"} watchlist"><span aria-hidden="true">${on?"★":"☆"}</span><span class="wl">${on?"Watching":"Watch"}</span></button>`; }
 function isBought(t){ const e = edits[t]; return !!e && e.approve==="yes" && ((+e.shares>0) || (e.lots||[]).length>0); }
 function filtered(){
   const q = state.q.trim().toLowerCase();
@@ -936,6 +955,7 @@ function render(animate=true){
     if(state.open.has(s.t)) h += `<tr class="detail" data-for="${s.t}"><td colspan="${cols.length}">${detailHTML(s)}</td></tr>`;
   }
   const tbl = document.getElementById("tbl");
+  tbl.dataset.view = state.view;
   const doSwap = () => { tbl.innerHTML = h+"</tbody>"; tbl.querySelectorAll(".dd-anim").forEach(d=>{ d.classList.add("show"); armDetail(d); }); };
   doSwap();
   lastKey = key; first = false;
@@ -961,7 +981,7 @@ function toggleRow(tr){
 }
 
 const tbl = document.getElementById("tbl");
-tbl.addEventListener("click", e=>{ const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
+tbl.addEventListener("click", e=>{ const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const wb=e.target.closest("[data-watch]"); if(wb){ toggleWatch(wb.dataset.watch); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
@@ -1019,6 +1039,7 @@ function pcell(h,k){
   }
 }
 function renderPortfolio(){
+  renderWatch();
   const list = confirmedTickers().map(holding).sort((a,b)=>(b.value??b.cost??0)-(a.value??a.cost??0));
   document.getElementById("portCnt").textContent = list.length;
   if(state.tab!=="portfolio") return;
@@ -1079,13 +1100,77 @@ document.getElementById("pFile").addEventListener("change", async e=>{
     toast(`Backup restored: ${confirmedTickers().length} holding${confirmedTickers().length===1?"":"s"}.`, {label:"Undo", fn:()=>put(prev)});
   }catch(x){ toast("That file isn't a Blue-Chip Dip Finder backup."); }
 });
+/* ===== Watchlist ===== */
+function watchTickers(){ return Object.keys(edits).filter(isWatched); }
+function syncWatchButtons(t){
+  const on = isWatched(t);
+  document.querySelectorAll(`#tbl [data-watch="${t}"]`).forEach(b=>{ b.classList.toggle("on",on); b.setAttribute("aria-pressed",on); b.title = on?"On your Watchlist. Press to remove":"Add to your Watchlist";
+    b.firstElementChild.textContent = on?"★":"☆"; b.lastElementChild.textContent = on?"Watching":"Watch"; });
+}
+function toggleWatch(t){
+  const done = ()=>{ syncWatchButtons(t); renderPortfolio(); };
+  if(isWatched(t)){
+    const prev = edits[t].watch; delete edits[t].watch; store.set("bcdf.edits",edits); done();
+    toast(`Removed ${t} from your Watchlist.`, {label:"Undo", fn:()=>{ setEd(t,"watch",prev); done(); }});
+  } else {
+    const q = quoteOf(t);
+    if((edits[t]||{}).buy==null && q.curr!=null) setEd(t,"buy",String(Math.floor(q.curr*0.95*100)/100));
+    setEd(t,"watch",{date:today(), price:q.curr, name:q.name, sector:q.sector}); done();
+    toast(`Added ${t} to your Watchlist.`, state.tab==="watchlist" ? null : {label:"View", fn:()=>{ setTab("watchlist"); scrollTo({top:0}); }});
+  }
+}
+function watchItem(t){
+  const q = quoteOf(t), e = edits[t], w = e.watch, s = q.s;
+  const name = s ? s.name : (w.name||t), buy = num(e.buy);
+  return { t, s, name, sector: s ? s.sector : w.sector, curr: q.curr, pct3m: s ? s.pct3m : null, w, buy,
+    since: w.price && q.curr!=null ? (q.curr/w.price-1)*100 : null, gap: buy && q.curr!=null ? (q.curr/buy-1)*100 : null, comment: e.comment||"" };
+}
+const WCOLS = [["name","Name"],["agent","Agent today"],["curr","Price now","r"],["pct","% 3M","r"],["since","Since added","r"],["added","Added"],["buy","Target buy","r"],["gap","To target buy","r"],["comment","Comment"],["chart",""],["trade",""],["rm",""]];
+function wcell(h,k){
+  switch(k){
+    case "name": return `<td class="c-name"><div class="co">${logo({t:h.t,sector:h.sector,name:h.name})}<span>${esc(h.name)}</span></div></td>`;
+    case "agent": return `<td>${h.s ? agentPill(h.s)+(h.s.agent?` <span class="muted">${h.s.score}/7</span>`:"") : `<span class="muted">Not in dip list</span>`}</td>`;
+    case "curr": return `<td class="r num">${money(h.curr)}</td>`;
+    case "pct": return `<td class="r num${h.pct3m!=null?" loss":""}">${h.pct3m!=null?pct(h.pct3m):`<span class="muted" title="No longer down 10% or more over 3 months">—</span>`}</td>`;
+    case "since": return `<td class="r num ${h.since==null?"":h.since>=0?"gain":"loss"}">${pct(h.since)}</td>`;
+    case "added": return `<td class="num">${h.w.date?new Date(h.w.date+"T12:00:00Z").toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"}):"—"}<span class="note">at ${money(h.w.price)}</span></td>`;
+    case "buy": return `<td class="r"><input class="n" data-pk="buy" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.buy??""}" aria-label="Target buy for ${h.t}"></td>`;
+    case "gap": return `<td class="r num">${h.gap==null?"—":h.gap<=0?`<span class="pill yes">Reached</span>`:pct(h.gap)+" above"}</td>`;
+    case "comment": return `<td><input class="c" data-pk="comment" data-t="${h.t}" type="text" value="${esc(h.comment)}" aria-label="Comment for ${h.t}"></td>`;
+    case "chart": return `<td>${h.s?`<button type="button" class="linkbtn" data-chart="${h.t}">5Y chart</button>`:`<a href="https://finance.yahoo.com/quote/${h.t}/" target="_blank" rel="noopener">Yahoo ↗</a>`}</td>`;
+    case "trade": return `<td><button class="buybtn" data-buy="${h.t}" aria-label="Buy ${esc(h.name)}">Buy</button></td>`;
+    case "rm": return `<td><button class="rm" data-watch="${h.t}" aria-label="Remove ${h.t} from watchlist">Remove</button></td>`;
+  }
+}
+function renderWatch(){
+  const list = watchTickers().map(watchItem).sort((a,b)=>(a.gap??1e9)-(b.gap??1e9) || a.t.localeCompare(b.t));
+  document.getElementById("watchCnt").textContent = list.length;
+  if(state.tab!=="watchlist") return;
+  const reached = list.filter(h=>h.gap!=null && h.gap<=0), yes = list.filter(h=>h.s && h.s.agent==="yes"), moved = list.filter(h=>h.since!=null);
+  const avg = moved.length ? moved.reduce((a,h)=>a+h.since,0)/moved.length : null;
+  document.getElementById("watchTallies").innerHTML = [
+    ["Watching", list.length, "shares on your watchlist", ""],
+    ["At target buy", reached.length, reached.length ? reached.slice(0,4).map(h=>h.t).join(" · ") : "none yet", reached.length?"good":""],
+    ["Agent says yes", yes.length, yes.length ? yes.slice(0,4).map(h=>h.t).join(" · ") : "none today", yes.length?"good":""],
+    ["Average move", avg==null?"—":pct(avg), "since each was added", avg==null?"":avg>=0?"good":"bad"],
+  ].map(([k,v,s,c])=>`<div class="tally ${c}"><div class="v num">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`).join("");
+  let h = `<thead><tr>${WCOLS.map(c=>`<th class="${c[2]||""} c-${c[0]}" scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
+  if(!list.length) h += `<tr><td colspan="${WCOLS.length}" class="pempty"><b>Nothing on your watchlist yet</b>In the Finder, press the star in the <b style="display:inline;font-size:inherit">Watch</b> column on any share and it will appear here.</td></tr>`;
+  for(const x of list) h += `<tr>${WCOLS.map(c=>wcell(x,c[0])).join("")}</tr>`;
+  document.getElementById("wtbl").innerHTML = h + `</tbody>`;
+}
+const wtbl = document.getElementById("wtbl");
+wtbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.pk) return; setEd(el.dataset.t, el.dataset.pk, el.value); renderWatch(); });
+wtbl.addEventListener("click", e=>{ const c=e.target.closest("[data-chart]"); if(c){ openChart(c.dataset.chart); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } const w=e.target.closest("[data-watch]"); if(w) toggleWatch(w.dataset.watch); });
+
 function setTab(tab){
   state.tab = tab; store.set("bcdf.tab",tab);
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
   document.getElementById("finderView").hidden = tab!=="finder";
   document.getElementById("portView").hidden = tab!=="portfolio";
-  if(tab==="portfolio") renderPortfolio(); else { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
-  if(history.replaceState) history.replaceState(null,"",tab==="portfolio"?"#portfolio":location.pathname+location.search);
+  document.getElementById("watchView").hidden = tab!=="watchlist";
+  if(tab!=="finder") renderPortfolio(); else { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
+  if(history.replaceState) history.replaceState(null,"",tab==="finder"?location.pathname+location.search:"#"+tab);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
 
@@ -1094,7 +1179,7 @@ const bm = { el: document.getElementById("buyModal"), t:null, mode:"shares", las
 const fees = Object.assign({brok:0, fx:0}, store.get("bcdf.fees",{}));
 const today = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
 function quoteOf(t){
-  const s = DATA.find(x=>x.t===t), snap = (edits[t]||{}).snap||{};
+  const s = DATA.find(x=>x.t===t), snap = Object.assign({}, (edits[t]||{}).watch, (edits[t]||{}).snap);
   return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr: s ? s.curr : (PRICES[t] ?? snap.curr ?? null) };
 }
 function openBuy(t){
@@ -1169,6 +1254,7 @@ function confirmBuy(){
   setEd(t,"held", String(Math.round(shares*avg*100)/100));
   if(!had || !e.date) setEd(t,"date", document.getElementById("bmDate").value);
   setEd(t,"lots", lots);
+  if(edits[t].watch){ if(!edits[t].snap) edits[t].snap = {name:bm.q.name, sector:bm.q.sector, curr:bm.q.curr}; delete edits[t].watch; store.set("bcdf.edits",edits); }
   if(bm.q.s){ const sn = Object.assign({}, edits[t].snap, {name:bm.q.name, sector:bm.q.sector, curr:bm.q.curr}); setEd(t,"snap",sn); }
   closeBuy();
   render(false); renderPortfolio();
@@ -1345,7 +1431,7 @@ setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add
 const deck=document.querySelector('.deck'); let deckTop=0; const measure=()=>{deck.classList.remove('compact'); deckTop=deck.getBoundingClientRect().top+scrollY;}; measure();
 addEventListener('scroll',()=>{ if(getComputedStyle(deck).position!=='sticky') return; deck.classList.toggle('compact', scrollY>deckTop+40); },{passive:true});
 buildTallies(); buildHist(); render();
-setTab(location.hash==="#portfolio" ? "portfolio" : (store.get("bcdf.tab","finder")));
+setTab((t=>["finder","watchlist","portfolio"].includes(t)?t:"finder")(location.hash ? location.hash.slice(1) : store.get("bcdf.tab","finder")));
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
 </script>
