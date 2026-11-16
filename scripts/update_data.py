@@ -144,6 +144,21 @@ def main():
     asof = max(last_dates)
     print(f"Prices for {len(prices)} tickers, as of {asof.date()}")
 
+    # The index's own 3-month change, shown above the % 3M column for comparison
+    index = None
+    try:
+        ix = yf.download("^GSPC", period="6mo", interval="1d", auto_adjust=False, progress=False)["Close"]
+        if isinstance(ix, pd.DataFrame):
+            ix = ix.iloc[:, 0]
+        ix = ix.dropna().loc[:asof]
+        base = close_on_or_before(ix, asof - pd.DateOffset(months=3))
+        if len(ix) and base:
+            index = {"name": "S&P 500", "curr": round(float(ix.iloc[-1]), 2), "p3m": round(base, 2),
+                     "pct3m": round((float(ix.iloc[-1]) / base - 1) * 100, 2)}
+            print(f"S&P 500 3-month change: {index['pct3m']}%")
+    except Exception as e:
+        print(f"Index lookup failed ({e}); the page will leave it out")
+
     prev, prev_asof = previous()
     asof_str = asof.strftime("%Y-%m-%d")
     out, misses = [], 0
@@ -208,6 +223,7 @@ def main():
         "asof": asof_str,
         "universe": len(prices),
         "minDrop": abs(MIN_DROP),
+        "index": index,
         "source": "Yahoo Finance via yfinance (prices, fundamentals); Wikipedia (S&P 500 list)",
         "stocks": sorted(out, key=lambda r: r["pct3m"]),
         # latest close for every member, so portfolio holdings keep pricing

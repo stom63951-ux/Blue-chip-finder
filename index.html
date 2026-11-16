@@ -514,6 +514,96 @@ body.modal-open{overflow:hidden}
 .sumcard .wbtn .wl,.wbtn.full .wl{display:inline}
 .sumcard .wbtn{padding:6px 12px}
 .spark .sl{font-size:10px;fill:var(--muted)} .spark .sv{font-size:10px;fill:var(--ink);font-family:var(--font-data)}
+
+/* ---- compact layout: slim header, one-line stats and filters, dense table ---- */
+.wrap{padding-block:10px 40px}
+.hero{align-items:center;gap:6px 24px;margin-bottom:6px;padding-bottom:6px}
+.hero>div:first-child{display:flex;align-items:baseline;gap:14px;min-width:0}
+h1{font-size:1.15rem;margin:0;white-space:nowrap}
+.lede{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:none}
+.meta{font-size:.74rem;gap:2px 14px;max-width:none;align-items:center}
+.tabs{margin:0 0 8px}
+.tabs button{padding:5px 12px 7px;font-size:.86rem}
+.tallies{gap:8px;margin-bottom:8px}
+.tally{display:flex;align-items:baseline;gap:8px;padding:5px 10px;border-radius:8px;min-width:0}
+.tally .v{font-size:1.05rem;line-height:1.2}
+.tally .k{font-size:.62rem;white-space:nowrap}
+.tally .s{font-size:.72rem;flex:1;min-width:0;margin:0}
+.deck{padding:6px 12px;gap:6px 18px;margin-bottom:8px;border-radius:10px;align-items:center}
+.deck.compact{padding-block:6px}
+.deck>div:first-child{display:flex;align-items:center;gap:10px;min-width:0}
+.deck .hist,.deck .range-ends{display:none}
+.drop-head{margin:0;white-space:nowrap;gap:6px}
+.drop-head .big,.deck.compact .drop-head .big{font-size:1.1rem;min-width:2.6ch}
+.drop-head .t{font-size:.8rem}
+.deck .range{flex:1;min-width:90px}
+.deck>div:nth-child(2),.deck>div:nth-child(3){display:flex;align-items:center;gap:8px}
+.ctl-label{margin:0;white-space:nowrap;font-size:.62rem}
+.deck>div:nth-child(4) .ctl-label{display:none}
+.seg{padding:2px}
+.seg .ind{top:2px;bottom:2px}
+.seg button{padding:4px 11px;font-size:.78rem}
+.search,.search:focus{width:100%;padding:5px 12px;font-size:.8rem}
+.deck-foot{padding-top:6px;font-size:.78rem;gap:4px 18px}
+.switch{font-size:.78rem;gap:8px}
+.switch .tg{width:32px;height:18px}
+.switch .tg::after{width:12px;height:12px}
+.switch input:checked+.tg::after{transform:translateX(14px)}
+thead tr.groups th{padding-top:5px;font-size:.6rem}
+thead tr.groups th.idx{letter-spacing:.04em;white-space:nowrap}
+thead tr.groups th.idx b{font-family:var(--font-data);font-weight:600;font-size:.72rem;letter-spacing:0;margin-left:4px}
+thead tr.groups th.idx b.neg{color:var(--bad)} thead tr.groups th.idx b.pos{color:var(--good)}
+.caret{width:16px;height:16px;font-size:.5rem}
+.pill{padding:1px 8px;font-size:.7rem}
+.score{font-size:.68rem}
+.buybtn{padding:3px 9px;font-size:.72rem;border-radius:6px}
+.wbtn{padding:2px 6px;font-size:.72rem;border-radius:6px}
+.pt .rm{padding:2px 7px;font-size:.72rem}
+td input[type=number]{-moz-appearance:textfield;appearance:textfield}
+td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+@media (min-width:1025px){
+  .deck{grid-template-columns:minmax(300px,1.5fr) auto auto minmax(150px,240px)}
+  #tbl,.pt{font-size:.76rem}
+  #tbl th,#tbl td,.pt th,.pt td{padding:3px 6px}
+  #tbl thead th,.pt thead th{font-size:.62rem;letter-spacing:.04em}
+  #tbl thead tr:last-child th{padding-block:4px}
+  #tbl td input,#tbl td select,.pt td input{font-size:.74rem;border-radius:6px}
+  #tbl td input.n,.pt td input.n{width:68px;padding:1px 5px}
+  #tbl td input.d,.pt td input.d{width:118px;padding:1px 5px}
+  #tbl td input.c,.pt td input.c{width:110px;padding:1px 5px}
+  #tbl th:last-child,#tbl tr.row td:last-child{width:100%}
+  .buybtn{padding:2px 9px}
+  .wbtn{padding:1px 6px}
+  #tbl td select{padding:1px 2px}
+  #tbl[data-view="full"] td input.c{width:76px}
+  #tbl td input.n[data-k="shares"]{width:52px}
+  #tbl .logo{display:none}
+  .pt .logo{width:18px;height:18px;font-size:.42rem}
+  .dropbar{width:28px;height:4px}
+  .dropcell{gap:6px}
+}
+@media (max-width:1279px){.lede{display:none}}
+@media (max-width:1024px){
+  th,td,.pt th,.pt td{padding:5px 7px}
+  .logo{width:20px;height:20px;font-size:.45rem}
+}
+@media (max-width:719px){
+  .wrap{padding-block:8px 32px}
+  h1{font-size:1.1rem}
+  .tallies{gap:6px}
+  .tally{padding:4px 8px;gap:6px}
+  .tally .v{font-size:.95rem}
+  .deck{padding:8px 10px;gap:8px 10px}
+  .deck>div:nth-child(2),.deck>div:nth-child(3){flex-direction:column;align-items:stretch;gap:3px}
+  .seg button{padding:6px 8px}
+  .search,.search:focus{padding:7px 12px}
+  th,td,.pt th,.pt td{padding:4px 6px}
+  td input.n{width:74px}
+  td input,td select{padding:3px 6px}
+  .meta>span:nth-child(3){display:none}
+  .hero{margin-bottom:4px;padding-bottom:6px}
+  .deck-foot{gap:4px}
+}
 </style>
 
 </head>
@@ -617,6 +707,7 @@ body.modal-open{overflow:hidden}
       <h2>About this data</h2>
       <ul>
         <li>Every weekday after the US market closes, the whole S&amp;P 500 is re-screened and this page updates automatically.</li>
+        <li>The <b>S&amp;P 500</b> figure above the % 3M column is the index's own change over the same 3 months, so you can see whether a share fell with the market or on its own.</li>
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
         <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's S&amp;P 500 list.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
@@ -768,8 +859,8 @@ function sortRows(rows){
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"]]],
-  ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
+  ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
+  ["g","Price · USD",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
   ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
@@ -777,12 +868,12 @@ const COLS_FULL = [
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","Agent",[["agent","Recommends"]]],
-  ["g","Price · USD",[["pct","% 3M","r"],["curr","Curr","r"]]],
-  ["g","Value",[["pe","P/E","r"],["buy","Target buy","r"]]],
+  ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
+  ["g","Price and value",[["curr","Curr","r"],["pe","P/E","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
+const IDX = PAYLOAD.index && PAYLOAD.index.pct3m!=null ? PAYLOAD.index : null;
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
 function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${s.t.slice(0,4)}</span>`; }
@@ -840,7 +931,7 @@ function spark(s){
   <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx)}, low ${money(mn)}, now ${money(s.curr)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
 }
 
-const CARD_KEYS = ["name","agent","pct","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
+const CARD_KEYS = ["name","pct","agent","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
 function cardHTML(s){
   const labels = Object.fromEntries(COLS_FULL.flatMap(g=>g[2]).map(c=>[c[0],c[1]]));
@@ -962,7 +1053,7 @@ function render(animate=true){
   const key = state.view+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith(state.view+"|");
-  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}">${g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
     h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
       : (state.q.trim() || state.ag!=="all") && DATA.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
