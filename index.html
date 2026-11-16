@@ -1190,7 +1190,8 @@ function setTab(tab){
   document.getElementById("finderView").hidden = tab!=="finder";
   document.getElementById("portView").hidden = tab!=="portfolio";
   document.getElementById("watchView").hidden = tab!=="watchlist";
-  if(tab!=="finder") renderPortfolio(); else { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
+  renderPortfolio(); // always: this also keeps the Watchlist and Portfolio tab counts current
+  if(tab==="finder") { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
   if(history.replaceState) history.replaceState(null,"",tab==="finder"?location.pathname+location.search:"#"+tab);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
