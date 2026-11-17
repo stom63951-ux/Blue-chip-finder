@@ -201,6 +201,87 @@
      "note": "Forecast given in words (\"mid-single digits\"), taken as 4% to 6%"
     }
    ]
+  },
+  "HWM": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2021",
+     "lo": 0.75,
+     "hi": 0.89,
+     "act": 1.01,
+     "src": "https://www.sec.gov/Archives/edgar/data/4281/000115752321000132/a52372603ex99_1.htm"
+    },
+    {
+     "y": "2022",
+     "lo": 1.31,
+     "hi": 1.43,
+     "act": 1.4,
+     "src": "https://www.sec.gov/Archives/edgar/data/4281/000115752322000133/a52572323ex99_1.htm"
+    },
+    {
+     "y": "2023",
+     "lo": 1.53,
+     "hi": 1.67,
+     "act": 1.84,
+     "src": "https://www.sec.gov/Archives/edgar/data/4281/000115752323000273/a53321439_ex991.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 2.1,
+     "hi": 2.2,
+     "act": 2.69,
+     "src": "https://www.sec.gov/Archives/edgar/data/4281/000115752324000226/a53895480ex99_1.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 3.13,
+     "hi": 3.21,
+     "act": 3.77,
+     "src": "https://www.sec.gov/Archives/edgar/data/4281/000110465925012529/tm256423d1_ex99-1.htm"
+    }
+   ]
+  },
+  "ETN": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2021",
+     "lo": 5.4,
+     "hi": 5.8,
+     "act": 6.62,
+     "src": "https://www.sec.gov/Archives/edgar/data/1551182/000115752321000119/a52371791ex99.htm"
+    },
+    {
+     "y": "2022",
+     "lo": 7.3,
+     "hi": 7.7,
+     "act": 7.57,
+     "src": "https://www.sec.gov/Archives/edgar/data/1551182/000115752322000149/a52574065ex99.htm"
+    },
+    {
+     "y": "2023",
+     "lo": 8.04,
+     "hi": 8.44,
+     "act": 9.12,
+     "src": "https://www.sec.gov/Archives/edgar/data/1551182/000115752323000204/a53306075ex99.htm"
+    }
+   ]
+  },
+  "FTNT": {
+   "measure": "revenue",
+   "unit": "$B",
+   "years": [
+    {
+     "y": "2025",
+     "lo": 6.65,
+     "hi": 6.85,
+     "act": 6.8,
+     "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203925000007/ftntq4-2024ex991.htm"
+    }
+   ]
   }
  }
 }
