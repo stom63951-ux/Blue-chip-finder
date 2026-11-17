@@ -540,6 +540,17 @@ h1{font-size:1.15rem;margin:0;white-space:nowrap}
 .deck>div:nth-child(2),.deck>div:nth-child(3){display:flex;align-items:center;gap:8px}
 .ctl-label{margin:0;white-space:nowrap;font-size:.62rem}
 .deck>div:nth-child(4) .ctl-label{display:none}
+.colpick{position:relative;display:inline-block;margin-left:6px;vertical-align:middle}
+.colbtn{font:inherit;font-size:.78rem;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--edge);border-radius:999px;padding:5px 12px;cursor:pointer}
+.colbtn:hover,.colbtn[aria-expanded="true"]{border-color:var(--chip);color:var(--chip)}
+.colbtn:focus-visible{outline:2px solid var(--chip);outline-offset:2px}
+.colmenu{position:absolute;z-index:60;top:calc(100% + 6px);left:0;width:min(440px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--edge);border-radius:10px;box-shadow:0 12px 32px -12px rgba(16,24,40,.35);padding:10px 12px;font-size:.8rem}
+.colmenu .cm-top{display:flex;gap:12px;align-items:center;margin-bottom:6px;color:var(--muted)}
+.colmenu .cm-top button{font:inherit;font-size:.78rem;color:var(--chip);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.colmenu .cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:2px 10px}
+.colmenu h5{grid-column:1/-1;margin:6px 0 1px;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.colmenu label{display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer;white-space:nowrap}
+@media (max-width:640px){.colpick{display:block;margin:6px 0 0}.colmenu{left:0}}
 .seg{padding:2px}
 .seg .ind{top:2px;bottom:2px}
 .seg button{padding:4px 11px;font-size:.78rem}
@@ -691,6 +702,7 @@ body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
     <div>
       <span class="ctl-label">View</span>
       <div class="seg" id="segView" role="group" aria-label="View"><span class="ind"></span><button data-v="full" aria-pressed="true">Full</button><button data-v="high" aria-pressed="false">High level</button></div>
+      <span class="colpick"><button type="button" id="colBtn" class="colbtn" aria-haspopup="true" aria-expanded="false" title="Choose which columns to show">Columns</button><div id="colMenu" class="colmenu" hidden></div></span>
     </div>
     <div>
       <span class="ctl-label">Agent says</span>
@@ -940,6 +952,18 @@ const COLS_HIGH = [
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
+const COL_GROUP_NAME = g => g[1]==="@idx" ? "Fall and verdict" : g[1]==="@ccy" ? "Prices" : g[1];
+const OPT_COLS = COLS_FULL.slice(1).flatMap(g=>g[2].map(c=>c[0]));
+const HIGH_KEYS = COLS_HIGH.slice(1).flatMap(g=>g[2].map(c=>c[0]));
+const sameSet = (a,b) => a.size===b.length && b.every(k=>a.has(k));
+function setCols(keys, save=true){ state.cols = new Set(keys.filter(k=>OPT_COLS.includes(k)));
+  state.view = sameSet(state.cols,OPT_COLS) ? "full" : sameSet(state.cols,HIGH_KEYS) ? "high" : "custom";
+  if(save) store.set("bcdf.cols", [...state.cols]); }
+const activeGroups = () => COLS_FULL.map((g,i)=> i===0 ? g : [g[0],g[1],g[2].filter(c=>state.cols.has(c[0]))]).filter(g=>g[2].length);
+function buildColMenu(){ const m = document.getElementById("colMenu");
+  m.innerHTML = `<div class="cm-top"><span>Tick the columns to show</span><button type="button" data-cm="all">Show all</button><button type="button" data-cm="high">High level only</button></div><div class="cm-grid">` +
+    COLS_FULL.slice(1).map(g=>`<h5>${COL_GROUP_NAME(g)}</h5>`+g[2].map(c=>`<label><input type="checkbox" data-col="${c[0]}"${state.cols.has(c[0])?" checked":""}> ${c[1]}</label>`).join("")).join("") + `</div>`; }
+setCols(store.get("bcdf.cols", null) || HIGH_KEYS, false);
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
 const MAX_PICKS = 10;
@@ -1146,7 +1170,7 @@ function updateHist(){
 
 function moveInd(seg){
   const on = seg.querySelector('button[aria-pressed="true"]'), ind = seg.querySelector(".ind");
-  if(!on) return; ind.style.width = on.offsetWidth+"px"; ind.style.transform = `translateX(${on.offsetLeft}px)`;
+  if(!on){ ind.style.width = "0px"; return; } ind.style.width = on.offsetWidth+"px"; ind.style.transform = `translateX(${on.offsetLeft}px)`;
 }
 
 let first = true, lastKey = "";
@@ -1157,15 +1181,15 @@ function render(animate=true){
   document.querySelectorAll("#segAg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.ag===state.ag));
   moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg"));
   applyPool(); updateHist(); buildIdxTabs();
-  const groups = state.view==="full" ? COLS_FULL : COLS_HIGH;
+  const groups = activeGroups();
   const cols = groups.flatMap(g=>g[2].map((c,i)=>({key:c[0],label:c[1],cls:((c[2]||"")+(i===0&&g[0]==="g"?" gl":"")).trim()})));
   const rows = sortRows(filtered());
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
   document.getElementById("summary").innerHTML = `${state.tab==="picks"?`<b>AI picks:</b> the agent's ${MAX_PICKS} highest-confidence blue-chips across every index · `:""}${state.showFail&&state.tab!=="picks"?`Showing <b>${rows.length}</b> of ${POOL.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${POOL.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(POOL.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"confidence":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
-  const key = state.view+"|"+state.idx+"|"+rows.map(s=>s.t).join(",");
+  const key = [...state.cols].join(",")+"|"+state.idx+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
-  const viewChanged = !lastKey.startsWith(state.view+"|");
+  const viewChanged = !lastKey.startsWith([...state.cols].join(",")+"|");
   let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}${c.key==="caret"?"":`<span class="rz" data-rz="${c.key}" title="Drag to resize. Double-click to reset"></span>`}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
     h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
@@ -1181,7 +1205,7 @@ function render(animate=true){
     if(state.open.has(s.t)) h += `<tr class="detail" data-for="${s.t}"><td colspan="${cols.length}">${detailHTML(s)}</td></tr>`;
   }
   const tbl = document.getElementById("tbl");
-  tbl.dataset.view = state.view;
+  tbl.dataset.view = state.view==="high" ? "high" : "full";
   const doSwap = () => { tbl.innerHTML = h+"</tbody>"; tbl.querySelectorAll(".dd-anim").forEach(d=>{ d.classList.add("show"); armDetail(d); }); };
   doSwap();
   lastKey = key; first = false;
@@ -1230,7 +1254,17 @@ tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return;
 
 let raf=0;
 document.getElementById("drop").addEventListener("input", e=>{ state.drop=+e.target.value; store.set("bcdf.drop",state.drop); document.getElementById("dropVal").textContent=state.drop+"%"; updateHist(); cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>render()); });
-document.querySelectorAll("#segView button").forEach(b=>b.onclick=()=>{ state.view=b.dataset.v; state.viewPicked=true; render(); });
+document.querySelectorAll("#segView button").forEach(b=>b.onclick=()=>{ setCols(b.dataset.v==="full" ? OPT_COLS : HIGH_KEYS); state.viewPicked=true; buildColMenu(); render(); });
+{ const btn = document.getElementById("colBtn"), menu = document.getElementById("colMenu");
+  const shut = () => { menu.hidden = true; btn.setAttribute("aria-expanded","false"); };
+  btn.onclick = e => { e.stopPropagation(); if(menu.hidden){ buildColMenu(); menu.hidden = false; btn.setAttribute("aria-expanded","true"); } else shut(); };
+  menu.addEventListener("click", e => { e.stopPropagation(); const b = e.target.closest("[data-cm]"); if(!b) return;
+    setCols(b.dataset.cm==="all" ? OPT_COLS : HIGH_KEYS); state.viewPicked = true; buildColMenu(); render(false); });
+  menu.addEventListener("change", e => { const c = e.target.closest("[data-col]"); if(!c) return;
+    const k = new Set(state.cols); c.checked ? k.add(c.dataset.col) : k.delete(c.dataset.col);
+    setCols(OPT_COLS.filter(x=>k.has(x))); state.viewPicked = true; render(false); });
+  document.addEventListener("click", shut);
+  document.addEventListener("keydown", e => { if(e.key==="Escape") shut(); }); }
 document.querySelectorAll("#segAg button").forEach(b=>b.onclick=()=>{ state.ag=b.dataset.ag; render(); });
 document.getElementById("q").addEventListener("input", e=>{state.q=e.target.value;render();});
 document.getElementById("showFail").addEventListener("change", e=>{state.showFail=e.target.checked;render();});
