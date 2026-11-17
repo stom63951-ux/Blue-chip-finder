@@ -761,7 +761,7 @@ body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
         <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's list for each index.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
-        <li><b>Forecast accuracy</b> (Full view) compares each company's own forecast at the start of a year with what it later reported, read from the company's results releases. "3/3 · 7%" means it met or beat its forecast in 3 of 3 years, and the result typically landed 7% from the middle of its forecast range ("pts" means percentage points). Companies forecast different measures, so hover over a figure to see which one and every year. A grey figure with a star is the older analyst-based score, shown until that company's releases have been read; "none" means the company publishes no numeric forecast.</li>
+        <li><b>Forecast accuracy</b> (Full view) says how close each company's own forecast at the start of a year was to what it later reported, read from the company's results releases. <b>Very accurate</b> means the result typically landed within 3% of the middle of its forecast, <b>Accurate</b> within 7.5%, <b>Fairly accurate</b> within 15%, and <b>Not accurate</b> further away than that, whether it beat or missed. Companies forecast different measures, so hover over the word to see which one and the figures for every year. A grey word with a star is the older analyst-based score, shown until that company's releases have been read; "No forecast" means the company publishes no numeric forecast.</li>
         <li><b>AI picks</b> lists up to ten blue-chips from every index that the agent says Yes to, ranked by confidence score and then by how far the analyst target is above the price. It is rule-based and reads numbers only.</li>
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
         <li><b>Target buy</b> starts 5% under the current price; <b>Target divest</b> starts at the analyst average target.</li>
@@ -915,7 +915,7 @@ const SORTS = {
   ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
   pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
   pe:s=>s.stats.pe, sector:s=>s.sector, status:s=>s.status, lev:s=>s.stats.debitda,
-  buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest), fa:s=>{ const d=guideOf(s); return d&&!d.none ? 1000+d.met/d.n*100-Math.min(99,d.gap)/100 : s.fa ? 100-Math.min(100,s.fa.med) : null; },
+  buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest), fa:s=>{ const d=guideOf(s); return d&&!d.none ? 1000-Math.min(900,d.gap*(d.pts?3:1)) : s.fa ? 100-Math.min(100,s.fa.med) : null; },
 };
 function sortRows(rows){
   const f = SORTS[state.sort.k] || SORTS.pct, d = state.sort.dir;
@@ -926,17 +926,17 @@ function sortRows(rows){
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","@idx",[["pct","% 3M","r"],["agent","Confidence"]]],
+  ["g","@idx",[["pct","% 3M","r"],["pe","P/E","r"],["agent","Confidence"]]],
   ["g","@ccy",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
-  ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"],["fa","Forecast accuracy","r"]]],
+  ["g","Company",[["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"],["fa","Forecast accuracy"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
   ["g","Links",[["web","Links"]]],
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","@idx",[["pct","% 3M","r"],["agent","Confidence"]]],
-  ["g","@ccy",[["curr","Curr","r"],["pe","P/E","r"],["buy","Target buy","r"]]],
+  ["g","@idx",[["pct","% 3M","r"],["pe","P/E","r"],["agent","Confidence"]]],
+  ["g","@ccy",[["curr","Curr","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
@@ -981,6 +981,9 @@ function guideOf(s){
 const gdGap = d => fmt(d.gap, d.gap<10?1:0) + (d.pts ? " pts" : "%");
 const gdVal = (d,v) => d.unit==="$" ? "$"+fmt(v,2) : d.unit==="%" ? fmt(v,1)+"%" : /^[$€£]B$/.test(d.unit) ? d.unit[0]+fmt(v,2)+"B" : fmt(v,1)+" "+d.unit;
 const gdNote = d => d.none ? d.none : `The company's own forecast of ${d.measure} against what it reported. Met or beat its forecast in ${d.met} of ${d.n} year${d.n===1?"":"s"}; typical gap from the middle of its range ${gdGap(d)}. ` + d.years.map(y=>`${y.y}: forecast ${y.lo===y.hi?gdVal(d,y.lo):gdVal(d,y.lo)+" to "+gdVal(d,y.hi)}, reported ${gdVal(d,y.act)} (${y.res}).`).join(" ");
+const FA_WORDS = ["Very accurate","Accurate","Fairly accurate","Not accurate"];
+const faLevel = (gap,pts) => { const g = pts ? gap*3 : gap; return g<=3 ? 0 : g<=7.5 ? 1 : g<=15 ? 2 : 3; };
+const gdWord = d => FA_WORDS[faLevel(d.gap,d.pts)];
 const faScore = s => 100 - Math.min(100, s.fa.med);
 const faNote = s => `Reported earnings per share came within ${fmt(s.fa.med,1)}% of the forecast in a typical quarter, over the last ${s.fa.n} quarters (about ${Math.round(s.fa.n/4)} years). Met or beat the forecast ${s.fa.hit} times out of ${s.fa.n}.`;
 function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${disp(s.t).slice(0,4)}</span>`; }
@@ -1001,8 +1004,8 @@ function cell(s,key){
     case "sector": return `<td title="${esc(s.sector)}">${SHORT_SECTOR[s.sector]||s.sector}</td>`;
     case "status": return `<td class="status-${s.status}">${s.status}</td>`;
     case "fa": { const d=guideOf(s);
-      if(d) return d.none ? `<td class="r num muted" title="${esc(gdNote(d))}">none</td>` : `<td class="r num" title="${esc(gdNote(d))}"><b>${d.met}/${d.n}</b> · ${gdGap(d)}</td>`; }
-      return s.fa ? `<td class="r num muted fa-an" title="Analyst-based for now: the company's own forecasts have not been read yet. ${faNote(s)}">${fmt(faScore(s),0)}%*</td>` : `<td class="r num" title="No forecast history for this share yet">—</td>`;
+      if(d) return d.none ? `<td class="muted" title="${esc(gdNote(d))}">No forecast</td>` : `<td class="fa-w fa-${faLevel(d.gap,d.pts)}" title="${esc(gdNote(d))}">${gdWord(d)}</td>`; }
+      return s.fa ? `<td class="muted fa-an" title="Analyst-based for now: the company's own forecasts have not been read yet. ${faNote(s)}">${FA_WORDS[faLevel(s.fa.med,false)]}*</td>` : `<td class="r num" title="No forecast history for this share yet">—</td>`;
     case "lev": return `<td class="r num"${s.fin?` title="Not used for banks and financials"`:""}>${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":s.fin?"n/a":"—"}</td>`;
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
     case "buy": return `<td class="r"><input class="n" id="buy-${s.t}" data-k="buy" data-t="${s.t}" type="number" step="0.01" value="${e.buy}" aria-label="Target buy for ${s.t}"></td>`;
@@ -1041,7 +1044,7 @@ function spark(s){
   <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx,s.ccy)}, low ${money(mn,s.ccy)}, now ${money(s.curr,s.ccy)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
 }
 
-const CARD_KEYS = ["name","pct","agent","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
+const CARD_KEYS = ["name","pct","pe","agent","curr","p1m","p3m","p1y","p2y","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
 const CARD_WIDE = new Set(["name","sector","comment","web","date"]);
 function cardHTML(s){
   const labels = Object.fromEntries(COLS_FULL.flatMap(g=>g[2]).map(c=>[c[0],c[1]]));
@@ -1067,7 +1070,7 @@ function detailHTML(s){
     <dt>Revenue (12 months)</dt><dd>${bn(st.rev)}</dd>${st.revg!=null?`<dt>Sales growth (on a year earlier)</dt><dd${neg(st.revg)}>${pct(st.revg)}</dd>`:""}<dt>Operating margin</dt><dd${neg(st.om)}>${st.om==null?"n/a":fmt(st.om,1)+"%"}</dd>
     <dt>Net income</dt><dd${neg(st.ni)}>${bn(st.ni)}</dd><dt>Profit margin</dt><dd${neg(st.pm)}>${st.pm==null?"n/a":fmt(st.pm,1)+"%"}</dd>
     <dt>Earnings per share</dt><dd${neg(st.eps)}>${money(st.eps,s.ccy)}</dd><dt>Free cash flow</dt><dd${neg(st.fcf)}>${bn(st.fcf)}</dd>
-    ${guideOf(s)&&!guideOf(s).none?`<dt>Forecast accuracy</dt><dd title="${esc(gdNote(guideOf(s)))}">met or beat ${guideOf(s).met} of ${guideOf(s).n} · gap ${gdGap(guideOf(s))} (${guideOf(s).measure})</dd>`:s.fa?`<dt>Forecast accuracy</dt><dd title="${faNote(s)}">${fmt(faScore(s),0)}% · met or beat ${s.fa.hit} of ${s.fa.n}</dd>`:""}<dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
+    ${guideOf(s)&&!guideOf(s).none?`<dt>Forecast accuracy</dt><dd title="${esc(gdNote(guideOf(s)))}">${gdWord(guideOf(s))} (${guideOf(s).measure})</dd>`:s.fa?`<dt>Forecast accuracy</dt><dd title="${faNote(s)}">${FA_WORDS[faLevel(s.fa.med,false)]}* (analyst-based for now)</dd>`:""}<dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
     <dt>Current ratio</dt><dd>${fmt(st.cr,2)}</dd><dt>Dividend yield</dt><dd>${st.div?fmt(st.div,2)+"%":"none"}</dd>
     ${st.pb!=null?`<dt>Price to book</dt><dd>${fmt(st.pb,2)}×</dd>`:""}<dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}${st.analysts?` (${st.analysts})`:""}</dd></dl>${s.statsAsof&&PAYLOAD.asof&&s.statsAsof!==PAYLOAD.asof?`<p class="deephint">Company figures are from ${fmtDate(s.statsAsof)}, because today's update for this share failed.</p>`:""}` : `<p class="muted">Pending.</p>`;
   return `<div class="dd-anim"><div><div class="dd">
