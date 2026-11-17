@@ -392,6 +392,89 @@
      "src": "https://www.sec.gov/Archives/edgar/data/1327567/000132756724000023/ex991q424earningsrelease.htm"
     }
    ]
+  },
+  "PH": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2023",
+     "lo": 18.1,
+     "hi": 18.9,
+     "act": 21.55,
+     "src": "https://www.sec.gov/Archives/edgar/data/76334/000007633422000030/exhibit991q4fy22.htm",
+     "note": "Forecast excluded the Meggitt acquisition, which completed during the year"
+    },
+    {
+     "y": "FY2024",
+     "lo": 21.9,
+     "hi": 22.9,
+     "act": 25.44,
+     "src": "https://www.sec.gov/Archives/edgar/data/76334/000007633423000038/exhibit991q4fy23.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 26.3,
+     "hi": 27.0,
+     "act": 27.33,
+     "src": "https://www.sec.gov/Archives/edgar/data/76334/000007633424000039/exhibit991q4fy24.htm"
+    },
+    {
+     "y": "FY2026",
+     "lo": 28.4,
+     "hi": 29.4,
+     "act": 32.31,
+     "src": "https://www.sec.gov/Archives/edgar/data/76334/000007633425000031/exhibit991q4fy25.htm"
+    }
+   ]
+  },
+  "HUBB": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2022",
+     "lo": 8.75,
+     "hi": 9.25,
+     "act": 10.62,
+     "src": "https://www.sec.gov/Archives/edgar/data/48898/000162828022001739/exhibit991_02032022.htm"
+    },
+    {
+     "y": "2023",
+     "lo": 11.0,
+     "hi": 11.5,
+     "act": 15.33,
+     "src": "https://www.sec.gov/Archives/edgar/data/48898/000162828023001785/exhibit991_01312023.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 16.0,
+     "hi": 16.5,
+     "act": 16.57,
+     "src": "https://www.sec.gov/Archives/edgar/data/48898/000162828024002494/exhibit991_01302024.htm"
+    }
+   ]
+  },
+  "XYL": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2023",
+     "lo": 3.0,
+     "hi": 3.25,
+     "act": 3.78,
+     "src": "https://www.sec.gov/Archives/edgar/data/1524472/000152447223000004/xyl02072023ex991.htm",
+     "note": "Forecast excluded the Evoqua acquisition, which completed during the year"
+    },
+    {
+     "y": "2024",
+     "lo": 4.0,
+     "hi": 4.2,
+     "act": 4.27,
+     "src": "https://www.sec.gov/Archives/edgar/data/1524472/000152447224000003/xyl02062024ex991.htm"
+    }
+   ]
   }
  }
 }
