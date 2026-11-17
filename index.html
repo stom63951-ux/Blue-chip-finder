@@ -604,6 +604,16 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
   .hero{margin-bottom:4px;padding-bottom:6px}
   .deck-foot{gap:4px}
 }
+/* ---- index tabs ---- */
+.idxtabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.idxtabs::-webkit-scrollbar{display:none}
+.idxtabs button{flex:0 0 auto;font:inherit;font-size:.8rem;font-weight:500;line-height:1.2;color:var(--muted);background:var(--surface);border:1px solid var(--edge);border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap;transition:color .2s,background-color .2s,border-color .2s}
+.idxtabs button:hover{color:var(--ink);background:var(--hover)}
+.idxtabs button[aria-pressed="true"]{color:var(--chip);background:var(--chip-soft);border-color:var(--chip-edge);font-weight:600}
+.idxtabs .cnt{margin-left:6px;font-size:.72rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.idxtabs button[aria-pressed="true"] .cnt{color:inherit}
+.idxtabs .old{margin-left:4px;font-size:.68rem;color:var(--warn,#a15c00)}
+#tbl td.c-curr .cy{color:var(--muted);font-size:.85em;margin-right:1px}
 </style>
 
 </head>
@@ -612,10 +622,10 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
   <header class="hero">
     <div>
       <h1>Blue-Chip Dip Finder</h1>
-      <p class="lede">China-free S&amp;P 500 blue-chips that have fallen over the last 3 months, each with a Yes/No buy check. Refreshed every weekday.</p>
+      <p class="lede">China-free blue-chips that have fallen over the last 3 months, each with a Yes/No buy check. Refreshed every weekday.</p>
     </div>
     <div class="meta">
-      <span><b>Prices</b> close <span id="mAsof">…</span> (USD)</span>
+      <span><b>Prices</b> close <span id="mAsof">…</span></span>
       <span><b>Updated</b> <span id="mGen">…</span></span>
       <span><b>Source</b> Yahoo Finance</span>
       <span class="disclaimer">Demo only · Not financial advice</span>
@@ -632,6 +642,7 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
   <div class="notice" id="notice" role="status" hidden></div>
 
   <div id="finderView">
+  <nav class="idxtabs" id="idxTabs" aria-label="Share index" hidden></nav>
   <div class="tallies" id="tallies"></div>
 
   <div class="deck rise" style="animation-delay:.3s" role="region" aria-label="Filters">
@@ -681,8 +692,8 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
       <h2>What counts as blue-chip</h2>
       <p>A share must pass all six tests. Failures are hidden unless you switch them on above.</p>
       <ol>
-        <li><b>Index member:</b> in the S&amp;P 500.</li>
-        <li><b>Size:</b> market value of at least US$20 billion.</li>
+        <li><b>Index member:</b> in one of the indexes on the tabs above the table.</li>
+        <li><b>Size:</b> market value of at least US$20 billion, with other currencies converted to US dollars.</li>
         <li><b>Financial strength:</b> debt no more than 3.5× yearly cash earnings (EBITDA). Banks, brokers and asset managers are exempt, because the measure does not fit how they are financed.</li>
         <li><b>Profitable:</b> positive net income over the last 12 months.</li>
         <li><b>Track record:</b> trading for at least 10 years.</li>
@@ -706,10 +717,12 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
     <section class="reveal">
       <h2>About this data</h2>
       <ul>
-        <li>Every weekday after the US market closes, the whole S&amp;P 500 is re-screened and this page updates automatically.</li>
-        <li>The <b>S&amp;P 500</b> figure above the % 3M column is the index's own change over the same 3 months, so you can see whether a share fell with the market or on its own.</li>
+        <li>Every weekday after the US market closes, every member of each index is re-screened and this page updates automatically. Pick an index with the tabs above the table; <b>All</b> shows every index together.</li>
+        <li>Prices are in each share's own currency: US dollars, pounds, euros, rupees or Australian dollars. Company figures such as market value and profit are converted to US dollars so they can be compared.</li>
+        <li>Figures for shares outside the US come from the same Yahoo feed but are checked less widely, so look twice at anything that seems off.</li>
+        <li>The index figure above the % 3M column is that index's own change over the same 3 months, so you can see whether a share fell with the market or on its own.</li>
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
-        <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's S&amp;P 500 list.</li>
+        <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's list for each index.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
         <li><b>Target buy</b> starts 5% under the current price; <b>Target divest</b> starts at the analyst average target.</li>
@@ -731,9 +744,9 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
       </div>
       <div class="fgrid">
         <label id="lbShares">Number of shares<input id="bmShares" class="n" type="number" min="1" step="1" inputmode="numeric"></label>
-        <label id="lbAmount" hidden>Amount to spend (USD)<input id="bmAmount" class="n" type="number" min="0" step="1" inputmode="decimal"></label>
-        <label>Price per share (USD)<input id="bmPrice" class="n" type="number" min="0" step="0.01" inputmode="decimal"><span class="hint" id="bmPriceHint"></span></label>
-        <label>Brokerage fee (USD)<input id="bmBrok" class="n" type="number" min="0" step="0.01" inputmode="decimal"></label>
+        <label id="lbAmount" hidden>Amount to spend (<span class="bmCcy">USD</span>)<input id="bmAmount" class="n" type="number" min="0" step="1" inputmode="decimal"></label>
+        <label>Price per share (<span class="bmCcy">USD</span>)<input id="bmPrice" class="n" type="number" min="0" step="0.01" inputmode="decimal"><span class="hint" id="bmPriceHint"></span></label>
+        <label>Brokerage fee (<span class="bmCcy">USD</span>)<input id="bmBrok" class="n" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>Currency / other fee (%)<input id="bmFx" class="n" type="number" min="0" step="0.05" inputmode="decimal"></label>
         <label>Purchase date<input id="bmDate" type="date"></label>
       </div>
@@ -784,20 +797,32 @@ const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const store = { get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}, set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}} };
 const edits = store.get("bcdf.edits",{});
 const fmt = (v,d=2)=> v==null||isNaN(v) ? "—" : v.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
-const money = v => v==null ? "—" : "$"+fmt(v,2);
+const SYM = {USD:"$", GBP:"£", EUR:"€", INR:"₹", AUD:"A$"};
+const SUFFIX_CCY = {L:"GBP", NS:"INR", BO:"INR", AX:"AUD", DE:"EUR", PA:"EUR", AS:"EUR", MI:"EUR", MC:"EUR", BR:"EUR", HE:"EUR", IR:"EUR", VI:"EUR", LS:"EUR", F:"EUR"};
+const ccyOf = t => { const m = /\.([A-Z]+)$/.exec(t||""); return m ? (SUFFIX_CCY[m[1]]||"USD") : "USD"; };
+const sym = c => SYM[c] || "$";
+const disp = t => String(t).replace(/\.[A-Z]+$/,"");   // RELIANCE.NS is shown as RELIANCE
+const FX = Object.assign({USD:1}, PAYLOAD.fx||{});
+const toUsd = (v,c) => v==null ? null : v*(FX[c]||1);
+const money = (v,c) => v==null ? "—" : sym(c)+fmt(v,2);
 const bn = v => v==null ? "—" : (Math.abs(v)>=1000 ? "$"+fmt(v/1000,2)+"T" : "$"+fmt(v,2)+"B");
 const pct = (v,d=1)=> v==null ? "—" : (v>0?"+":"")+fmt(v,d)+"%";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+const INDEXES = (Array.isArray(PAYLOAD.indexes) && PAYLOAD.indexes.length ? PAYLOAD.indexes
+  : [Object.assign({id:"sp500", name:"S&P 500", ccy:"USD"}, PAYLOAD.index||{})]);
+const IDX_NAME = Object.fromEntries(INDEXES.map(i=>[i.id,i.name]));
 function enrich(s){
   const st = s.stats || (s.stats = {});
+  s.ccy = s.ccy || ccyOf(s.t);
+  if(!Array.isArray(s.idx) || !s.idx.length) s.idx = ["sp500"];
   const yr = new Date().getFullYear();
   const has = st.mcap!=null || st.ni!=null || st.pe!=null || st.fpe!=null;
   // Banks, brokers and asset managers: Yahoo reports no EBITDA or free cash flow for them
   const fin = s.fin = s.sector==="Financials" && st.ebitda==null && st.debitda==null;
   const strength = st.debitda!=null ? st.debitda<=3.5 : fin ? true : (st.ebitda!=null && st.ebitda<=0 && st.debt>0) ? false : (st.ebitda>0 ? true : null);
   s.tests = [
-    {k:"Index member (S&P 500)", ok:true},
+    {k:`Index member (${s.idx.map(i=>IDX_NAME[i]||i).join(", ")})`, ok:true},
     {k:`Market value ≥ US$${BIG}B`, ok: st.mcap!=null && st.mcap>=BIG, v: st.mcap!=null ? bn(st.mcap) : "not reported"},
     {k:"Debt ≤ 3.5× EBITDA", ok: strength, v: st.debitda!=null ? fmt(st.debitda,2)+"×" : fin ? "not applicable to banks and financials" : strength===true ? "little or no debt" : strength===false ? "no cash earnings to cover its debt" : "not reported"},
     {k:"Profitable (12 months)", ok: st.ni!=null && st.ni>0, v: st.ni!=null ? bn(st.ni) : "not reported"},
@@ -828,14 +853,15 @@ function enrich(s){
         : {ok: st.debitda!=null ? st.debitda<=2 : strength===true, t: st.debitda!=null ? `Debt / EBITDA ${fmt(st.debitda,2)}× (want 2× or less)` : strength===true ? "Little or no debt reported" : "Debt / EBITDA not reported"},
     fin ? {ok: ey!=null && ey>=7, t:`Earnings yield ${nr(ey,1,"%")} (want 7%+; used for banks and financials in place of free cash flow)`}
         : {ok: fcfY!=null && fcfY>=3, t:`Free cash flow yield ${nr(fcfY,1,"%")} (want 3%+)`},
-    {ok: up!=null && up>=25 && !few, t: up==null ? "No analyst target" : `Analyst target ${money(st.pt)}, ${pct(up)} from here (want +25%)${few?`, but only ${st.analysts} analyst${st.analysts===1?"":"s"} cover it (want 5+)`:st.analysts?`, ${st.analysts} analysts`:""}`},
+    {ok: up!=null && up>=25 && !few, t: up==null ? "No analyst target" : `Analyst target ${money(st.pt,s.ccy)}, ${pct(up)} from here (want +25%)${few?`, but only ${st.analysts} analyst${st.analysts===1?"":"s"} cover it (want 5+)`:st.analysts?`, ${st.analysts} analysts`:""}`},
   ];
   s.score = Math.max(0, s.rules.filter(r=>r.ok).length - (s.steep?1:0) - (s.shrink?1:0));
   s.agent = (st.ni>0 && s.score>=6) ? "yes" : "no";
 }
 const agentPill = s => s && s.agent ? `<span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span>` : `<span class="pill na">Pending</span>`;
 DATA.forEach(enrich);
-const BLUE = DATA.filter(s=>s.blue);
+const state0idx = (v=>v==="all"||INDEXES.some(i=>i.id===v)?v:INDEXES[0].id)(store.get("bcdf.idx", INDEXES[0].id));
+let IDX = null, POOL = DATA, BLUE = DATA.filter(s=>s.blue);
 
 function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   buy: e.buy ?? Math.floor(s.curr*0.95*100)/100, shares: e.shares ?? "",
@@ -843,7 +869,7 @@ function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   held: e.held ?? "", date: e.date ?? "", comment: e.comment ?? "" };}
 function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set("bcdf.edits",edits); }
 
-const state = { tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
+const state = { idx: state0idx, tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
 const SORTS = {
   ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
   pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
@@ -860,7 +886,7 @@ function sortRows(rows){
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
-  ["g","Price · USD",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
+  ["g","@ccy",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
   ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
@@ -869,23 +895,40 @@ const COLS_FULL = [
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
-  ["g","Price and value",[["curr","Curr","r"],["pe","P/E","r"],["buy","Target buy","r"]]],
+  ["g","@ccy",[["curr","Curr","r"],["pe","P/E","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
-const IDX = PAYLOAD.index && PAYLOAD.index.pct3m!=null ? PAYLOAD.index : null;
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
-function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${s.t.slice(0,4)}</span>`; }
+function pickIdx(id){
+  state.idx = id; store.set("bcdf.idx", id);
+  IDX = INDEXES.find(i=>i.id===id) || null;   // null on the All tab
+  POOL = IDX ? DATA.filter(s=>s.idx.includes(id)) : DATA;
+  BLUE = POOL.filter(s=>s.blue);
+}
+pickIdx(state.idx);
+function buildIdxTabs(){
+  const nav = document.getElementById("idxTabs");
+  if(INDEXES.length<2){ nav.hidden = true; return; }
+  const n = id => DATA.filter(s=>s.blue && !isBought(s.t) && (id==="all" || s.idx.includes(id))).length;
+  nav.hidden = false;
+  nav.innerHTML = INDEXES.map(i=>`<button type="button" data-idx="${i.id}" aria-pressed="${state.idx===i.id}" title="${esc(i.name)}: ${n(i.id)} blue-chips down ${PAYLOAD.minDrop||10}% or more${i.stale?". Not refreshed in the latest update, so these are the previous figures":""}">${esc(i.name)}<span class="cnt">${n(i.id)}</span>${i.stale?`<span class="old">old</span>`:""}</button>`).join("")
+    + `<button type="button" data-idx="all" aria-pressed="${state.idx==="all"}" title="Every index together">All<span class="cnt">${n("all")}</span></button>`;
+}
+document.getElementById("idxTabs").addEventListener("click", e=>{ const b = e.target.closest("[data-idx]"); if(!b || b.dataset.idx===state.idx) return;
+  pickIdx(b.dataset.idx); state.open.clear(); buildIdxTabs(); buildHist(); render(); });
+
+function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${disp(s.t).slice(0,4)}</span>`; }
 
 function cell(s,key){
   const e = ed(s.t);
   switch(key){
     case "caret": return `<td><span class="caret" aria-hidden="true">▶</span></td>`;
-    case "ticker": return `<td class="tick">${s.t}</td>`;
+    case "ticker": return `<td class="tick" title="${s.t}">${disp(s.t)}</td>`;
     case "name": return `<td><div class="co">${logo(s)}<span>${esc(s.name)}</span>${s.blue?"":` <span class="pill flag">not blue-chip</span>`}</div></td>`;
     case "pct": return `<td class="r"><div class="dropcell"><span class="dropbar"><i style="width:${(-s.pct3m/maxDrop*100).toFixed(1)}%"></i></span><span class="num drop">${pct(s.pct3m)}</span></div></td>`;
-    case "curr": return `<td class="r num">${fmt(s.curr)}</td>`;
+    case "curr": return `<td class="r num">${IDX?"":`<span class="cy">${sym(s.ccy)}</span>`}${fmt(s.curr)}</td>`;
     case "p1m": return `<td class="r num">${fmt(s.p1m)}</td>`;
     case "p3m": return `<td class="r num">${fmt(s.p3m)}</td>`;
     case "p1y": return `<td class="r num">${fmt(s.p1y)}</td>`;
@@ -897,7 +940,7 @@ function cell(s,key){
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
     case "buy": return `<td class="r"><input class="n" id="buy-${s.t}" data-k="buy" data-t="${s.t}" type="number" step="0.01" value="${e.buy}" aria-label="Target buy for ${s.t}"></td>`;
     case "shares": return `<td class="r"><input class="n" id="sh-${s.t}" data-k="shares" data-t="${s.t}" type="number" step="1" min="0" value="${e.shares}" aria-label="Number of shares for ${s.t}"></td>`;
-    case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v):"—"}</td>`; }
+    case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v,s.ccy):"—"}</td>`; }
     case "divest": return `<td class="r"><input class="n" id="dv-${s.t}" data-k="divest" data-t="${s.t}" type="number" step="0.01" value="${e.divest}" aria-label="Target divest for ${s.t}"></td>`;
     case "watch": return `<td>${watchBtn(s.t, s.name)}</td>`;
     case "trade": return `<td><button class="buybtn" data-buy="${s.t}" aria-label="Buy ${esc(s.name)}">Buy</button></td>`;
@@ -928,7 +971,7 @@ function spark(s){
   const area=line+` L${x(n-1).toFixed(1)},${H-pb} L${x(0).toFixed(1)},${H-pb} Z`;
   const id="sg"+s.t, first = wk ? (n>=53?"1 year ago":"First trade") : "1 year ago";
   return `<svg class="spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Price of ${s.t} over the last year"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chip)" stop-opacity=".22"/><stop offset="1" stop-color="var(--chip)" stop-opacity="0"/></linearGradient></defs><path class="area" d="${area}" fill="url(#${id})"/><path class="line" d="${line}" fill="none" stroke="var(--chip)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="--len:${Math.ceil(len)}"/><circle cx="${x(n-1).toFixed(1)}" cy="${y(vals[n-1]).toFixed(1)}" r="4" fill="var(--bad)"/><text x="${pl}" y="${H-5}" class="sl">${first}</text><text x="${W-pr}" y="${H-5}" text-anchor="end" class="sl">Now</text></svg>
-  <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx)}, low ${money(mn)}, now ${money(s.curr)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
+  <p class="deephint">${wk?"Weekly closes. ":""}High ${money(mx,s.ccy)}, low ${money(mn,s.ccy)}, now ${money(s.curr,s.ccy)}${s.month!=null?`, ${pct(s.month)} in the last month`:""}.</p>`;
 }
 
 const CARD_KEYS = ["name","pct","agent","curr","p1m","p3m","p1y","p2y","pe","sector","status","lev","rating","buy","shares","total","divest","approve","trade","watch","held","date","comment","web","graph"];
@@ -956,7 +999,7 @@ function detailHTML(s){
   const pl = st ? `<dl class="kv">
     <dt>Revenue (12 months)</dt><dd>${bn(st.rev)}</dd>${st.revg!=null?`<dt>Sales growth (on a year earlier)</dt><dd${neg(st.revg)}>${pct(st.revg)}</dd>`:""}<dt>Operating margin</dt><dd${neg(st.om)}>${st.om==null?"n/a":fmt(st.om,1)+"%"}</dd>
     <dt>Net income</dt><dd${neg(st.ni)}>${bn(st.ni)}</dd><dt>Profit margin</dt><dd${neg(st.pm)}>${st.pm==null?"n/a":fmt(st.pm,1)+"%"}</dd>
-    <dt>Earnings per share</dt><dd${neg(st.eps)}>${money(st.eps)}</dd><dt>Free cash flow</dt><dd${neg(st.fcf)}>${bn(st.fcf)}</dd>
+    <dt>Earnings per share</dt><dd${neg(st.eps)}>${money(st.eps,s.ccy)}</dd><dt>Free cash flow</dt><dd${neg(st.fcf)}>${bn(st.fcf)}</dd>
     <dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
     <dt>Current ratio</dt><dd>${fmt(st.cr,2)}</dd><dt>Dividend yield</dt><dd>${st.div?fmt(st.div,2)+"%":"none"}</dd>
     ${st.pb!=null?`<dt>Price to book</dt><dd>${fmt(st.pb,2)}×</dd>`:""}<dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}${st.analysts?` (${st.analysts})`:""}</dd></dl>${s.statsAsof&&PAYLOAD.asof&&s.statsAsof!==PAYLOAD.asof?`<p class="deephint">Company figures are from ${fmtDate(s.statsAsof)}, because today's update for this share failed.</p>`:""}` : `<p class="muted">Pending.</p>`;
@@ -969,9 +1012,9 @@ function detailHTML(s){
     <section class="card"><h3>Price, last 12 months</h3>${spark(s)}<h3 style="margin-top:14px">Blue-chip test</h3><ul class="rules">${tests}</ul></section>
     <section class="card"><h3>Links</h3><div class="links">
       ${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Company website <span>↗</span></a>`:""}
-      <a href="https://stockanalysis.com/stocks/${t}/financials/" target="_blank" rel="noopener">Income statement (P&amp;L) <span>↗</span></a>
+      ${/\.[A-Z]+$/.test(s.t)?"":`      <a href="https://stockanalysis.com/stocks/${t}/financials/" target="_blank" rel="noopener">Income statement (P&amp;L) <span>↗</span></a>
       <a href="https://stockanalysis.com/stocks/${t}/financials/?p=quarterly" target="_blank" rel="noopener">Quarterly earnings <span>↗</span></a>
-      <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=${s.t}&amp;type=10-&amp;dateb=&amp;owner=include&amp;count=40" target="_blank" rel="noopener">Annual &amp; quarterly reports (SEC) <span>↗</span></a>
+      <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=${s.t}&amp;type=10-&amp;dateb=&amp;owner=include&amp;count=40" target="_blank" rel="noopener">Annual &amp; quarterly reports (SEC) <span>↗</span></a>`}
       <a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">Yahoo Finance quote and chart <span>↗</span></a>
       <a href="https://finance.yahoo.com/quote/${s.t}/key-statistics/" target="_blank" rel="noopener">Source for these figures <span>↗</span></a>
     </div></section>
@@ -984,7 +1027,7 @@ function watchBtn(t, name, full){ const on = isWatched(t);
 function isBought(t){ const e = edits[t]; return !!e && e.approve==="yes" && ((+e.shares>0) || (e.lots||[]).length>0); }
 function filtered(){
   const q = state.q.trim().toLowerCase();
-  return DATA.filter(s => !isBought(s.t) && (state.showFail || s.blue) && s.pct3m <= -state.drop
+  return POOL.filter(s => !isBought(s.t) && (state.showFail || s.blue) && s.pct3m <= -state.drop
     && (state.ag==="all" || s.agent===state.ag)
     && (!q || s.t.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.sector||"").toLowerCase().includes(q) || (s.industry||"").toLowerCase().includes(q)));
 }
@@ -1011,7 +1054,7 @@ function updateTallies(rows){
   countTo(document.getElementById("tv1"), rows.length);
   document.getElementById("tv1s").textContent = `of ${BLUE.length} blue-chips down ${PAYLOAD.minDrop||10}%+`;
   countTo(document.getElementById("tv2"), yes.length);
-  document.getElementById("tv2s").textContent = yes.length ? yes.slice(0,4).map(s=>s.t).join(" · ")+(yes.length>4?" …":"") : "none in this view";
+  document.getElementById("tv2s").textContent = yes.length ? yes.slice(0,4).map(s=>disp(s.t)).join(" · ")+(yes.length>4?" …":"") : "none in this view";
   const deepest = rows.length ? rows.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : null;
   countTo(document.getElementById("tv3"), deepest? deepest.pct3m : 0, {dec:1,suf:"%"});
   document.getElementById("tv3s").textContent = deepest ? deepest.name : "nothing in view";
@@ -1043,20 +1086,21 @@ function render(animate=true){
   document.querySelectorAll("#segView button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.v===state.view));
   document.querySelectorAll("#segAg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.ag===state.ag));
   moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg"));
-  updateHist();
+  updateHist(); buildIdxTabs();
   const groups = state.view==="full" ? COLS_FULL : COLS_HIGH;
   const cols = groups.flatMap(g=>g[2].map((c,i)=>({key:c[0],label:c[1],cls:((c[2]||"")+(i===0&&g[0]==="g"?" gl":"")).trim()})));
   const rows = sortRows(filtered());
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
-  document.getElementById("summary").innerHTML = `${state.showFail?`Showing <b>${rows.length}</b> of ${DATA.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${DATA.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(DATA.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"agent score":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
-  const key = state.view+"|"+rows.map(s=>s.t).join(",");
+  document.getElementById("summary").innerHTML = `${state.showFail?`Showing <b>${rows.length}</b> of ${POOL.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${POOL.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(POOL.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"agent score":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
+  const key = state.view+"|"+state.idx+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith(state.view+"|");
-  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
     h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
-      : (state.q.trim() || state.ag!=="all") && DATA.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
+      : (state.q.trim() || state.ag!=="all") && POOL.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
+      : !BLUE.length ? `<div class="e1">No blue-chips here are down ${PAYLOAD.minDrop||10}% or more</div>${IDX?`Nothing in the ${esc(IDX.name)} passes the blue-chip test after a fall that size right now. Try another index, or switch on the shares that failed the test.`:"Check back after the next daily update."}`
       : `<div class="e1">No blue-chip fell ${state.drop}% or more</div>The deepest fall in this list is ${esc(deepestBlue.name)} at ${pct(deepestBlue.pct3m)}. Slide left to bring shares back.`}</td></tr>`;
   }
   let i=0;
@@ -1098,7 +1142,7 @@ tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.targ
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
   tbl.querySelectorAll(`[data-k="${el.dataset.k}"][data-t="${el.dataset.t}"]`).forEach(o=>{ if(o!==el) o.value=el.value; });
-  if(el.dataset.k==="buy"||el.dataset.k==="shares"){ const x=ed(el.dataset.t); tbl.querySelectorAll(`[data-total="${el.dataset.t}"]`).forEach(c=>{ c.textContent = x.buy&&x.shares?money(x.buy*x.shares):"—"; c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); }); }});
+  if(el.dataset.k==="buy"||el.dataset.k==="shares"){ const x=ed(el.dataset.t); tbl.querySelectorAll(`[data-total="${el.dataset.t}"]`).forEach(c=>{ c.textContent = x.buy&&x.shares?money(x.buy*x.shares,ccyOf(el.dataset.t)):"—"; c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); }); }});
 
 let raf=0;
 document.getElementById("drop").addEventListener("input", e=>{ state.drop=+e.target.value; store.set("bcdf.drop",state.drop); document.getElementById("dropVal").textContent=state.drop+"%"; updateHist(); cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>render()); });
@@ -1124,7 +1168,7 @@ function holding(t){
   const cost = sh!=null && buy!=null ? sh*buy + fees : held;
   const value = sh!=null && curr!=null ? sh*curr : null;
   const gain = value!=null && cost!=null ? value-cost : null;
-  return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr, buy, divest, shares, derived, cost, value, gain,
+  return { t, s, ccy: ccyOf(t), name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr, buy, divest, shares, derived, cost, value, gain,
     gainPct: gain!=null && cost ? gain/cost*100 : null, toTarget: divest && curr ? (divest/curr-1)*100 : null,
     date: e.date||"", comment: e.comment||"", agent: s ? s.agent : null, score: s ? s.score : null };
 }
@@ -1137,10 +1181,10 @@ function pcell(h,k){
     case "agent": return `<td>${h.agent ? `<span class="pill ${h.agent}">${h.agent==="yes"?"Yes":"No"}</span> <span class="muted">${h.score}/7</span>` : `<span class="muted">Not in dip list</span>`}</td>`;
     case "shares": return `<td class="r"><input class="n" data-pk="shares" data-t="${h.t}" type="number" step="1" min="0" value="${h.shares??""}" placeholder="${h.derived!=null?fmt(h.derived,2):"—"}" aria-label="Shares held in ${h.t}"></td>`;
     case "buy": return `<td class="r"><input class="n" data-pk="buy" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.buy??""}" aria-label="Buy price for ${h.t}"></td>`;
-    case "cost": return `<td class="r num">${money(h.cost)}</td>`;
-    case "curr": return `<td class="r num">${money(h.curr)}</td>`;
-    case "value": return `<td class="r num">${money(h.value)}</td>`;
-    case "gain": return `<td class="r num ${tone(h.gain)}">${h.gain==null?"—":(h.gain>=0?"+":"−")+money(Math.abs(h.gain))}</td>`;
+    case "cost": return `<td class="r num">${money(h.cost,h.ccy)}</td>`;
+    case "curr": return `<td class="r num">${money(h.curr,h.ccy)}</td>`;
+    case "value": return `<td class="r num">${money(h.value,h.ccy)}</td>`;
+    case "gain": return `<td class="r num ${tone(h.gain)}">${h.gain==null?"—":(h.gain>=0?"+":"−")+money(Math.abs(h.gain),h.ccy)}</td>`;
     case "gainPct": return `<td class="r num ${tone(h.gainPct)}">${pct(h.gainPct)}</td>`;
     case "divest": return `<td class="r"><input class="n" data-pk="divest" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.divest??""}" aria-label="Target divest for ${h.t}"></td>`;
     case "toTarget": return `<td class="r num">${h.toTarget==null?"—":h.toTarget<=0?`<span class="pill yes">Reached</span>`:pct(h.toTarget)}</td>`;
@@ -1155,14 +1199,16 @@ function renderPortfolio(){
   const list = confirmedTickers().map(holding).sort((a,b)=>(b.value??b.cost??0)-(a.value??a.cost??0));
   document.getElementById("portCnt").textContent = list.length;
   if(state.tab!=="portfolio") return;
-  const sum = k => list.reduce((a,h)=>a+(h[k]??0),0);
-  const cost = sum("cost"), value = list.filter(h=>h.value!=null).reduce((a,h)=>a+h.value,0);
-  const priced = list.filter(h=>h.gain!=null), gain = priced.reduce((a,h)=>a+h.gain,0), pcost = priced.reduce((a,h)=>a+h.cost,0);
+  // totals are added up in US dollars, because holdings can be in different currencies
+  const sum = k => list.reduce((a,h)=>a+(toUsd(h[k],h.ccy)??0),0);
+  const mixed = list.some(h=>h.ccy!=="USD");
+  const cost = sum("cost"), value = list.filter(h=>h.value!=null).reduce((a,h)=>a+toUsd(h.value,h.ccy),0);
+  const priced = list.filter(h=>h.gain!=null), gain = priced.reduce((a,h)=>a+toUsd(h.gain,h.ccy),0), pcost = priced.reduce((a,h)=>a+toUsd(h.cost,h.ccy),0);
   const reached = list.filter(h=>h.toTarget!=null && h.toTarget<=0).length;
   document.getElementById("portTallies").innerHTML = [
     ["Holdings", list.length, `${reached} at or above target divest`, ""],
-    ["Invested", money(cost), "including fees", ""],
-    ["Value now", money(value), "at latest close", ""],
+    ["Invested", money(cost), mixed?"including fees, in US dollars":"including fees", ""],
+    ["Value now", money(value), mixed?"at latest close, in US dollars":"at latest close", ""],
     ["Gain / loss", (gain>=0?"+":"−")+money(Math.abs(gain)), pcost? pct(gain/pcost*100)+" overall":"enter shares and buy price", gain>=0?"good":"bad"],
   ].map(([k,v,s,c])=>`<div class="tally ${priced.length?c:""}"><div class="v num">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`).join("");
   let h = `<thead><tr>${PCOLS.map(c=>`<th class="${c[2]||""} c-${c[0]}" scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
@@ -1170,7 +1216,7 @@ function renderPortfolio(){
   for(const x of list) h += `<tr>${PCOLS.map(c=>pcell(x,c[0])).join("")}</tr>`;
   h += `</tbody>`;
   const tone = gain>=0?"gain":"loss", gtxt = (gain>=0?"+":"−")+money(Math.abs(gain));
-  const foot = {name:`<td class="c-name">Total</td>`, cost:`<td class="r num">${money(cost)}</td>`, value:`<td class="r num">${money(value)}</td>`, gain:`<td class="r num ${tone}">${gtxt}</td>`, gainPct:`<td class="r num ${tone}">${pcost?pct(gain/pcost*100):"—"}</td>`};
+  const foot = {name:`<td class="c-name">Total${mixed?" (US$)":""}</td>`, cost:`<td class="r num">${money(cost)}</td>`, value:`<td class="r num">${money(value)}</td>`, gain:`<td class="r num ${tone}">${gtxt}</td>`, gainPct:`<td class="r num ${tone}">${pcost?pct(gain/pcost*100):"—"}</td>`};
   if(list.length) h += `<tfoot><tr>${PCOLS.map(c=>foot[c[0]]||"<td></td>").join("")}</tr></tfoot>`;
   document.getElementById("ptbl").innerHTML = h;
 }
@@ -1194,8 +1240,8 @@ function download(name, text, type){
 document.getElementById("pCsv").onclick = ()=>{
   const list = confirmedTickers().map(holding); if(!list.length){ toast("There are no holdings to download yet."); return; }
   const q = v => v==null ? "" : /[",\n]/.test(String(v)) ? '"'+String(v).replace(/"/g,'""')+'"' : String(v), r2 = v => v==null ? "" : Math.round(v*100)/100;
-  const rows = [["Ticker","Name","Shares","Buy price (USD)","Cost incl. fees","Price now","Value now","Gain / loss","Gain %","Target divest","Purchase date","Comment"]]
-    .concat(list.map(h=>[h.t,h.name,h.shares??r2(h.derived),r2(h.buy),r2(h.cost),r2(h.curr),r2(h.value),r2(h.gain),r2(h.gainPct),r2(h.divest),h.date,h.comment]));
+  const rows = [["Ticker","Name","Currency","Shares","Buy price","Cost incl. fees","Price now","Value now","Gain / loss","Gain %","Target divest","Purchase date","Comment"]]
+    .concat(list.map(h=>[h.t,h.name,h.ccy,h.shares??r2(h.derived),r2(h.buy),r2(h.cost),r2(h.curr),r2(h.value),r2(h.gain),r2(h.gainPct),r2(h.divest),h.date,h.comment]));
   download(`portfolio-${today()}.csv`, "\ufeff"+rows.map(r=>r.map(q).join(",")).join("\r\n"), "text/csv");
 };
 document.getElementById("pBackup").onclick = ()=> download(`blue-chip-finder-backup-${today()}.json`, JSON.stringify({app:"blue-chip-dip-finder", saved:new Date().toISOString(), edits, fees}), "application/json");
@@ -1234,7 +1280,7 @@ function toggleWatch(t){
 function watchItem(t){
   const q = quoteOf(t), e = edits[t], w = e.watch, s = q.s;
   const name = s ? s.name : (w.name||t), buy = num(e.buy);
-  return { t, s, name, sector: s ? s.sector : w.sector, curr: q.curr, pct3m: s ? s.pct3m : null, w, buy,
+  return { t, s, ccy: ccyOf(t), name, sector: s ? s.sector : w.sector, curr: q.curr, pct3m: s ? s.pct3m : null, w, buy,
     since: w.price && q.curr!=null ? (q.curr/w.price-1)*100 : null, gap: buy && q.curr!=null ? (q.curr/buy-1)*100 : null, comment: e.comment||"" };
 }
 const WCOLS = [["name","Name"],["agent","Agent today"],["curr","Price now","r"],["pct","% 3M","r"],["since","Since added","r"],["added","Added"],["buy","Target buy","r"],["gap","To target buy","r"],["comment","Comment"],["chart",""],["trade",""],["rm",""]];
@@ -1242,10 +1288,10 @@ function wcell(h,k){
   switch(k){
     case "name": return `<td class="c-name"><div class="co">${logo({t:h.t,sector:h.sector,name:h.name})}<span>${esc(h.name)}</span></div></td>`;
     case "agent": return `<td>${h.s ? agentPill(h.s)+(h.s.agent?` <span class="muted">${h.s.score}/7</span>`:"") : `<span class="muted">Not in dip list</span>`}</td>`;
-    case "curr": return `<td class="r num">${money(h.curr)}</td>`;
+    case "curr": return `<td class="r num">${money(h.curr,h.ccy)}</td>`;
     case "pct": return `<td class="r num${h.pct3m!=null?" loss":""}">${h.pct3m!=null?pct(h.pct3m):`<span class="muted" title="No longer down 10% or more over 3 months">—</span>`}</td>`;
     case "since": return `<td class="r num ${h.since==null?"":h.since>=0?"gain":"loss"}">${pct(h.since)}</td>`;
-    case "added": return `<td class="num">${h.w.date?new Date(h.w.date+"T12:00:00Z").toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"}):"—"}<span class="note">at ${money(h.w.price)}</span></td>`;
+    case "added": return `<td class="num">${h.w.date?new Date(h.w.date+"T12:00:00Z").toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"}):"—"}<span class="note">at ${money(h.w.price,h.ccy)}</span></td>`;
     case "buy": return `<td class="r"><input class="n" data-pk="buy" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.buy??""}" aria-label="Target buy for ${h.t}"></td>`;
     case "gap": return `<td class="r num">${h.gap==null?"—":h.gap<=0?`<span class="pill yes">Reached</span>`:pct(h.gap)+" above"}</td>`;
     case "comment": return `<td><input class="c" data-pk="comment" data-t="${h.t}" type="text" value="${esc(h.comment)}" aria-label="Comment for ${h.t}"></td>`;
@@ -1262,8 +1308,8 @@ function renderWatch(){
   const avg = moved.length ? moved.reduce((a,h)=>a+h.since,0)/moved.length : null;
   document.getElementById("watchTallies").innerHTML = [
     ["Watching", list.length, "shares on your watchlist", ""],
-    ["At target buy", reached.length, reached.length ? reached.slice(0,4).map(h=>h.t).join(" · ") : "none yet", reached.length?"good":""],
-    ["Agent says yes", yes.length, yes.length ? yes.slice(0,4).map(h=>h.t).join(" · ") : "none today", yes.length?"good":""],
+    ["At target buy", reached.length, reached.length ? reached.slice(0,4).map(h=>disp(h.t)).join(" · ") : "none yet", reached.length?"good":""],
+    ["Agent says yes", yes.length, yes.length ? yes.slice(0,4).map(h=>disp(h.t)).join(" · ") : "none today", yes.length?"good":""],
     ["Average move", avg==null?"—":pct(avg), "since each was added", avg==null?"":avg>=0?"good":"bad"],
   ].map(([k,v,s,c])=>`<div class="tally ${c}"><div class="v num">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`).join("");
   let h = `<thead><tr>${WCOLS.map(c=>`<th class="${c[2]||""} c-${c[0]}" scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>`;
@@ -1293,16 +1339,17 @@ const fees = Object.assign({brok:0, fx:0}, store.get("bcdf.fees",{}));
 const today = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
 function quoteOf(t){
   const s = DATA.find(x=>x.t===t), snap = Object.assign({}, (edits[t]||{}).watch, (edits[t]||{}).snap);
-  return { t, s, name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr: s ? s.curr : (PRICES[t] ?? snap.curr ?? null) };
+  return { t, s, ccy: ccyOf(t), name: s ? s.name : (snap.name||t), sector: s ? s.sector : snap.sector, curr: s ? s.curr : (PRICES[t] ?? snap.curr ?? null) };
 }
 function openBuy(t){
   const q = quoteOf(t); bm.t = t; bm.q = q; bm.mode = "shares";
+  bm.el.querySelectorAll(".bmCcy").forEach(x=>x.textContent = q.ccy);
   const e = edits[t]||{}, target = num(e.buy) ?? (q.s ? Math.floor(q.s.curr*0.95*100)/100 : null);
-  document.getElementById("bmHead").innerHTML = `<div class="co">${logo({t,sector:q.sector,name:q.name})}<div><h3 id="bmTitle">Buy ${esc(q.name)}</h3><div class="sub">${t} · latest close ${money(q.curr)}${q.s?` · agent says ${agentPill(q.s)}`:""}</div></div></div>`;
+  document.getElementById("bmHead").innerHTML = `<div class="co">${logo({t,sector:q.sector,name:q.name})}<div><h3 id="bmTitle">Buy ${esc(q.name)}</h3><div class="sub">${disp(t)} · latest close ${money(q.curr,bm.q.ccy)}${q.s?` · agent says ${agentPill(q.s)}`:""}</div></div></div>`;
   document.getElementById("bmShares").value = num(e.shares) && e.approve!=="yes" ? e.shares : 10;
   document.getElementById("bmAmount").value = "";
   document.getElementById("bmPrice").value = q.curr ?? "";
-  document.getElementById("bmPriceHint").innerHTML = target && q.curr && Math.abs(target-q.curr)>0.005 ? `Latest close. <button type="button" id="bmUseTarget">Use target buy ${money(target)}</button>` : "Latest close; change it to your limit price";
+  document.getElementById("bmPriceHint").innerHTML = target && q.curr && Math.abs(target-q.curr)>0.005 ? `Latest close. <button type="button" id="bmUseTarget">Use target buy ${money(target,bm.q.ccy)}</button>` : "Latest close; change it to your limit price";
   document.getElementById("bmBrok").value = fees.brok;
   document.getElementById("bmFx").value = fees.fx;
   document.getElementById("bmDate").value = today();
@@ -1343,17 +1390,17 @@ function calcBuy(){
   document.getElementById("bmPreview").innerHTML = `
     <div class="big"><span class="muted">You get</span><b class="num">${shares||0} share${shares===1?"":"s"}</b></div>
     <dl>
-      <dt>${shares||0} × ${money(price)}</dt><dd class="num">${money(sub)}</dd>
-      <dt>Brokerage</dt><dd class="num">${money(shares?brok:0)}</dd>
-      <dt>Currency / other fee (${fmt(fx,2)}%)</dt><dd class="num">${money(fxFee)}</dd>
-      <dt class="tot">Total cost</dt><dd class="tot num">${money(total)}</dd>
-      ${amount!=null?`<dt>Left over from ${money(amount)}</dt><dd class="num">${money(Math.max(0,amount-total))}</dd>`:""}
-      <dt>Cost per share with fees</dt><dd class="num">${money(per)}</dd>
+      <dt>${shares||0} × ${money(price,bm.q.ccy)}</dt><dd class="num">${money(sub,bm.q.ccy)}</dd>
+      <dt>Brokerage</dt><dd class="num">${money(shares?brok:0,bm.q.ccy)}</dd>
+      <dt>Currency / other fee (${fmt(fx,2)}%)</dt><dd class="num">${money(fxFee,bm.q.ccy)}</dd>
+      <dt class="tot">Total cost</dt><dd class="tot num">${money(total,bm.q.ccy)}</dd>
+      ${amount!=null?`<dt>Left over from ${money(amount,bm.q.ccy)}</dt><dd class="num">${money(Math.max(0,amount-total),bm.q.ccy)}</dd>`:""}
+      <dt>Cost per share with fees</dt><dd class="num">${money(per,bm.q.ccy)}</dd>
       ${own?`<dt>Holding after this buy</dt><dd class="num">${own + (shares||0)} shares</dd>`:""}
-      ${pt&&shares?`<dt>Value at analyst target (${money(pt)})</dt><dd class="num">${money(pt*shares)}</dd>`:""}
+      ${pt&&shares?`<dt>Value at analyst target (${money(pt,bm.q.ccy)})</dt><dd class="num">${money(pt*shares,bm.q.ccy)}</dd>`:""}
     </dl>${warn?`<div class="warn">${warn}</div>`:""}`;
   document.getElementById("bmConfirm").disabled = !bm.last;
-  document.getElementById("bmConfirm").textContent = bm.last ? `Confirm buy · ${money(total)}` : "Confirm buy";
+  document.getElementById("bmConfirm").textContent = bm.last ? `Confirm buy · ${money(total,bm.q.ccy)}` : "Confirm buy";
 }
 function confirmBuy(){
   const b = bm.last; if(!b) return; const t = bm.t, e = edits[t]||{};
@@ -1371,7 +1418,7 @@ function confirmBuy(){
   if(bm.q.s){ const sn = Object.assign({}, edits[t].snap, {name:bm.q.name, sector:bm.q.sector, curr:bm.q.curr}); setEd(t,"snap",sn); }
   closeBuy();
   render(false); renderPortfolio();
-  toast(`Bought ${b.shares} ${t} for ${money(b.total)}. Added to Portfolio.`, state.tab!=="portfolio");
+  toast(`Bought ${b.shares} ${t} for ${money(b.total,bm.q.ccy)}. Added to Portfolio.`, state.tab!=="portfolio");
 }
 function toast(msg, action){
   const el = document.getElementById("toast"), act = action===true ? {label:"View", fn:()=>{ setTab("portfolio"); scrollTo({top:0}); }} : action;
@@ -1393,9 +1440,10 @@ const deepCache = store.get("bcdf.deep", {});
 const dp = { el: document.getElementById("deep"), t:null };
 function deepBrief(s){
   const st = s.stats||{}, f = (v,d=2)=> v==null?"n/a":fmt(v,d);
-  return `Deep dive on ${s.name} (${s.t}), an S&P 500 company in ${s.sector}.
+  const $ = sym(s.ccy);
+  return `Deep dive on ${s.name} (${s.t}), a ${s.idx.map(i=>IDX_NAME[i]||i).join(" and ")} company in ${s.sector}. Share prices are in ${s.ccy}; company totals are in US dollars.
 
-Facts from my screener (Yahoo Finance, close ${PAYLOAD.asof||"latest"}): price $${f(s.curr)}; 3-month change ${f(s.pct3m,1)}% (from $${f(s.p3m)}); 1 month ago $${f(s.p1m)}; 1 year ago $${f(s.p1y)}; 2 years ago $${f(s.p2y)}. Market value ${bn(st.mcap)}. Trailing P/E ${f(st.pe,1)}, forward P/E ${f(st.fpe,1)}. Profit margin ${f(st.pm,1)}%. Debt/EBITDA ${f(st.debitda,2)}x. Free cash flow ${bn(st.fcf)}.${st.revg!=null?` Sales growth on a year earlier ${f(st.revg,1)}%.`:""} Return on equity ${f(st.roe,1)}%. Analyst average target $${f(st.pt)}${st.analysts?` from ${st.analysts} analysts`:""}. My rule-based screener scored it ${s.score??"n/a"}/7 and said ${s.agent==="yes"?"YES":"NO"}.
+Facts from my screener (Yahoo Finance, close ${PAYLOAD.asof||"latest"}): price ${$}${f(s.curr)}; 3-month change ${f(s.pct3m,1)}% (from ${$}${f(s.p3m)}); 1 month ago ${$}${f(s.p1m)}; 1 year ago ${$}${f(s.p1y)}; 2 years ago ${$}${f(s.p2y)}. Market value ${bn(st.mcap)}. Trailing P/E ${f(st.pe,1)}, forward P/E ${f(st.fpe,1)}. Profit margin ${f(st.pm,1)}%. Debt/EBITDA ${f(st.debitda,2)}x. Free cash flow ${bn(st.fcf)}.${st.revg!=null?` Sales growth on a year earlier ${f(st.revg,1)}%.`:""} Return on equity ${f(st.roe,1)}%. Analyst average target ${$}${f(st.pt)}${st.analysts?` from ${st.analysts} analysts`:""}. My rule-based screener scored it ${s.score??"n/a"}/7 and said ${s.agent==="yes"?"YES":"NO"}.
 
 Please search the web for the latest news, earnings and filings, then give me:
 1. Why the share price has fallen over the last 3 months (specific events, dates, numbers).
@@ -1427,7 +1475,7 @@ const DEEP_SAMPLE = {
 };
 function reportHTML(r, s){
   const v = (r.verdict||"").toLowerCase(), vt = {buy:"Buy", wait:"Wait", avoid:"Avoid"}[v] || "—";
-  const range = r.buyRange && r.buyRange[0] ? `${money(r.buyRange[0])} – ${money(r.buyRange[1])}` : "—";
+  const range = r.buyRange && r.buyRange[0] ? `${money(r.buyRange[0],dp.s.ccy)} – ${money(r.buyRange[1],dp.s.ccy)}` : "—";
   return `<section class="dverdict v-${v}">
       <div class="vrow"><span class="vbadge">${vt}</span><div><div class="vk">Claude's conclusion</div><div class="vs">Confidence ${esc(r.confidence||"—")} · Buy range ${range}</div></div></div>
       <p>${esc(r.summary||"")}</p>${r.changeMind?`<p class="muted"><b>Would change my mind:</b> ${esc(r.changeMind)}</p>`:""}
@@ -1438,7 +1486,7 @@ function reportHTML(r, s){
 }
 function openDeep(t){
   const s = DATA.find(x=>x.t===t); if(!s) return; dp.t = t; dp.s = s;
-  document.getElementById("dpHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="dpTitle">Deep dive · ${esc(s.name)}</h3><div class="sub">${s.t} · ${money(s.curr)} · ${pct(s.pct3m)} in 3 months · screener says ${agentPill(s)}</div></div></div>`;
+  document.getElementById("dpHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="dpTitle">Deep dive · ${esc(s.name)}</h3><div class="sub">${s.t} · ${money(s.curr,s.ccy)} · ${pct(s.pct3m)} in 3 months · screener says ${agentPill(s)}</div></div></div>`;
   const cached = deepCache[t];
   if(cached) showReport(cached);
   else if(DEEP_DIVE_API) runDeep();
@@ -1490,7 +1538,7 @@ function chartSVG(s){
   const ticks = []; for(let k=0;k<=4;k++){ const v = y0 + (y1-y0)*k/4; ticks.push(`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="cg"/><text x="${W-R+6}" y="${Y(v)+4}" class="ct">${fmt(v, v>=100?0:2)}</text>`); }
   const yrs = []; const ys = new Date(t0).getUTCFullYear()+1, ye = new Date(t1).getUTCFullYear();
   for(let yr=ys; yr<=ye; yr++){ const tt = Date.UTC(yr,0,1); const i = (tt-t0)/(t1-t0)*(n-1); yrs.push(`<line x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H-B}" class="cg"/><text x="${X(i)}" y="${H-8}" class="ct" text-anchor="middle">${yr}</text>`); }
-  const ref = (v,lab,cls) => v ? `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}"/><text x="${L+4}" y="${Y(v)-5}" class="cl ${cls}">${lab} ${money(v)}</text>` : "";
+  const ref = (v,lab,cls) => v ? `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}"/><text x="${L+4}" y="${Y(v)-5}" class="cl ${cls}">${lab} ${money(v,s.ccy)}</text>` : "";
   const e = ed(s.t), pt = s.stats && s.stats.pt;
   return { n, c, t0, t1, X, Y, W, H, svg: `<svg viewBox="0 0 ${W} ${H}" class="c5" role="img" aria-label="${esc(s.name)} weekly closing price over five years">
     ${ticks.join("")}${yrs.join("")}
@@ -1503,7 +1551,7 @@ function chartSVG(s){
 }
 function openChart(t){
   const s = DATA.find(x=>x.t===t); if(!s) return;
-  document.getElementById("chHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="chTitle">${esc(s.name)} · 5 years</h3><div class="sub">${s.t} · weekly closing price, USD · latest ${money(s.curr)}</div></div></div>`;
+  document.getElementById("chHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="chTitle">${esc(s.name)} · 5 years</h3><div class="sub">${s.t} · weekly closing price, ${s.ccy} · latest ${money(s.curr,s.ccy)}</div></div></div>`;
   const g = chartSVG(s), body = document.getElementById("chBody");
   if(!g){
     body.innerHTML = `<p class="muted">The 5-year price history for ${esc(s.name)} arrives with the next daily data update.</p><p><a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">See the chart on Yahoo Finance ↗</a></p>`;
@@ -1511,8 +1559,8 @@ function openChart(t){
     const c = g.c, hi = Math.max(...c), lo = Math.min(...c), ch5 = (c[c.length-1]/c[0]-1)*100, offHi = (s.curr/hi-1)*100;
     body.innerHTML = `<div class="cstats">
         <div><span>5-year change</span><b class="num ${ch5>=0?"pos":"neg"}">${pct(ch5)}</b></div>
-        <div><span>5-year high</span><b class="num">${money(hi)}</b></div>
-        <div><span>5-year low</span><b class="num">${money(lo)}</b></div>
+        <div><span>5-year high</span><b class="num">${money(hi,s.ccy)}</b></div>
+        <div><span>5-year low</span><b class="num">${money(lo,s.ccy)}</b></div>
         <div><span>Below 5-year high</span><b class="num neg">${pct(offHi)}</b></div>
       </div>
       <div class="cwrap">${g.svg}<div class="ctip" hidden></div></div>
@@ -1525,7 +1573,7 @@ function openChart(t){
       hov.style.display = ""; hov.querySelector(".hl").setAttribute("x1", cx); hov.querySelector(".hl").setAttribute("x2", cx);
       hov.querySelector(".hc").setAttribute("cx", cx); hov.querySelector(".hc").setAttribute("cy", cy);
       const d = new Date(g.t0 + (g.t1-g.t0)*i/(g.n-1));
-      tip.hidden = false; tip.innerHTML = `<b>${money(c[i])}</b><span>${d.toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</span>`;
+      tip.hidden = false; tip.innerHTML = `<b>${money(c[i],s.ccy)}</b><span>${d.toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</span>`;
       const px = cx / g.W * r.width; tip.style.left = Math.max(4, Math.min(r.width - tip.offsetWidth - 4, px - tip.offsetWidth/2)) + "px";
     };
     svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
@@ -1543,7 +1591,7 @@ setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add
 
 const deck=document.querySelector('.deck'); let deckTop=0; const measure=()=>{deck.classList.remove('compact'); deckTop=deck.getBoundingClientRect().top+scrollY;}; measure();
 addEventListener('scroll',()=>{ if(getComputedStyle(deck).position!=='sticky') return; deck.classList.toggle('compact', scrollY>deckTop+40); },{passive:true});
-buildTallies(); buildHist(); render();
+buildTallies(); buildIdxTabs(); buildHist(); render();
 setTab((t=>["finder","watchlist","portfolio"].includes(t)?t:"finder")(location.hash ? location.hash.slice(1) : store.get("bcdf.tab","finder")));
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
