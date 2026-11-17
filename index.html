@@ -977,9 +977,11 @@ function activeCols(){ const keys = [...COLS_FULL[0][2].map(c=>c[0]), ...state.o
 function buildColMenu(){ const m = document.getElementById("colMenu");
   m.innerHTML = `<div class="cm-top"><span>Tick columns to show. Drag headings to reorder.</span><button type="button" data-cm="all">Show all</button><button type="button" data-cm="high">Reset</button></div><div class="cm-grid">` +
     COLS_FULL.slice(1).map(g=>`<h5>${COL_GROUP_NAME(g)}</h5>`+g[2].map(c=>`<label><input type="checkbox" data-col="${c[0]}"${state.cols.has(c[0])?" checked":""}> ${c[1]}</label>`).join("")).join("") + `</div>`; }
-{ const saved = store.get("bcdf.cols", null), EXTRA = ["hi52","lo52","dip"];   // these three were briefly on by default; take them back out once
-  if(saved && !store.get("bcdf.cols52b", false)) setCols(saved.filter(k=>!EXTRA.includes(k))); else setCols(saved || HIGH_KEYS, false);
-  store.set("bcdf.cols52b", true); }
+{ let saved = store.get("bcdf.cols", null), changed = false;   // one-time: untick columns that are no longer part of the default view
+  for(const [flag, keys] of [["bcdf.cols52b",["hi52","lo52","dip"]],["bcdf.colsfa",["fa"]]]){
+    if(saved && !store.get(flag, false)){ saved = saved.filter(k=>!keys.includes(k)); changed = true; }
+    store.set(flag, true); }
+  setCols(saved || HIGH_KEYS, changed); }
 setOrder(store.get("bcdf.colorder", null), false);
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
