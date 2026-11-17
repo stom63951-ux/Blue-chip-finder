@@ -36,7 +36,7 @@ OTHER_COVERAGE = 0.8  # an index other than the S&P 500 is skipped for the day b
 # figures are kept) if their member list or prices cannot be read.
 INDEXES = [
     {"id": "sp500", "name": "S&P 500", "yahoo": "^GSPC", "ccy": "USD"},
-    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": ["Nasdaq-100", "List_of_Nasdaq-100_companies", "Nasdaq-100_Index"], "suffix": "", "rows": (90, 115)},
+    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": ["List_of_NASDAQ-100_companies", "Nasdaq-100", "List_of_Nasdaq-100_companies"], "suffix": "", "rows": (90, 115)},
     {"id": "dow", "name": "Dow Jones", "yahoo": "^DJI", "ccy": "USD", "page": ["Dow_Jones_Industrial_Average", "List_of_Dow_Jones_Industrial_Average_companies", "Components_of_the_Dow_Jones_Industrial_Average"], "suffix": "", "rows": (28, 32)},
     {"id": "ftse", "name": "FTSE 100", "yahoo": "^FTSE", "ccy": "GBP", "page": "FTSE_100_Index", "suffix": ".L", "rows": (95, 105)},
     {"id": "sx5e", "name": "Euro Stoxx 50", "yahoo": "^STOXX50E", "ccy": "EUR", "page": "EURO_STOXX_50", "suffix": None, "rows": (48, 52)},
