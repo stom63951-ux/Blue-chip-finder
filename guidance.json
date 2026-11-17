@@ -267,6 +267,20 @@
      "hi": 8.44,
      "act": 9.12,
      "src": "https://www.sec.gov/Archives/edgar/data/1551182/000115752323000204/a53306075ex99.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 9.95,
+     "hi": 10.35,
+     "act": 10.8,
+     "src": "https://www.sec.gov/Archives/edgar/data/1551182/000115752324000149/a53890459ex99.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 11.8,
+     "hi": 12.2,
+     "act": 12.07,
+     "src": "https://www.sec.gov/Archives/edgar/data/1551182/000155118225000003/etn12312024exhibit99.htm"
     }
    ]
   },
@@ -275,11 +289,107 @@
    "unit": "$B",
    "years": [
     {
+     "y": "2021",
+     "lo": 3.025,
+     "hi": 3.075,
+     "act": 3.342,
+     "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203921000005/ftntq4-2020ex991.htm"
+    },
+    {
+     "y": "2022",
+     "lo": 4.275,
+     "hi": 4.325,
+     "act": 4.42,
+     "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203922000005/ftntq4-2021ex991.htm"
+    },
+    {
+     "y": "2023",
+     "lo": 5.37,
+     "hi": 5.43,
+     "act": 5.305,
+     "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203923000003/ftntq4-2022ex991.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 5.715,
+     "hi": 5.815,
+     "act": 5.96,
+     "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203924000006/ftntq4-2023ex991.htm"
+    },
+    {
      "y": "2025",
      "lo": 6.65,
      "hi": 6.85,
      "act": 6.8,
      "src": "https://www.sec.gov/Archives/edgar/data/1262039/000126203925000007/ftntq4-2024ex991.htm"
+    }
+   ]
+  },
+  "DELL": {
+   "measure": "revenue",
+   "unit": "$B",
+   "note": "Earlier years' forecasts were given on the earnings call, not in the release.",
+   "years": [
+    {
+     "y": "FY2026",
+     "lo": 101.0,
+     "hi": 105.0,
+     "act": 113.5,
+     "src": "https://www.sec.gov/Archives/edgar/data/1571996/000157199625000014/exhibit991earnings8kq4fy25.htm"
+    }
+   ]
+  },
+  "NOW": {
+   "measure": "subscription revenue",
+   "unit": "$B",
+   "years": [
+    {
+     "y": "2023",
+     "lo": 8.44,
+     "hi": 8.5,
+     "act": 8.68,
+     "src": "https://www.sec.gov/Archives/edgar/data/1373715/000137371523000016/erq4fy22.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 10.555,
+     "hi": 10.575,
+     "act": 10.646,
+     "src": "https://www.sec.gov/Archives/edgar/data/1373715/000137371524000009/erq4fy23.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 12.635,
+     "hi": 12.675,
+     "act": 12.883,
+     "src": "https://www.sec.gov/Archives/edgar/data/1373715/000137371525000007/erq4fy24.htm"
+    }
+   ]
+  },
+  "PANW": {
+   "measure": "revenue",
+   "unit": "$B",
+   "years": [
+    {
+     "y": "FY2023",
+     "lo": 6.85,
+     "hi": 6.9,
+     "act": 6.893,
+     "src": "https://www.sec.gov/Archives/edgar/data/1327567/000132756722000020/ex991q422earningsrelease.htm"
+    },
+    {
+     "y": "FY2024",
+     "lo": 8.15,
+     "hi": 8.2,
+     "act": 8.028,
+     "src": "https://www.sec.gov/Archives/edgar/data/1327567/000132756723000020/ex991q423earningsrelease.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 9.1,
+     "hi": 9.15,
+     "act": 9.222,
+     "src": "https://www.sec.gov/Archives/edgar/data/1327567/000132756724000023/ex991q424earningsrelease.htm"
     }
    ]
   }
