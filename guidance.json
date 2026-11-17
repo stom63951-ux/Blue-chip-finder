@@ -1029,6 +1029,102 @@
   },
   "CIEN": {
    "none": "Gave its forecast only on the results call until fiscal 2026. The first written one (revenue of $5.7 to 6.1 billion) can be scored when that year ends."
+  },
+  "C": {
+   "measure": "Revenue",
+   "unit": "$B",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 83.5,
+     "hi": 84.5,
+     "act": 85.2,
+     "src": "https://finanzen.ch/nachrichten/aktien/citigroup-turns-to-profit-in-q4-revenue-up-12percent;-issues-2025-guidance-1034230265",
+     "note": "Reported revenue. Adjusted revenue was 86.6 billion."
+    }
+   ]
+  },
+  "STT": {
+   "measure": "Fee revenue growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 3.0,
+     "hi": 5.0,
+     "act": 9.0,
+     "src": "https://www.sec.gov/Archives/edgar/data/93751/000009375125000004/stt4q24earningspresentat.htm"
+    }
+   ]
+  },
+  "PNC": {
+   "measure": "Revenue growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 6.0,
+     "hi": 6.0,
+     "act": 7.0,
+     "src": "https://www.tipranks.com/news/the-fly/pnc-expects-to-generate-substantial-positive-operating-leverage-in-2025",
+     "note": "Forecast was about 6%."
+    }
+   ]
+  },
+  "MTB": {
+   "measure": "Net interest income",
+   "unit": "$B",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 7.05,
+     "hi": 7.15,
+     "act": 6.992,
+     "src": "https://www.tipranks.com/news/the-fly/mt-bank-affirms-2025-net-interest-income-outlook-7-05b-7-15b-thefly",
+     "note": "Forecast as restated in June 2025; the January wording was not found."
+    }
+   ]
+  },
+  "HBAN": {
+   "measure": "Net interest income growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 4.0,
+     "hi": 6.0,
+     "act": 12.0,
+     "src": "https://www.americanbanker.com/news/huntington-turns-to-organic-growth-as-expansion-effort-clicks",
+     "note": "The result includes the Veritex purchase late in the year."
+    }
+   ]
+  },
+  "SHRIRAMFIN.NS": {
+   "measure": "Growth in loans under management",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2026,
+     "lo": 15.0,
+     "hi": 15.0,
+     "act": 15.0,
+     "src": "https://www.business-standard.com/companies/news/shriram-finance-margin-guidance-aum-growth-q1fy26-performance-125072801400_1.html",
+     "note": "Year to March 2026. Forecast was about 15%."
+    }
+   ]
+  },
+  "NESTLEIND.NS": {
+   "none": "Gives no numeric forecast."
+  },
+  "MQG.AX": {
+   "none": "Describes its outlook in words only, with no numeric forecast."
+  },
+  "COF": {
+   "none": "Gives no numeric annual forecast."
   }
  }
 }
