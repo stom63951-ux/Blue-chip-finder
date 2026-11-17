@@ -72,10 +72,10 @@ def wiki_members(ix):
     lo, hi = ix["rows"]
     tables = []
     try:  # several index pages mark the member table with this id
-        tables += pd.read_html(io.StringIO(html), attrs={"id": "constituents"})
-    except ValueError:
+        tables += pd.read_html(io.StringIO(html), attrs={"id": "constituents"}, flavor="lxml")
+    except Exception:
         pass
-    tables += pd.read_html(io.StringIO(html))
+    tables += pd.read_html(io.StringIO(html), flavor="lxml")
     clean = lambda k: re.sub(r"\[.*?\]", "", k).strip()
     seen = []
     for t in tables:
