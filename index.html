@@ -777,6 +777,7 @@ body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
         <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's list for each index.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
+        <li><b>52W high</b> and <b>52W low</b> are the highest and lowest closing prices of the last 52 weeks. <b>Deepest dip</b> is the biggest fall from a peak to a later low since the share listed, worked out from month-end prices (weekly for the last 5 years), so a very short plunge inside a month can be understated. Hover over it for the dates.</li>
         <li><b>Forecast accuracy</b> (tick it under Columns) says how close each company's own forecast at the start of a year was to what it later reported, read from the company's results releases. <b>Very accurate</b> means the result typically landed within 3% of the middle of its forecast, <b>Accurate</b> within 7.5%, <b>Fairly accurate</b> within 15%, and <b>Not accurate</b> further away than that, whether it beat or missed. Companies forecast different measures, so hover over the word to see which one and the figures for every year. A grey word with a star is the older analyst-based score, shown until that company's releases have been read; "No forecast" means the company publishes no numeric forecast.</li>
         <li><b>AI picks</b> lists up to ten blue-chips from every index that the agent says Yes to, ranked by confidence score and then by how far the analyst target is above the price. It is rule-based and reads numbers only.</li>
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
@@ -929,7 +930,7 @@ function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set(
 const state = { idx: state0idx, tab:"finder", drop: store.get("bcdf.drop",10),  ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
 const SORTS = {
   ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
-  pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
+  pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y, hi52:s=>rangeOf(s).hi, lo52:s=>rangeOf(s).lo, dip:s=>rangeOf(s).dip,
   pe:s=>s.stats.pe, sector:s=>s.sector, status:s=>s.status, lev:s=>s.stats.debitda,
   buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest), fa:s=>{ const d=guideOf(s); return d&&!d.none ? 1000-Math.min(900,d.gap*(d.pts?3:1)) : s.fa ? 100-Math.min(100,s.fa.med) : null; },
 };
@@ -943,7 +944,7 @@ function sortRows(rows){
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","@idx",[["pct","% 3M","r"],["pe","P/E","r"],["agent","Confidence"]]],
-  ["g","@ccy",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
+  ["g","@ccy",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"],["hi52","52W high","r"],["lo52","52W low","r"],["dip","Deepest dip","r"]]],
   ["g","Company",[["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"],["fa","Forecast accuracy"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
@@ -952,7 +953,7 @@ const COLS_FULL = [
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
   ["g","@idx",[["pct","% 3M","r"],["pe","P/E","r"],["agent","Confidence"]]],
-  ["g","@ccy",[["curr","Curr","r"],["buy","Target buy","r"]]],
+  ["g","@ccy",[["curr","Curr","r"],["hi52","52W high","r"],["lo52","52W low","r"],["dip","Deepest dip","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
@@ -962,8 +963,11 @@ const HIGH_KEYS = COLS_HIGH.slice(1).flatMap(g=>g[2].map(c=>c[0]));
 const sameSet = (a,b) => a.size===b.length && b.every(k=>a.has(k));
 function setCols(keys, save=true){ state.cols = new Set(keys.filter(k=>OPT_COLS.includes(k)));
   if(save) store.set("bcdf.cols", [...state.cols]); }
+const DEF_ORDER = [...HIGH_KEYS, ...OPT_COLS.filter(k=>!HIGH_KEYS.includes(k))].sort((a,b)=>OPT_COLS.indexOf(a)-OPT_COLS.indexOf(b));
 const COLDEF = Object.fromEntries(COLS_FULL.flatMap((g,gi)=>g[2].map(c=>[c[0],{label:c[1],cls:c[2]||"",g:gi}])));
-function setOrder(keys, save=true){ const k = (keys||[]).filter(x=>OPT_COLS.includes(x)); state.order = [...new Set([...k, ...OPT_COLS])]; if(save) store.set("bcdf.colorder", state.order); }
+function setOrder(keys, save=true){ const k = (keys||[]).filter(x=>OPT_COLS.includes(x)); const o = [...new Set(k)];
+  if(o.length) DEF_ORDER.forEach((x,i)=>{ if(!o.includes(x)){ const at = o.indexOf(DEF_ORDER[i-1]); o.splice(at<0 ? o.length : at+1, 0, x); } });
+  state.order = o.length ? o : [...DEF_ORDER]; if(save) store.set("bcdf.colorder", state.order); }
 // visible columns in the user's order, with a group heading over each run of neighbours from the same group
 function activeCols(){ const keys = [...COLS_FULL[0][2].map(c=>c[0]), ...state.order.filter(k=>state.cols.has(k))];
   const cols = keys.map(k=>({key:k,label:COLDEF[k].label,cls:COLDEF[k].cls,g:COLDEF[k].g})), runs = [];
@@ -973,7 +977,9 @@ function activeCols(){ const keys = [...COLS_FULL[0][2].map(c=>c[0]), ...state.o
 function buildColMenu(){ const m = document.getElementById("colMenu");
   m.innerHTML = `<div class="cm-top"><span>Tick columns to show. Drag headings to reorder.</span><button type="button" data-cm="all">Show all</button><button type="button" data-cm="high">Reset</button></div><div class="cm-grid">` +
     COLS_FULL.slice(1).map(g=>`<h5>${COL_GROUP_NAME(g)}</h5>`+g[2].map(c=>`<label><input type="checkbox" data-col="${c[0]}"${state.cols.has(c[0])?" checked":""}> ${c[1]}</label>`).join("")).join("") + `</div>`; }
-setCols(store.get("bcdf.cols", null) || HIGH_KEYS, false);
+{ const saved = store.get("bcdf.cols", null), NEW = ["hi52","lo52","dip"];
+  if(saved && !store.get("bcdf.cols52", false)){ setCols([...saved, ...NEW]); } else setCols(saved || HIGH_KEYS, false);
+  store.set("bcdf.cols52", true); }
 setOrder(store.get("bcdf.colorder", null), false);
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
@@ -1019,6 +1025,21 @@ const gdNote = d => d.none ? d.none : `The company's own forecast of ${d.measure
 const FA_WORDS = ["Very accurate","Accurate","Fairly accurate","Not accurate"];
 const faLevel = (gap,pts) => { const g = pts ? gap*3 : gap; return g<=3 ? 0 : g<=7.5 ? 1 : g<=15 ? 2 : 3; };
 const gdWord = d => FA_WORDS[faLevel(d.gap,d.pts)];
+// 52-week range and the deepest fall from a peak since listing, from the price history already loaded
+const addT = (start, i, unit) => { const d = new Date(start+"T00:00:00Z"); unit==="m" ? d.setUTCMonth(d.getUTCMonth()+i) : d.setUTCDate(d.getUTCDate()+i*(unit==="w"?7:1.45)); return d.toISOString().slice(0,10); };
+const monYr = d => new Date(d+"T00:00:00Z").toLocaleDateString("en-AU",{month:"short",year:"numeric",timeZone:"UTC"});
+function rangeOf(s){
+  if(s.rg) return s.rg;
+  const pts = [], push = (h,unit,until) => { if(h && h.c) h.c.forEach((c,i)=>{ const d = addT(h.start,i,unit); if(c!=null && (!until || d<until) && (!pts.length || d>pts[pts.length-1][0])) pts.push([d,c]); }); };
+  push(s.hm,"m",s.h5&&s.h5.start); push(s.h5,"w",s.hd&&s.hd.start); push(s.hd,"d");
+  const asof = PAYLOAD.asof || new Date().toISOString().slice(0,10);
+  if(s.curr!=null) pts.push([asof,s.curr]);
+  const yr = addT(asof,-12,"m"), last = pts.filter(p=>p[0]>=yr).map(p=>p[1]);
+  let peak = null, dip = 0, from = null, to = null;
+  for(const p of pts){ if(!peak || p[1]>peak[1]) peak = p; const f = (p[1]/peak[1]-1)*100; if(f<dip){ dip = f; from = peak; to = p; } }
+  return s.rg = { hi: s.hi52 ?? (last.length ? Math.max(...last) : null), lo: s.lo52 ?? (last.length ? Math.min(...last) : null),
+    dip: pts.length>12 ? dip : null, from, to, since: pts.length ? pts[0][0] : null };
+}
 const faScore = s => 100 - Math.min(100, s.fa.med);
 const faNote = s => `Reported earnings per share came within ${fmt(s.fa.med,1)}% of the forecast in a typical quarter, over the last ${s.fa.n} quarters (about ${Math.round(s.fa.n/4)} years). Met or beat the forecast ${s.fa.hit} times out of ${s.fa.n}.`;
 function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${disp(s.t).slice(0,4)}</span>`; }
@@ -1043,6 +1064,9 @@ function cell(s,key){
       return s.fa ? `<td class="muted fa-an" title="Analyst-based for now: the company's own forecasts have not been read yet. ${faNote(s)}">${FA_WORDS[faLevel(s.fa.med,false)]}*</td>` : `<td class="r num" title="No forecast history for this share yet">—</td>`;
     case "lev": return `<td class="r num"${s.fin?` title="Not used for banks and financials"`:""}>${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":s.fin?"n/a":"—"}</td>`;
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
+    case "hi52": { const r=rangeOf(s); return `<td class="r num"${r.hi&&s.curr!=null?` title="Now ${fmt((s.curr/r.hi-1)*100,1)}% below the highest close of the last 52 weeks"`:""}>${fmt(r.hi)}</td>`; }
+    case "lo52": { const r=rangeOf(s); return `<td class="r num"${r.lo&&s.curr!=null?` title="Now ${fmt((s.curr/r.lo-1)*100,1)}% above the lowest close of the last 52 weeks"`:""}>${fmt(r.lo)}</td>`; }
+    case "dip": { const r=rangeOf(s); return r.dip==null ? `<td class="r num">—</td>` : `<td class="r num" title="Biggest fall from a peak since ${monYr(r.since)}: from ${fmt(r.from[1])} in ${monYr(r.from[0])} to ${fmt(r.to[1])} in ${monYr(r.to[0])}. Based on month-end prices, and weekly prices for the last 5 years.">${fmt(r.dip,1)}%</td>`; }
     case "buy": return `<td class="r"><input class="n" id="buy-${s.t}" data-k="buy" data-t="${s.t}" type="number" step="0.01" value="${e.buy}" aria-label="Target buy for ${s.t}"></td>`;
     case "shares": return `<td class="r"><input class="n" id="sh-${s.t}" data-k="shares" data-t="${s.t}" type="number" step="1" min="0" value="${e.shares}" aria-label="Number of shares for ${s.t}"></td>`;
     case "total": { const v = e.buy&&e.shares ? e.buy*e.shares : null; return `<td class="r num" data-total="${s.t}">${v?money(v,s.ccy):"—"}</td>`; }

@@ -484,6 +484,9 @@ def main():
         p = prices.get(r["t"])
         if p:
             r["hd"] = daily_6m(p["series"], p["asof"])
+            yr = p["series"][p["series"].index > p["asof"] - pd.DateOffset(years=1)]
+            if len(yr):   # 52-week high and low, on daily closing prices
+                r["hi52"], r["lo52"] = round(float(yr.max()), 2), round(float(yr.min()), 2)
         if r["t"] in monthly:
             r["hm"] = monthly[r["t"]]
         was = prev.get(r["t"]) or {}
