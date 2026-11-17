@@ -498,6 +498,11 @@ body.modal-open{overflow:hidden}
 /* ---- sortable headers, notices, portfolio tools ---- */
 #tbl th[data-sort]{cursor:pointer;user-select:none;-webkit-user-select:none}
 #tbl th[data-sort]:hover{color:var(--ink)}
+#tbl th[data-col]{cursor:grab;touch-action:pan-y pinch-zoom}
+#tbl th.dragging{opacity:.45}
+#tbl th.drop-l{box-shadow:inset 3px 0 0 var(--chip)}
+#tbl th.drop-r{box-shadow:inset -3px 0 0 var(--chip)}
+body.coldrag,body.coldrag *{cursor:grabbing!important;user-select:none;-webkit-user-select:none}
 #tbl th[aria-sort]{color:var(--ink)}
 #tbl th .sa{font-size:.6rem;margin-left:3px;color:var(--chip)}
 .notice{border:1px solid var(--warn-edge);background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:.86rem;margin:0 0 12px}
@@ -540,7 +545,7 @@ h1{font-size:1.15rem;margin:0;white-space:nowrap}
 .deck>div:nth-child(2),.deck>div:nth-child(3){display:flex;align-items:center;gap:8px}
 .ctl-label{margin:0;white-space:nowrap;font-size:.62rem}
 .deck>div:nth-child(4) .ctl-label{display:none}
-.colpick{position:relative;display:inline-block;margin-left:6px;vertical-align:middle}
+.colpick{position:relative;display:inline-block;vertical-align:middle}
 .colbtn{font:inherit;font-size:.78rem;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--edge);border-radius:999px;padding:5px 12px;cursor:pointer}
 .colbtn:hover,.colbtn[aria-expanded="true"]{border-color:var(--chip);color:var(--chip)}
 .colbtn:focus-visible{outline:2px solid var(--chip);outline-offset:2px}
@@ -700,9 +705,8 @@ body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
       <div class="range-ends"><span>10%</span><span>45%</span><span>80%</span></div>
     </div>
     <div>
-      <span class="ctl-label">View</span>
-      <div class="seg" id="segView" role="group" aria-label="View"><span class="ind"></span><button data-v="full" aria-pressed="true">Full</button><button data-v="high" aria-pressed="false">High level</button></div>
-      <span class="colpick"><button type="button" id="colBtn" class="colbtn" aria-haspopup="true" aria-expanded="false" title="Choose which columns to show">Columns</button><div id="colMenu" class="colmenu" hidden></div></span>
+      <span class="ctl-label">Table</span>
+      <span class="colpick"><button type="button" id="colBtn" class="colbtn" aria-haspopup="true" aria-expanded="false" title="Choose which columns to show. Drag a column heading in the table to move it">Columns</button><div id="colMenu" class="colmenu" hidden></div></span>
     </div>
     <div>
       <span class="ctl-label">Agent says</span>
@@ -773,7 +777,7 @@ body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
         <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's list for each index.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
-        <li><b>Forecast accuracy</b> (Full view) says how close each company's own forecast at the start of a year was to what it later reported, read from the company's results releases. <b>Very accurate</b> means the result typically landed within 3% of the middle of its forecast, <b>Accurate</b> within 7.5%, <b>Fairly accurate</b> within 15%, and <b>Not accurate</b> further away than that, whether it beat or missed. Companies forecast different measures, so hover over the word to see which one and the figures for every year. A grey word with a star is the older analyst-based score, shown until that company's releases have been read; "No forecast" means the company publishes no numeric forecast.</li>
+        <li><b>Forecast accuracy</b> (tick it under Columns) says how close each company's own forecast at the start of a year was to what it later reported, read from the company's results releases. <b>Very accurate</b> means the result typically landed within 3% of the middle of its forecast, <b>Accurate</b> within 7.5%, <b>Fairly accurate</b> within 15%, and <b>Not accurate</b> further away than that, whether it beat or missed. Companies forecast different measures, so hover over the word to see which one and the figures for every year. A grey word with a star is the older analyst-based score, shown until that company's releases have been read; "No forecast" means the company publishes no numeric forecast.</li>
         <li><b>AI picks</b> lists up to ten blue-chips from every index that the agent says Yes to, ranked by confidence score and then by how far the analyst target is above the price. It is rule-based and reads numbers only.</li>
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
         <li><b>Target buy</b> starts 5% under the current price; <b>Target divest</b> starts at the analyst average target.</li>
@@ -922,7 +926,7 @@ function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
   held: e.held ?? "", date: e.date ?? "", comment: e.comment ?? "" };}
 function setEd(t,k,v){ edits[t]=Object.assign(edits[t]||{}, {[k]:v}); store.set("bcdf.edits",edits); }
 
-const state = { idx: state0idx, tab:"finder", drop: store.get("bcdf.drop",10), view:"high", viewPicked:false, ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
+const state = { idx: state0idx, tab:"finder", drop: store.get("bcdf.drop",10),  ag:"all", q:"", showFail:false, open:new Set(), sort:{k:"pct",dir:1} };
 const SORTS = {
   ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
   pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
@@ -957,13 +961,20 @@ const OPT_COLS = COLS_FULL.slice(1).flatMap(g=>g[2].map(c=>c[0]));
 const HIGH_KEYS = COLS_HIGH.slice(1).flatMap(g=>g[2].map(c=>c[0]));
 const sameSet = (a,b) => a.size===b.length && b.every(k=>a.has(k));
 function setCols(keys, save=true){ state.cols = new Set(keys.filter(k=>OPT_COLS.includes(k)));
-  state.view = sameSet(state.cols,OPT_COLS) ? "full" : sameSet(state.cols,HIGH_KEYS) ? "high" : "custom";
   if(save) store.set("bcdf.cols", [...state.cols]); }
-const activeGroups = () => COLS_FULL.map((g,i)=> i===0 ? g : [g[0],g[1],g[2].filter(c=>state.cols.has(c[0]))]).filter(g=>g[2].length);
+const COLDEF = Object.fromEntries(COLS_FULL.flatMap((g,gi)=>g[2].map(c=>[c[0],{label:c[1],cls:c[2]||"",g:gi}])));
+function setOrder(keys, save=true){ const k = (keys||[]).filter(x=>OPT_COLS.includes(x)); state.order = [...new Set([...k, ...OPT_COLS])]; if(save) store.set("bcdf.colorder", state.order); }
+// visible columns in the user's order, with a group heading over each run of neighbours from the same group
+function activeCols(){ const keys = [...COLS_FULL[0][2].map(c=>c[0]), ...state.order.filter(k=>state.cols.has(k))];
+  const cols = keys.map(k=>({key:k,label:COLDEF[k].label,cls:COLDEF[k].cls,g:COLDEF[k].g})), runs = [];
+  cols.forEach((c,i)=>{ const last = runs[runs.length-1];
+    if(last && last.g===c.g){ last.n++; last.pct = last.pct || c.key==="pct"; } else { runs.push({g:c.g,n:1,pct:c.key==="pct"}); if(i) c.cls = (c.cls+" gl").trim(); } });
+  return {cols, runs}; }
 function buildColMenu(){ const m = document.getElementById("colMenu");
-  m.innerHTML = `<div class="cm-top"><span>Tick the columns to show</span><button type="button" data-cm="all">Show all</button><button type="button" data-cm="high">High level only</button></div><div class="cm-grid">` +
+  m.innerHTML = `<div class="cm-top"><span>Tick columns to show. Drag headings to reorder.</span><button type="button" data-cm="all">Show all</button><button type="button" data-cm="high">Reset</button></div><div class="cm-grid">` +
     COLS_FULL.slice(1).map(g=>`<h5>${COL_GROUP_NAME(g)}</h5>`+g[2].map(c=>`<label><input type="checkbox" data-col="${c[0]}"${state.cols.has(c[0])?" checked":""}> ${c[1]}</label>`).join("")).join("") + `</div>`; }
 setCols(store.get("bcdf.cols", null) || HIGH_KEYS, false);
+setOrder(store.get("bcdf.colorder", null), false);
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
 const MAX_PICKS = 10;
@@ -1177,12 +1188,11 @@ let first = true, lastKey = "";
 function render(animate=true){
   document.getElementById("dropVal").textContent = state.drop+"%";
   document.getElementById("drop").value = state.drop;
-  document.querySelectorAll("#segView button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.v===state.view));
   document.querySelectorAll("#segAg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.ag===state.ag));
-  moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg"));
+  moveInd(document.getElementById("segAg"));
   applyPool(); updateHist(); buildIdxTabs();
-  const groups = activeGroups();
-  const cols = groups.flatMap(g=>g[2].map((c,i)=>({key:c[0],label:c[1],cls:((c[2]||"")+(i===0&&g[0]==="g"?" gl":"")).trim()})));
+  const {cols, runs} = activeCols();
+  const groups = runs.map(r=>[r.g?"g":"g0", COLS_FULL[r.g][1]==="@idx" && !r.pct ? "" : COLS_FULL[r.g][1], {length:r.n}]);
   const rows = sortRows(filtered());
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
@@ -1190,7 +1200,7 @@ function render(animate=true){
   const key = [...state.cols].join(",")+"|"+state.idx+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith([...state.cols].join(",")+"|");
-  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}${c.key==="caret"?"":`<span class="rz" data-rz="${c.key}" title="Drag to resize. Double-click to reset"></span>`}</th>`; }).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${c.g?` data-col="${c.key}"`:""}${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}${c.key==="caret"?"":`<span class="rz" data-rz="${c.key}" title="Drag to resize. Double-click to reset"></span>`}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
     h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
       : (state.q.trim() || state.ag!=="all") && POOL.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
@@ -1205,7 +1215,7 @@ function render(animate=true){
     if(state.open.has(s.t)) h += `<tr class="detail" data-for="${s.t}"><td colspan="${cols.length}">${detailHTML(s)}</td></tr>`;
   }
   const tbl = document.getElementById("tbl");
-  tbl.dataset.view = state.view==="high" ? "high" : "full";
+  tbl.dataset.view = state.cols.size > HIGH_KEYS.length+2 ? "full" : "high";
   const doSwap = () => { tbl.innerHTML = h+"</tbody>"; tbl.querySelectorAll(".dd-anim").forEach(d=>{ d.classList.add("show"); armDetail(d); }); };
   doSwap();
   lastKey = key; first = false;
@@ -1245,7 +1255,23 @@ tbl.addEventListener("pointerdown", e=>{ const h = e.target.closest(".rz"); if(!
   const up = () => { h.removeEventListener("pointermove", move); h.classList.remove("on"); document.body.classList.remove("resizing"); store.set("bcdf.colw", COLW); };
   h.addEventListener("pointermove", move); h.addEventListener("pointerup", up, {once:true}); h.addEventListener("pointercancel", up, {once:true}); });
 tbl.addEventListener("dblclick", e=>{ const h = e.target.closest(".rz"); if(!h) return; delete COLW[h.dataset.rz]; store.set("bcdf.colw", COLW); paintColw(); });
-tbl.addEventListener("click", e=>{ if(e.target.closest(".rz")) return; const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const wb=e.target.closest("[data-watch]"); if(wb){ toggleWatch(wb.dataset.watch); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
+/* column order: drag a heading sideways (press and hold first on a touch screen); saved in this browser */
+let colDragged = 0;
+tbl.addEventListener("pointerdown", e=>{ const th = e.target.closest("th[data-col]"); if(!th || e.target.closest(".rz") || (e.pointerType==="mouse" && e.button!==0)) return;
+  const k = th.dataset.col, x0 = e.clientX, y0 = e.clientY, touch = e.pointerType==="touch"; let on = false, target = null, after = false, timer = 0;
+  const clear = () => tbl.querySelectorAll("th.drop-l,th.drop-r").forEach(x=>x.classList.remove("drop-l","drop-r"));
+  const start = () => { on = true; th.classList.add("dragging"); document.body.classList.add("coldrag"); };
+  const stopScroll = ev => { if(on) ev.preventDefault(); };
+  const move = ev => { if(!on){ const far = Math.abs(ev.clientX-x0) > 6 || Math.abs(ev.clientY-y0) > 6; if(touch){ if(far) end(ev); return; } if(!far) return; start(); }
+    clear(); target = null;
+    for(const o of tbl.querySelectorAll("th[data-col]")){ const r = o.getBoundingClientRect(); if(ev.clientX >= r.left && ev.clientX < r.right){ if(o!==th){ target = o; after = ev.clientX > r.left + r.width/2; o.classList.add(after?"drop-r":"drop-l"); } break; } } };
+  const end = ev => { clearTimeout(timer); removeEventListener("pointermove", move); removeEventListener("pointerup", end); removeEventListener("pointercancel", end); tbl.removeEventListener("touchmove", stopScroll);
+    th.classList.remove("dragging"); document.body.classList.remove("coldrag"); clear();
+    if(on){ colDragged = Date.now(); if(target && ev.type==="pointerup"){ const o = state.order.filter(x=>x!==k); o.splice(o.indexOf(target.dataset.col)+(after?1:0), 0, k); setOrder(o); render(false); } } };
+  if(touch) timer = setTimeout(start, 350);
+  addEventListener("pointermove", move); addEventListener("pointerup", end); addEventListener("pointercancel", end); tbl.addEventListener("touchmove", stopScroll, {passive:false});
+});
+tbl.addEventListener("click", e=>{ if(e.target.closest(".rz") || Date.now()-colDragged < 300) return; const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const wb=e.target.closest("[data-watch]"); if(wb){ toggleWatch(wb.dataset.watch); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
@@ -1254,21 +1280,20 @@ tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return;
 
 let raf=0;
 document.getElementById("drop").addEventListener("input", e=>{ state.drop=+e.target.value; store.set("bcdf.drop",state.drop); document.getElementById("dropVal").textContent=state.drop+"%"; updateHist(); cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>render()); });
-document.querySelectorAll("#segView button").forEach(b=>b.onclick=()=>{ setCols(b.dataset.v==="full" ? OPT_COLS : HIGH_KEYS); state.viewPicked=true; buildColMenu(); render(); });
 { const btn = document.getElementById("colBtn"), menu = document.getElementById("colMenu");
   const shut = () => { menu.hidden = true; btn.setAttribute("aria-expanded","false"); };
   btn.onclick = e => { e.stopPropagation(); if(menu.hidden){ buildColMenu(); menu.hidden = false; btn.setAttribute("aria-expanded","true"); } else shut(); };
   menu.addEventListener("click", e => { e.stopPropagation(); const b = e.target.closest("[data-cm]"); if(!b) return;
-    setCols(b.dataset.cm==="all" ? OPT_COLS : HIGH_KEYS); state.viewPicked = true; buildColMenu(); render(false); });
+    if(b.dataset.cm==="all") setCols(OPT_COLS); else { setCols(HIGH_KEYS); setOrder(null); } buildColMenu(); render(false); });
   menu.addEventListener("change", e => { const c = e.target.closest("[data-col]"); if(!c) return;
     const k = new Set(state.cols); c.checked ? k.add(c.dataset.col) : k.delete(c.dataset.col);
-    setCols(OPT_COLS.filter(x=>k.has(x))); state.viewPicked = true; render(false); });
+    setCols(OPT_COLS.filter(x=>k.has(x))); render(false); });
   document.addEventListener("click", shut);
   document.addEventListener("keydown", e => { if(e.key==="Escape") shut(); }); }
 document.querySelectorAll("#segAg button").forEach(b=>b.onclick=()=>{ state.ag=b.dataset.ag; render(); });
 document.getElementById("q").addEventListener("input", e=>{state.q=e.target.value;render();});
 document.getElementById("showFail").addEventListener("change", e=>{state.showFail=e.target.checked;render();});
-addEventListener("resize", ()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
+addEventListener("resize", ()=>{ moveInd(document.getElementById("segAg")); });
 
 
 /* ===== Portfolio ===== */
@@ -1450,7 +1475,7 @@ function setTab(tab){
   document.getElementById("portView").hidden = tab!=="portfolio";
   document.getElementById("watchView").hidden = tab!=="watchlist";
   renderPortfolio(); // always: this also keeps the Watchlist and Portfolio tab counts current
-  if(tab==="finder" || tab==="picks") { applyPool(); buildHist(); render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
+  if(tab==="finder" || tab==="picks") { applyPool(); buildHist(); render(false); moveInd(document.getElementById("segAg")); }
   if(history.replaceState) history.replaceState(null,"",tab==="finder"?location.pathname+location.search:"#"+tab);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
@@ -1763,7 +1788,7 @@ addEventListener('scroll',()=>{ if(getComputedStyle(deck).position!=='sticky') r
   bt.onclick = ()=>{ const open = bk.hidden; store.set("bcdf.book", open); set(open); if(open) bk.querySelectorAll(".reveal").forEach(el=>el.classList.add("in")); }; }
 buildTallies(); buildIdxTabs(); buildHist(); render();
 setTab((t=>["finder","picks","watchlist","portfolio"].includes(t)?t:"finder")(location.hash ? location.hash.slice(1) : store.get("bcdf.tab","finder")));
-if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segAg")); });
 
 </script>
 
