@@ -475,6 +475,89 @@
      "src": "https://www.sec.gov/Archives/edgar/data/1524472/000152447224000003/xyl02062024ex991.htm"
     }
    ]
+  },
+  "ROK": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2024",
+     "lo": 12.0,
+     "hi": 13.5,
+     "act": 9.71,
+     "src": "https://www.sec.gov/Archives/edgar/data/1024478/000102447823000122/fy2023ex99.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 8.6,
+     "hi": 9.8,
+     "act": 10.53,
+     "src": "https://www.sec.gov/Archives/edgar/data/1024478/000102447824000105/fy2024ex99.htm"
+    }
+   ]
+  },
+  "JCI": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2023",
+     "lo": 3.2,
+     "hi": 3.6,
+     "act": 3.5,
+     "src": "https://www.sec.gov/Archives/edgar/data/833444/000083344422000038/exh991-johnsonctrlsq4fy22.htm"
+    },
+    {
+     "y": "FY2024",
+     "lo": 3.65,
+     "hi": 3.8,
+     "act": 3.71,
+     "src": "https://www.sec.gov/Archives/edgar/data/833444/000083344423000044/exh991-johnsonctrlsq4fy23.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 3.4,
+     "hi": 3.5,
+     "act": 3.76,
+     "src": "https://www.sec.gov/Archives/edgar/data/833444/000083344424000060/q4exh991xq4fy24earningsrel.htm",
+     "note": "Continuing operations, after the sale of the residential business"
+    },
+    {
+     "y": "FY2026",
+     "lo": 4.55,
+     "hi": 4.55,
+     "act": 5.16,
+     "src": "https://www.sec.gov/Archives/edgar/data/833444/000083344425000084/q4exh991xq4fy25earningsrel.htm"
+    }
+   ]
+  },
+  "LHX": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2023",
+     "lo": 12.0,
+     "hi": 12.5,
+     "act": 12.36,
+     "src": "https://www.sec.gov/Archives/edgar/data/202058/000020205823000005/l3harrisq42022investorle.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 12.4,
+     "hi": 12.8,
+     "act": 13.1,
+     "src": "https://www.sec.gov/Archives/edgar/data/202058/000020205824000010/exhibit991q4cy23earnings.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 10.55,
+     "hi": 10.85,
+     "act": 10.73,
+     "src": "https://www.sec.gov/Archives/edgar/data/202058/000020205825000011/exhibit991q4cy24earnings.htm",
+     "note": "The company changed how it defines adjusted earnings from 2025"
+    }
+   ]
   }
  }
 }
