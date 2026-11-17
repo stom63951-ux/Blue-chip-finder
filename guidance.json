@@ -1,0 +1,206 @@
+{
+ "asof": "2026-11-17",
+ "note": "Each company's own forecast at the start of the year against what it later reported, read from the company's results releases.",
+ "stocks": {
+  "CSCO": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2024",
+     "lo": 4.01,
+     "hi": 4.08,
+     "act": 3.73,
+     "src": "https://www.sec.gov/Archives/edgar/data/858877/000119312523214316/d511414dex991.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 3.52,
+     "hi": 3.58,
+     "act": 3.81,
+     "src": "https://www.sec.gov/Archives/edgar/data/858877/000119312524200636/d878533dex991.htm"
+    },
+    {
+     "y": "FY2026",
+     "lo": 4.0,
+     "hi": 4.06,
+     "act": 4.33
+    }
+   ]
+  },
+  "EME": {
+   "measure": "earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2023",
+     "lo": 8.75,
+     "hi": 9.5,
+     "act": 13.31,
+     "src": "https://www.sec.gov/Archives/edgar/data/105634/000010563423000008/eme-ex991_20221231xq4.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 14.0,
+     "hi": 15.0,
+     "act": 21.52,
+     "src": "https://www.sec.gov/Archives/edgar/data/105634/000010563424000008/eme-ex991_20231231xq4.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 22.25,
+     "hi": 24.0,
+     "act": 25.87,
+     "src": "https://www.sec.gov/Archives/edgar/data/105634/000010563426000027/eme-ex991_20251231xq4.htm",
+     "note": "Adjusted figure; reported was $28.19"
+    }
+   ]
+  },
+  "NFLX": {
+   "measure": "operating margin",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2023",
+     "lo": 18,
+     "hi": 20,
+     "act": 21,
+     "src": "https://www.sec.gov/Archives/edgar/data/1065280/000106528024000029/ex991_q423.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 24,
+     "hi": 24,
+     "act": 27,
+     "src": "https://www.sec.gov/Archives/edgar/data/1065280/000106528024000029/ex991_q423.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 29,
+     "hi": 29,
+     "act": 29.5,
+     "src": "https://www.sec.gov/Archives/edgar/data/1065280/000106528026000033/ex991_q425.htm"
+    }
+   ]
+  },
+  "CMI": {
+   "measure": "revenue change",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2024",
+     "lo": -5,
+     "hi": -2,
+     "act": 0.1,
+     "src": "https://www.sec.gov/Archives/edgar/data/26172/000002617224000003/cmi2023q48-kex99.htm"
+    },
+    {
+     "y": "2025",
+     "lo": -2,
+     "hi": 3,
+     "act": -1,
+     "src": "https://www.sec.gov/Archives/edgar/data/26172/000002617225000003/cmi2024q48-kex99.htm"
+    }
+   ]
+  },
+  "NOKIA.HE": {
+   "measure": "comparable operating profit",
+   "unit": "€B",
+   "years": [
+    {
+     "y": "2024",
+     "lo": 2.3,
+     "hi": 2.9,
+     "act": 2.619,
+     "src": "https://www.sec.gov/Archives/edgar/data/924613/000110465924006543/tm244123d1_6k.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 1.9,
+     "hi": 2.4,
+     "act": 2.024,
+     "src": "https://www.sec.gov/Archives/edgar/data/924613/000110465925007448/tm254922d1_6k.htm"
+    }
+   ]
+  },
+  "NWG.L": {
+   "measure": "return on tangible equity",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 15,
+     "hi": 16,
+     "act": 19.2,
+     "src": "https://www.sec.gov/Archives/edgar/data/844150/000165495425001511/a1343x.htm"
+    }
+   ]
+  },
+  "FRES.L": {
+   "measure": "silver production",
+   "unit": "moz",
+   "years": [
+    {
+     "y": "2024",
+     "lo": 55,
+     "hi": 62,
+     "act": 56.3,
+     "src": "https://www.lse.co.uk/rns/4q23-production-report-txzwb8hw7v861i6.html"
+    },
+    {
+     "y": "2025",
+     "lo": 49,
+     "hi": 56,
+     "act": 48.7,
+     "src": "https://www.fresnilloplc.com/media/zhzp5yyo/290125-4q24-production-report.pdf"
+    }
+   ]
+  },
+  "FANG": {
+   "measure": "oil production",
+   "unit": "thousand barrels a day",
+   "years": [
+    {
+     "y": "2025",
+     "lo": 485,
+     "hi": 498,
+     "act": 497.2,
+     "src": "https://www.sec.gov/Archives/edgar/data/1539838/000153983825000016/diamondbackex991-2x24x25.htm"
+    }
+   ]
+  },
+  "EXPE": {
+   "measure": "gross bookings growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 4,
+     "hi": 6,
+     "act": 8,
+     "src": "https://www.marketbeat.com/earnings/reports/2025-2-6-expedia-group-inc-stock/",
+     "note": "Forecast given on the earnings call"
+    }
+   ]
+  },
+  "BKNG": {
+   "measure": "gross bookings growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 4,
+     "hi": 6,
+     "act": 12,
+     "src": "https://www.marketbeat.com/earnings/reports/2025-2-20-booking-holdings-inc-stock/",
+     "note": "Forecast given in words (\"mid-single digits\"), taken as 4% to 6%"
+    }
+   ]
+  }
+ }
+}
