@@ -60,7 +60,15 @@ def ccy_of(ticker):
 
 def wiki_members(ix):
     """Members of an index from its Wikipedia page: the first table with a ticker column and the right size."""
-    html = requests.get("https://en.wikipedia.org/wiki/" + ix["page"], headers=UA, timeout=60).text
+    html = ""
+    for attempt in range(3):   # Wikipedia sometimes answers "too many requests"
+        r = requests.get("https://en.wikipedia.org/wiki/" + ix["page"], headers=UA, timeout=60)
+        html = r.text
+        if r.status_code == 200:
+            break
+        time.sleep(4 * (attempt + 1))
+    else:
+        raise ValueError(f"Wikipedia answered {r.status_code} for the {ix['name']} page")
     lo, hi = ix["rows"]
     tables = []
     try:  # several index pages mark the member table with this id
@@ -261,6 +269,7 @@ def main():
             failed[ix["id"]] = f"member list failed ({e})"
             print(f"{ix['name']}: {failed[ix['id']]}")
             continue
+        time.sleep(1)
         rows = [m for m in rows if m["t"] not in DUPLICATE_CLASSES]
         ix["tickers"] = [m["t"] for m in rows]
         print(f"{ix['name']} members: {len(rows)}")
@@ -408,6 +417,7 @@ def main():
         "index": next(({k: i.get(k) for k in ("name", "curr", "p3m", "pct3m")} for i in indexes if i["id"] == "sp500" and "pct3m" in i), None),
         "indexes": indexes,
         "fx": rates,
+        "notes": failed,  # why an index was not refreshed today, if any
         "source": "Yahoo Finance via yfinance (prices, fundamentals); Wikipedia (index member lists)",
         "stocks": sorted(out, key=lambda r: r["pct3m"]),
         # latest close for every member, so portfolio holdings keep pricing
