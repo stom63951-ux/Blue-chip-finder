@@ -1607,14 +1607,19 @@ function rangePts(src, range){   // src: {d: daily 6 months, w: weekly 5 years, 
   if(r[1]){ const d = new Date(p[p.length-1][0]); d.setUTCMonth(d.getUTCMonth()-r[1]); p = p.filter(x=>x[0] >= d.getTime()-864e5); }
   return p.length>=2 ? p : null;
 }
-const stockHist = s => ({d:s.hd, w:s.h5, m:s.hm});
+// Weekly and month-end labels can run past the last close, and a share's monthly bars are dated the 1st of the month they close
+const capEnd = b => b && PAYLOAD.asof && b.end > PAYLOAD.asof ? Object.assign({}, b, {end: PAYLOAD.asof}) : b;
+const monthBars = b => { if(!b) return b; const d = new Date(b.start+"T12:00:00Z"); d.setUTCMonth(d.getUTCMonth()+1);
+  return Object.assign({}, b, {start: d.toISOString().slice(0,10), end: PAYLOAD.asof && PAYLOAD.asof > b.end ? PAYLOAD.asof : b.end}); };
+const stockHist = s => ({d:s.hd, w:capEnd(s.h5), m:monthBars(s.hm)});
+const indexHist = ix => ({d:ix.hist.d, w:capEnd(ix.hist.w), m:capEnd(ix.hist.m)});
 function indexFor(s){ return [IDX, ...INDEXES].find(i=>i && i.hist && s.idx.includes(i.id)) || null; }
 function chartSVG(s, range, ix){
   const p = rangePts(stockHist(s), range); if(!p) return null;
   const W = 860, H = 320, L = 8, R = 64, T = 14, B = 28, n = p.length, t0 = p[0][0], t1 = p[n-1][0];
   // the index is rebased to start at the share's first price, so both lines share one scale
   let q = null, qBase = null;
-  if(ix){ const raw = (rangePts(ix.hist, range)||[]).filter(x=>x[0] >= t0-4*864e5 && x[0] <= t1+4*864e5);
+  if(ix){ const raw = (rangePts(indexHist(ix), range)||[]).filter(x=>x[0] >= t0-4*864e5 && x[0] <= t1+4*864e5);
     if(raw.length>=2){ qBase = raw[0][1]; q = raw.map(x=>[Math.min(t1,Math.max(t0,x[0])), x[1]/qBase*p[0][1]]); } }
   const all = p.map(x=>x[1]).concat(q?q.map(x=>x[1]):[]);
   const lo = Math.min(...all), hi = Math.max(...all), pad = (hi-lo)*0.06 || 1, y0 = Math.max(0, lo-pad), y1 = hi+pad;
