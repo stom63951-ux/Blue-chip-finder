@@ -651,6 +651,137 @@
      "src": "https://www.sec.gov/Archives/edgar/data/109198/000115752323000327/a53335348ex99_1.htm"
     }
    ]
+  },
+  "NTAP": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2024",
+     "lo": 5.65,
+     "hi": 5.85,
+     "act": 6.46,
+     "src": "https://www.sec.gov/Archives/edgar/data/1002047/000095017023025324/ntap-ex99_1.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 6.8,
+     "hi": 7.0,
+     "act": 7.25,
+     "src": "https://www.sec.gov/Archives/edgar/data/1002047/000095017024066567/ntap-ex99_1.htm"
+    },
+    {
+     "y": "FY2026",
+     "lo": 7.6,
+     "hi": 7.9,
+     "act": 8.13,
+     "src": "https://www.sec.gov/Archives/edgar/data/1002047/000095017025078936/ntap-ex99_1.htm"
+    }
+   ]
+  },
+  "VST": {
+   "measure": "adjusted EBITDA from ongoing operations",
+   "unit": "$B",
+   "years": [
+    {
+     "y": "2023",
+     "lo": 3.4,
+     "hi": 4.0,
+     "act": 4.14,
+     "src": "https://www.sec.gov/Archives/edgar/data/1692819/000119312523055104/d472125dex991.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 3.7,
+     "hi": 4.1,
+     "act": 5.656,
+     "src": "https://www.sec.gov/Archives/edgar/data/1692819/000119312524049124/d784050dex991.htm",
+     "note": "Forecast excluded the Energy Harbor acquisition, which completed during the year"
+    },
+    {
+     "y": "2025",
+     "lo": 5.5,
+     "hi": 6.1,
+     "act": 5.912,
+     "src": "https://www.sec.gov/Archives/edgar/data/1692819/000119312525037636/d126557dex991.htm"
+    }
+   ]
+  },
+  "GE": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "note": "GE Aerospace has stood alone only since April 2024.",
+   "years": [
+    {
+     "y": "2025",
+     "lo": 5.1,
+     "hi": 5.45,
+     "act": 6.37,
+     "src": "https://www.sec.gov/Archives/edgar/data/40545/000004054525000009/ge4q2024earningsrelease.htm"
+    }
+   ]
+  },
+  "HPE": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "FY2023",
+     "lo": 1.96,
+     "hi": 2.04,
+     "act": 2.15,
+     "src": "https://www.sec.gov/Archives/edgar/data/1645590/000164559022000060/ex-991pressreleasesam.htm"
+    },
+    {
+     "y": "FY2024",
+     "lo": 1.82,
+     "hi": 2.02,
+     "act": 1.99,
+     "src": "https://www.sec.gov/Archives/edgar/data/1645590/000164559023000103/hpesam2023pressrelease.htm"
+    }
+   ]
+  },
+  "ADM": {
+   "measure": "adjusted earnings per share",
+   "unit": "$",
+   "years": [
+    {
+     "y": "2024",
+     "lo": 5.25,
+     "hi": 6.25,
+     "act": 4.74,
+     "src": "https://www.sec.gov/Archives/edgar/data/7084/000000708424000010/adm-ex991_20231231xq4.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 4.0,
+     "hi": 4.75,
+     "act": 3.43,
+     "src": "https://www.sec.gov/Archives/edgar/data/7084/000000708425000005/adm-ex991_20241231xq4.htm"
+    }
+   ]
+  },
+  "CASY": {
+   "measure": "EBITDA growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "FY2025",
+     "lo": 8,
+     "hi": 8,
+     "act": 13.3,
+     "src": "https://www.sec.gov/Archives/edgar/data/726958/000072695824000030/ex991q42024pressrelease.htm",
+     "note": "Forecast was \"at least 8%\""
+    },
+    {
+     "y": "FY2026",
+     "lo": 10,
+     "hi": 12,
+     "act": 23.6,
+     "src": "https://www.sec.gov/Archives/edgar/data/726958/000072695825000032/ex991q42025pressrelease.htm"
+    }
+   ]
   }
  }
 }
