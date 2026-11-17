@@ -36,8 +36,8 @@ OTHER_COVERAGE = 0.8  # an index other than the S&P 500 is skipped for the day b
 # figures are kept) if their member list or prices cannot be read.
 INDEXES = [
     {"id": "sp500", "name": "S&P 500", "yahoo": "^GSPC", "ccy": "USD"},
-    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": "Nasdaq-100", "suffix": "", "rows": (95, 110)},
-    {"id": "dow", "name": "Dow Jones", "yahoo": "^DJI", "ccy": "USD", "page": "Dow_Jones_Industrial_Average", "suffix": "", "rows": (30, 30)},
+    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": "Nasdaq-100", "suffix": "", "rows": (90, 115)},
+    {"id": "dow", "name": "Dow Jones", "yahoo": "^DJI", "ccy": "USD", "page": "Dow_Jones_Industrial_Average", "suffix": "", "rows": (28, 32)},
     {"id": "ftse", "name": "FTSE 100", "yahoo": "^FTSE", "ccy": "GBP", "page": "FTSE_100_Index", "suffix": ".L", "rows": (95, 105)},
     {"id": "sx5e", "name": "Euro Stoxx 50", "yahoo": "^STOXX50E", "ccy": "EUR", "page": "EURO_STOXX_50", "suffix": None, "rows": (48, 52)},
     {"id": "nifty", "name": "Nifty 50", "yahoo": "^NSEI", "ccy": "INR", "page": "NIFTY_50", "suffix": ".NS", "rows": (48, 52)},
@@ -62,9 +62,21 @@ def wiki_members(ix):
     """Members of an index from its Wikipedia page: the first table with a ticker column and the right size."""
     html = requests.get("https://en.wikipedia.org/wiki/" + ix["page"], headers=UA, timeout=60).text
     lo, hi = ix["rows"]
-    for t in pd.read_html(io.StringIO(html)):
-        cols = {(" ".join(map(str, c)) if isinstance(c, tuple) else str(c)).strip().lower(): c for c in t.columns}
-        tcol = next((cols[k] for k in cols if re.sub(r"\[.*?\]", "", k).strip() in TICKER_COLS), None)
+    tables = []
+    try:  # several index pages mark the member table with this id
+        tables += pd.read_html(io.StringIO(html), attrs={"id": "constituents"})
+    except ValueError:
+        pass
+    tables += pd.read_html(io.StringIO(html))
+    clean = lambda k: re.sub(r"\[.*?\]", "", k).strip()
+    seen = []
+    for t in tables:
+        # a table with a two-row heading comes back with tuple column names; use the last part
+        cols = {str(c[-1] if isinstance(c, tuple) else c).strip().lower(): c for c in t.columns}
+        tcol = next((cols[k] for k in cols if clean(k) in TICKER_COLS), None) \
+            or next((cols[k] for k in cols if "ticker" in k or "symbol" in k), None)
+        if len(t) >= 20:
+            seen.append(f"{len(t)} rows {list(cols)[:6]}")
         if tcol is None or not lo <= len(t) <= hi:
             continue
         ncol = next((cols[k] for k in cols if re.sub(r"\[.*?\]", "", k).strip() in NAME_COLS), None)
@@ -83,7 +95,7 @@ def wiki_members(ix):
                          "sector": "", "industry": "", "hq": "", "founded": ""})
         if rows:
             return rows
-    raise ValueError(f"no member table of {lo} to {hi} rows found on the {ix['name']} page")
+    raise ValueError(f"no member table of {lo} to {hi} rows found on the {ix['name']} page; tables seen: {seen[:12]}")
 
 
 def download_closes(tickers):
@@ -214,6 +226,10 @@ def stats(info, curr, ticker="", old_fx=None):
         div = round(div_rate / curr * 100, 2) if div_rate and curr else 0
     else:
         dy = g("trailingAnnualDividendYield")
+        if dy and pence:
+            dy *= 100   # Yahoo divides a dividend in pounds by a price in pence
+        if not dy and div_rate and curr and not pence:
+            dy = div_rate / curr
         div = round(dy * 100, 2) if dy and 0 < dy < 0.5 else 0
     return {
         "mcap": bn(g("marketCap"), fx_price), "pe": pe, "fpe": fpe,
