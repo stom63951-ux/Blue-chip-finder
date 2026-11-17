@@ -979,7 +979,7 @@ function guideOf(s){
   return s.gd = {measure:g.measure, unit:g.unit, pts:!!g.pts, years:ys, n:ys.length, met:ys.filter(y=>y.res!=="below").length, gap:median(ys.map(y=>y.gap))};
 }
 const gdGap = d => fmt(d.gap, d.gap<10?1:0) + (d.pts ? " pts" : "%");
-const gdVal = (d,v) => d.unit==="$" ? "$"+fmt(v,2) : d.unit==="%" ? fmt(v,1)+"%" : d.unit==="€B" ? "€"+fmt(v,2)+"B" : fmt(v,1)+" "+d.unit;
+const gdVal = (d,v) => d.unit==="$" ? "$"+fmt(v,2) : d.unit==="%" ? fmt(v,1)+"%" : d.unit==="€B" ? "€"+fmt(v,2)+"B" : d.unit==="$B" ? "$"+fmt(v,2)+"B" : fmt(v,1)+" "+d.unit;
 const gdNote = d => d.none ? d.none : `The company's own forecast of ${d.measure} against what it reported. Met or beat its forecast in ${d.met} of ${d.n} year${d.n===1?"":"s"}; typical gap from the middle of its range ${gdGap(d)}. ` + d.years.map(y=>`${y.y}: forecast ${y.lo===y.hi?gdVal(d,y.lo):gdVal(d,y.lo)+" to "+gdVal(d,y.hi)}, reported ${gdVal(d,y.act)} (${y.res}).`).join(" ");
 const faScore = s => 100 - Math.min(100, s.fa.med);
 const faNote = s => `Reported earnings per share came within ${fmt(s.fa.med,1)}% of the forecast in a typical quarter, over the last ${s.fa.n} quarters (about ${Math.round(s.fa.n/4)} years). Met or beat the forecast ${s.fa.hit} times out of ${s.fa.n}.`;
