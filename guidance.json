@@ -812,6 +812,82 @@
   },
   "SW": {
    "none": "Formed in 2024; its first full-year forecast was for 2026, so there is nothing to score yet"
+  },
+  "TWLO": {
+   "measure": "adjusted operating income",
+   "unit": "$B",
+   "years": [
+    {
+     "y": "2025",
+     "lo": 0.825,
+     "hi": 0.85,
+     "act": 0.924,
+     "src": "https://www.sec.gov/Archives/edgar/data/1447669/000144766925000067/twloq125ex991.htm"
+    }
+   ]
+  },
+  "RR.L": {
+   "measure": "underlying operating profit",
+   "unit": "£B",
+   "years": [
+    {
+     "y": "2024",
+     "lo": 1.7,
+     "hi": 2.0,
+     "act": 2.464,
+     "src": "https://www.rolls-royce.com/media/press-releases/2024/22-02-2024-rr-holdings-plc-2023-full-year-results.aspx"
+    },
+    {
+     "y": "2025",
+     "lo": 2.7,
+     "hi": 2.9,
+     "act": 3.462,
+     "src": "https://www.rolls-royce.com/media/press-releases/2025/27-02-2025-rr-holdings-plc-2024-full-year-results.aspx"
+    }
+   ]
+  },
+  "BA.L": {
+   "measure": "underlying earnings per share growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 8,
+     "hi": 10,
+     "act": 12,
+     "src": "https://www.baesystems.com/en/article/2024-full-year-results",
+     "note": "Growth at constant exchange rates"
+    }
+   ]
+  },
+  "RHM.DE": {
+   "measure": "sales growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 25,
+     "hi": 30,
+     "act": 29,
+     "src": "https://www.rheinmetall.com/en/media/news-watch/news/2025/03/2025-03-12-rheinmetall-financial-figures-fiscal-year-2024"
+    }
+   ]
+  },
+  "SU.PA": {
+   "measure": "adjusted EBITA organic growth",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": "2025",
+     "lo": 10,
+     "hi": 15,
+     "act": 12.3,
+     "src": "https://www.emr-online.com/?p=12553"
+    }
+   ]
   }
  }
 }
