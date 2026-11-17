@@ -917,7 +917,7 @@ function enrich(s){
 }
 const agentPill = s => s && s.agent ? `<span class="pill ${s.agent}">${s.agent==="yes"?"Yes":"No"}</span>` : `<span class="pill na">Pending</span>`;
 DATA.forEach(enrich);
-const state0idx = (v=>v==="all"||INDEXES.some(i=>i.id===v)?v:INDEXES[0].id)(store.get("bcdf.idx", INDEXES[0].id));
+const state0idx = (INDEXES.find(i=>/s&p 500/i.test(i.name)) || INDEXES[0]).id; // always open on the S&P 500
 let IDX = null, POOL = DATA, BLUE = DATA.filter(s=>s.blue);
 
 function ed(t){ const s=DATA.find(x=>x.t===t); const e=edits[t]||{}; return {
