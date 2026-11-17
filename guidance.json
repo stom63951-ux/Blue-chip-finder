@@ -452,6 +452,13 @@
      "hi": 16.5,
      "act": 16.57,
      "src": "https://www.sec.gov/Archives/edgar/data/48898/000162828024002494/exhibit991_01302024.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 17.35,
+     "hi": 17.85,
+     "act": 18.21,
+     "src": "https://www.sec.gov/Archives/edgar/data/48898/000162828026004800/exhibit991_02032026.htm"
     }
    ]
   },
@@ -473,6 +480,13 @@
      "hi": 4.2,
      "act": 4.27,
      "src": "https://www.sec.gov/Archives/edgar/data/1524472/000152447224000003/xyl02062024ex991.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 4.5,
+     "hi": 4.7,
+     "act": 5.08,
+     "src": "https://www.sec.gov/Archives/edgar/data/1524472/000152447226000008/xyl02102026ex991.htm"
     }
    ]
   },
@@ -571,6 +585,13 @@
      "src": "https://www.sec.gov/Archives/edgar/data/1466258/000146625823000005/exhibit991-q42022earningsr.htm"
     },
     {
+     "y": "2024",
+     "lo": 10.0,
+     "hi": 10.3,
+     "act": 11.22,
+     "src": "https://www.sec.gov/Archives/edgar/data/1466258/000146625824000011/exhibit991-q42023earningsr.htm"
+    },
+    {
      "y": "2025",
      "lo": 12.7,
      "hi": 12.9,
@@ -636,6 +657,27 @@
      "hi": 1.79,
      "act": 1.71,
      "src": "https://www.sec.gov/Archives/edgar/data/885725/000088572522000002/q42021earningsrelease.htm"
+    },
+    {
+     "y": "2023",
+     "lo": 1.86,
+     "hi": 1.93,
+     "act": 2.05,
+     "src": "https://www.sec.gov/Archives/edgar/data/885725/000088572524000011/q42023earningsrelease.htm"
+    },
+    {
+     "y": "2024",
+     "lo": 2.23,
+     "hi": 2.27,
+     "act": 2.51,
+     "src": "https://www.sec.gov/Archives/edgar/data/885725/000088572525000007/q42024earningsrelease.htm"
+    },
+    {
+     "y": "2025",
+     "lo": 2.8,
+     "hi": 2.87,
+     "act": 3.06,
+     "src": "https://www.sec.gov/Archives/edgar/data/885725/000088572526000006/q42025earningsrelease.htm"
     }
    ]
   },
@@ -649,6 +691,20 @@
      "hi": 3.51,
      "act": 3.86,
      "src": "https://www.sec.gov/Archives/edgar/data/109198/000115752323000327/a53335348ex99_1.htm"
+    },
+    {
+     "y": "FY2025",
+     "lo": 3.94,
+     "hi": 4.02,
+     "act": 4.26,
+     "src": "https://www.sec.gov/Archives/edgar/data/109198/000010919824000010/tjxq4fy24earningspressrele.htm"
+    },
+    {
+     "y": "FY2026",
+     "lo": 4.34,
+     "hi": 4.43,
+     "act": 4.73,
+     "src": "https://www.sec.gov/Archives/edgar/data/109198/000010919826000004/tjxq4fy26earningspressrele.htm"
     }
    ]
   },
