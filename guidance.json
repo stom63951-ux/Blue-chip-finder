@@ -782,6 +782,36 @@
      "src": "https://www.sec.gov/Archives/edgar/data/726958/000072695825000032/ex991q42025pressrelease.htm"
     }
    ]
+  },
+  "P": {
+   "measure": "revenue",
+   "unit": "$B",
+   "note": "Earlier years' forecasts were given in words.",
+   "years": [
+    {
+     "y": "FY2026",
+     "lo": 3.515,
+     "hi": 3.515,
+     "act": 3.663,
+     "src": "https://www.sec.gov/Archives/edgar/data/1474432/000162828025008136/pstg-ex991q4fy2025.htm"
+    }
+   ]
+  },
+  "FCX": {
+   "measure": "copper sales",
+   "unit": "billion lb",
+   "years": [
+    {
+     "y": "2025",
+     "lo": 4.0,
+     "hi": 4.0,
+     "act": 3.6,
+     "src": "https://www.sec.gov/Archives/edgar/data/831259/000083125925000002/a4q2024exhibit991.htm"
+    }
+   ]
+  },
+  "SW": {
+   "none": "Formed in 2024; its first full-year forecast was for 2026, so there is nothing to score yet"
   }
  }
 }
