@@ -221,6 +221,77 @@ def weekly_5y(series, end):
             "c": [round(float(v), 2) for v in w.values]}
 
 
+def series_block(s, digits=2):
+    return {"start": s.index[0].strftime("%Y-%m-%d"), "end": s.index[-1].strftime("%Y-%m-%d"),
+            "c": [round(float(v), digits) for v in s.values]}
+
+
+def daily_6m(series, end):
+    """Daily closes for the last six months, for the 1M, 3M and 6M graph ranges."""
+    d = series[series.index > end - pd.DateOffset(months=6)].dropna()
+    return series_block(d) if len(d) >= 5 else None
+
+
+def monthly_max(tickers):
+    """Month-end closes over each share's whole listed life, for the Max graph range."""
+    out = {}
+    for i in range(0, len(tickers), 100):
+        batch = tickers[i:i + 100]
+        try:
+            px = yf.download(batch, period="max", interval="1mo", auto_adjust=False,
+                             group_by="ticker", threads=True, progress=False)
+        except Exception as e:
+            print(f"Monthly history batch failed ({e})")
+            continue
+        for t in batch:
+            try:
+                m = (px[t]["Close"] if len(batch) > 1 or isinstance(px.columns, pd.MultiIndex) else px["Close"]).dropna()
+            except KeyError:
+                continue
+            if len(m) >= 12:
+                out[t] = series_block(m * 0.01 if t.endswith(".L") else m)
+        time.sleep(2)
+    return out
+
+
+def index_history(symbol):
+    """An index's own daily, weekly and monthly closes, so the graph can overlay it on a share."""
+    c = yf.download(symbol, period="max", interval="1d", auto_adjust=False, progress=False)["Close"]
+    if isinstance(c, pd.DataFrame):
+        c = c.iloc[:, 0]
+    c = c.dropna()
+    end = c.index[-1]
+    w = c[c.index > end - pd.DateOffset(years=5)].resample("W-FRI").last().dropna()
+    m = c.resample("ME").last().dropna()
+    return c, {"d": daily_6m(c, end), "w": series_block(w), "m": series_block(m, 1)}
+
+
+def forecast_accuracy(ticker):
+    """How close reported earnings per share came to the forecast, over up to 20 quarters.
+
+    Yahoo has no record of companies' own guidance, so this compares each quarter's reported
+    EPS with the analyst forecast that stood before the results."""
+    df = yf.Ticker(ticker).get_earnings_dates(limit=28)
+    if df is None or not len(df):
+        return None
+    est = next((c for c in df.columns if "estimate" in c.lower()), None)
+    act = next((c for c in df.columns if "reported" in c.lower() or "actual" in c.lower()), None)
+    if not est or not act:
+        return None
+    rows = df[[est, act]].dropna().head(20)
+    miss, hit = [], 0
+    for e, a in rows.itertuples(index=False):
+        e, a = num(e), num(a)
+        if e is None or a is None or abs(e) < 0.01:
+            continue
+        miss.append(abs(a - e) / abs(e) * 100)
+        hit += a >= e
+    if len(miss) < 4:
+        return None
+    miss.sort()
+    return {"n": len(miss), "hit": int(hit), "med": round(miss[len(miss) // 2], 1)}
+
+
 def stats(info, curr, ticker="", old_fx=None):
     """Company figures. Money amounts are converted to US dollars; curr is the price in the share's own currency."""
     B = 1e9
@@ -339,10 +410,7 @@ def main():
         entry = {"id": ix["id"], "name": ix["name"], "ccy": ix["ccy"], "universe": ix["universe"],
                  "asof": max(prices[t]["asof"] for t in ix["tickers"] if t in prices).strftime("%Y-%m-%d")}
         try:
-            c = yf.download(ix["yahoo"], period="6mo", interval="1d", auto_adjust=False, progress=False)["Close"]
-            if isinstance(c, pd.DataFrame):
-                c = c.iloc[:, 0]
-            c = c.dropna()
+            c, entry["hist"] = index_history(ix["yahoo"])
             base = close_on_or_before(c, c.index[-1] - pd.DateOffset(months=3))
             if len(c) and base:
                 entry.update(curr=round(float(c.iloc[-1]), 2), p3m=round(base, 2),
@@ -407,6 +475,38 @@ def main():
         }
         out.append(rec)
         print(f"  {t:12} {pct3m:7.1f}%  {'CHINA' if china_reason else ''}")
+
+    # Graph data and forecast accuracy for the shares that made the list
+    today = dt.date.today()
+    monthly = monthly_max([r["t"] for r in out])
+    fa_new = 0
+    for r in out:
+        p = prices.get(r["t"])
+        if p:
+            r["hd"] = daily_6m(p["series"], p["asof"])
+        if r["t"] in monthly:
+            r["hm"] = monthly[r["t"]]
+        was = prev.get(r["t"]) or {}
+        fresh = False
+        try:
+            fresh = was.get("fa") and (today - dt.date.fromisoformat(was.get("faAsof", "2000-01-01"))).days < 7
+        except ValueError:
+            pass
+        if fresh:   # quarterly figures: once a week is plenty, and it spares Yahoo
+            r["fa"], r["faAsof"] = was["fa"], was["faAsof"]
+            continue
+        try:
+            fa = forecast_accuracy(r["t"])
+            time.sleep(0.4)
+        except Exception as e:
+            print(f"  {r['t']}: forecast history failed ({str(e)[:80]})")
+            fa = None
+        if fa:
+            r["fa"], r["faAsof"] = fa, today.isoformat()
+            fa_new += 1
+        elif was.get("fa"):
+            r["fa"], r["faAsof"] = was["fa"], was.get("faAsof")
+    print(f"Forecast accuracy: {sum(1 for r in out if r.get('fa'))} of {len(out)} shares ({fa_new} fetched today)")
 
     if len(out) >= 8 and misses > MAX_INFO_MISSES * len(out):
         sys.exit(f"Yahoo returned no fundamentals for {misses} of {len(out)} shares; keeping the existing data.json")
