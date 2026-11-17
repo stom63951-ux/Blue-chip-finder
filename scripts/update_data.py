@@ -36,8 +36,8 @@ OTHER_COVERAGE = 0.8  # an index other than the S&P 500 is skipped for the day b
 # figures are kept) if their member list or prices cannot be read.
 INDEXES = [
     {"id": "sp500", "name": "S&P 500", "yahoo": "^GSPC", "ccy": "USD"},
-    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": "Nasdaq-100", "suffix": "", "rows": (90, 115)},
-    {"id": "dow", "name": "Dow Jones", "yahoo": "^DJI", "ccy": "USD", "page": "Dow_Jones_Industrial_Average", "suffix": "", "rows": (28, 32)},
+    {"id": "ndx", "name": "Nasdaq 100", "yahoo": "^NDX", "ccy": "USD", "page": ["Nasdaq-100", "List_of_Nasdaq-100_companies", "Nasdaq-100_Index"], "suffix": "", "rows": (90, 115)},
+    {"id": "dow", "name": "Dow Jones", "yahoo": "^DJI", "ccy": "USD", "page": ["Dow_Jones_Industrial_Average", "List_of_Dow_Jones_Industrial_Average_companies", "Components_of_the_Dow_Jones_Industrial_Average"], "suffix": "", "rows": (28, 32)},
     {"id": "ftse", "name": "FTSE 100", "yahoo": "^FTSE", "ccy": "GBP", "page": "FTSE_100_Index", "suffix": ".L", "rows": (95, 105)},
     {"id": "sx5e", "name": "Euro Stoxx 50", "yahoo": "^STOXX50E", "ccy": "EUR", "page": "EURO_STOXX_50", "suffix": None, "rows": (48, 52)},
     {"id": "nifty", "name": "Nifty 50", "yahoo": "^NSEI", "ccy": "INR", "page": "NIFTY_50", "suffix": ".NS", "rows": (48, 52)},
@@ -59,16 +59,29 @@ def ccy_of(ticker):
 
 
 def wiki_members(ix):
-    """Members of an index from its Wikipedia page: the first table with a ticker column and the right size."""
+    """Members of an index from Wikipedia, trying each page it might be listed on."""
+    pages = ix["page"] if isinstance(ix["page"], list) else [ix["page"]]
+    errors = []
+    for page in pages:
+        try:
+            return wiki_table(ix, page)
+        except Exception as e:
+            errors.append(f"{page}: {e}")
+            time.sleep(1)
+    raise ValueError(" | ".join(errors))
+
+
+def wiki_table(ix, page):
+    """The first table on a Wikipedia page with a ticker column and the right number of rows."""
     html = ""
     for attempt in range(3):   # Wikipedia sometimes answers "too many requests"
-        r = requests.get("https://en.wikipedia.org/wiki/" + ix["page"], headers=UA, timeout=60)
+        r = requests.get("https://en.wikipedia.org/wiki/" + page, headers=UA, timeout=60)
         html = r.text
         if r.status_code == 200:
             break
         time.sleep(4 * (attempt + 1))
     else:
-        raise ValueError(f"Wikipedia answered {r.status_code} for the {ix['name']} page")
+        raise ValueError(f"Wikipedia answered {r.status_code}")
     lo, hi = ix["rows"]
     tables = []
     try:  # several index pages mark the member table with this id
@@ -103,7 +116,7 @@ def wiki_members(ix):
                          "sector": "", "industry": "", "hq": "", "founded": ""})
         if rows:
             return rows
-    raise ValueError(f"no member table of {lo} to {hi} rows found on the {ix['name']} page; tables seen: {seen[:12]}")
+    raise ValueError(f"no member table of {lo} to {hi} rows; tables seen: {seen[:8]}")
 
 
 def download_closes(tickers):
