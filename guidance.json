@@ -888,6 +888,147 @@
      "src": "https://www.emr-online.com/?p=12553"
     }
    ]
+  },
+  "SAF.PA": {
+   "measure": "Recurring operating income",
+   "unit": "€B",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 4.8,
+     "hi": 4.9,
+     "act": 5.197,
+     "src": "https://www.safran-group.com/download/press_release/file/2247586",
+     "note": "Forecast of 14 Feb 2025 excluded the Collins actuation purchase."
+    }
+   ]
+  },
+  "LLOY.L": {
+   "measure": "Return on tangible equity",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 13.5,
+     "hi": 13.5,
+     "act": 12.9,
+     "src": "https://www.boerse.de/nachrichten/EQS-News-2025-results/38112941",
+     "note": "Forecast was about 13.5%. Result was 14.8% before the motor finance charge."
+    }
+   ]
+  },
+  "BARC.L": {
+   "measure": "Return on tangible equity",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 11.0,
+     "hi": 11.0,
+     "act": 11.3,
+     "src": "https://www.rte.ie/news/business/2025/0213/1496476-barclays-annual-results",
+     "note": "Forecast was about 11%."
+    }
+   ]
+  },
+  "SGO.PA": {
+   "measure": "Operating margin",
+   "unit": "%",
+   "pts": true,
+   "years": [
+    {
+     "y": 2025,
+     "lo": 11.0,
+     "hi": 11.0,
+     "act": 11.4,
+     "src": "https://www.glassonline.com/saint-gobain-full-year-2024-results/",
+     "note": "Forecast was more than 11.0%."
+    }
+   ]
+  },
+  "BNP.PA": {
+   "measure": "Net income",
+   "unit": "€B",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 12.2,
+     "hi": 12.2,
+     "act": 12.225,
+     "src": "https://invest.bnpparibas/document/4q25-pr",
+     "note": "Objective was more than 12.2 billion euros."
+    }
+   ]
+  },
+  "SAN.MC": {
+   "measure": "Revenue",
+   "unit": "€B",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 62.0,
+     "hi": 62.0,
+     "act": 62.39,
+     "src": "https://www.santander.com/en/press-room/press-releases/2025/02/2024-santander-bank-earnings",
+     "note": "Target was about 62 billion euros. Return on tangible equity came in at 16.3% against about 16.5%."
+    }
+   ]
+  },
+  "SCHW": {
+   "measure": "Revenue growth",
+   "unit": "%",
+   "pts": true,
+   "note": "Schwab calls this a financial scenario, not guidance.",
+   "years": [
+    {
+     "y": 2025,
+     "lo": 13.0,
+     "hi": 15.0,
+     "act": 22.0,
+     "src": "https://content.schwab.com/web/retail/public/about-schwab/schwab_winter_business_update_012125.pdf"
+    }
+   ]
+  },
+  "FIX": {
+   "none": "Gives no numeric forecast, only comments on demand and backlog."
+  },
+  "CAT": {
+   "none": "Describes the year ahead in words against long-term target ranges, with no numeric annual forecast."
+  },
+  "ODFL": {
+   "none": "Gives an outlook for the next quarter only, not for the year."
+  },
+  "JBHT": {
+   "none": "Gives no numeric annual forecast."
+  },
+  "TPL": {
+   "none": "Gives no numeric forecast."
+  },
+  "STLD": {
+   "none": "Gives no numeric annual forecast."
+  },
+  "GOOGL": {
+   "none": "Gives no revenue or earnings forecast."
+  },
+  "IBKR": {
+   "none": "Gives no revenue or earnings forecast."
+  },
+  "BX": {
+   "none": "Gives no numeric annual forecast."
+  },
+  "KKR": {
+   "none": "Sets multi-year targets only, not a forecast for each year."
+  },
+  "GS": {
+   "none": "Sets medium-term return targets only, not a forecast for each year."
+  },
+  "MS": {
+   "none": "Sets long-term firm goals only, not a forecast for each year."
+  },
+  "CIEN": {
+   "none": "Gave its forecast only on the results call until fiscal 2026. The first written one (revenue of $5.7 to 6.1 billion) can be scored when that year ends."
   }
  }
 }
