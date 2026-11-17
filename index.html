@@ -604,6 +604,41 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
   .hero{margin-bottom:4px;padding-bottom:6px}
   .deck-foot{gap:4px}
 }
+/* ---- graph window: ranges, index overlay ---- */
+:root{--idxline:#8296b4}
+:root[data-theme="dark"]{--idxline:#93a7c6}
+.c5 .cln{fill:none;stroke:var(--chip);stroke-width:1.9;stroke-linejoin:round}
+.c5 .cix{fill:none;stroke:var(--idxline);stroke-width:1.6;stroke-linejoin:round}
+.c5 .ca{fill:var(--chip);opacity:.07}
+.c5 .cdot{fill:var(--chip)}
+.cctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-bottom:10px}
+.rng{display:flex;gap:3px}
+.rng button{font:inherit;font-size:.78rem;font-weight:500;color:var(--muted);background:var(--surface);border:1px solid var(--edge);border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .2s,background-color .2s,border-color .2s}
+.rng button:hover:not(:disabled){color:var(--ink);background:var(--hover)}
+.rng button[aria-pressed="true"]{color:var(--chip);background:var(--chip-soft);border-color:var(--chip-edge);font-weight:600}
+.rng button:disabled{opacity:.45;cursor:default}
+.cmp{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;color:var(--ink);cursor:pointer}
+.cmp.off{color:var(--muted);cursor:default}
+.cmp input{width:15px;height:15px;accent-color:var(--chip);margin:0}
+.clegend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.76rem;color:var(--muted);margin-bottom:4px}
+.clegend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--chip)}
+.clegend i.k2{background:var(--idxline)}
+.ctip{flex-wrap:wrap;max-width:92%}
+/* ---- resizable columns ---- */
+:where(#tbl thead tr:last-child th){position:relative}
+#tbl .rz{position:absolute;top:0;bottom:0;right:-4px;width:9px;cursor:col-resize;z-index:3;touch-action:none}
+#tbl .rz::after{content:"";position:absolute;top:22%;bottom:22%;left:4px;width:1px;background:transparent;transition:background-color .15s}
+#tbl th:hover .rz::after{background:var(--edge)}
+#tbl .rz:hover::after,#tbl .rz.on::after{background:var(--chip);width:2px;left:3px}
+body.resizing{cursor:col-resize;user-select:none;-webkit-user-select:none}
+/* ---- collapsible rules section ---- */
+.booktoggle{display:flex;align-items:center;gap:8px;width:100%;margin-top:22px;padding:7px 12px;font:inherit;font-size:.86rem;font-weight:600;color:var(--ink);background:var(--bg-2);border:1px solid var(--edge);border-radius:8px;cursor:pointer;text-align:left}
+.booktoggle:hover{background:var(--hover)}
+.booktoggle .bt-c{color:var(--muted);width:1em}
+.booktoggle .bt-a{margin-left:auto;font-weight:500;font-size:.78rem;color:var(--chip)}
+.book{margin-top:10px}
+.book[hidden]{display:none}
+.switch[hidden]{display:none}
 /* ---- index tabs ---- */
 .idxtabs{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;margin:0 0 8px;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .idxtabs::-webkit-scrollbar{display:none}
@@ -635,6 +670,7 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
 
   <nav class="tabs" role="tablist" aria-label="Sections">
     <button role="tab" id="tabFinder" data-tab="finder" aria-selected="true">Finder</button>
+    <button role="tab" id="tabPicks" data-tab="picks" aria-selected="false">AI picks <span class="cnt" id="picksCnt">0</span></button>
     <button role="tab" id="tabWatch" data-tab="watchlist" aria-selected="false">Watchlist <span class="cnt" id="watchCnt">0</span></button>
     <button role="tab" id="tabPort" data-tab="portfolio" aria-selected="false">Portfolio <span class="cnt" id="portCnt">0</span></button>
   </nav>
@@ -671,7 +707,7 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
   </div>
 
   <div class="register rise" style="animation-delay:.4s"><div class="scroller"><table id="tbl"></table></div></div>
-  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a column heading to sort. Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press the star to add a share to your Watchlist. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
+  <p class="muted" style="font-size:.8rem;margin:10px 4px 0">Click a column heading to sort. Drag the right edge of a heading to resize that column, and double-click the edge to reset it. Click a row to open the agent's reasoning, the profit and loss summary and links. Target buy, number of shares, target divest, approval and comment are editable and saved in this browser only. Press the star to add a share to your Watchlist. Press Buy to record a purchase, or set Manual approval to Yes, to add a share to your Portfolio.</p>
   </div>
 
   <section id="watchView" hidden>
@@ -687,7 +723,8 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
     <p class="muted" style="font-size:.8rem;margin:10px 4px 0">A share joins the portfolio when you press <b>Buy</b> or set its <b>Manual approval</b> to Yes in the Finder. Invested includes fees. Prices update every weekday, even after a share recovers and leaves the Finder list. Holdings are saved in this browser only, so save a backup file now and then. Restoring a backup on another device, such as your phone, copies your portfolio across.</p>
   </section>
 
-  <div class="book">
+  <button type="button" class="booktoggle" id="bookToggle" aria-expanded="true" aria-controls="book"><span class="bt-c" aria-hidden="true">▾</span>Rules and notes on the data<span class="bt-a">Hide</span></button>
+  <div class="book" id="book">
     <section class="reveal">
       <h2>What counts as blue-chip</h2>
       <p>A share must pass all six tests. Failures are hidden unless you switch them on above.</p>
@@ -724,6 +761,8 @@ td input[type=number]::-webkit-outer-spin-button,td input[type=number]::-webkit-
         <li><b>1M, 3M, 1Y, 2Y</b> are the closing prices on or just before those dates; <b>% 3M</b> compares today's close with the 3M price.</li>
         <li>Prices and fundamentals come from Yahoo Finance. Index membership comes from Wikipedia's list for each index.</li>
         <li>The China-exposure list is kept by hand from company annual reports and is approximate. Ask for names to be added or removed.</li>
+        <li><b>Forecast accuracy</b> (Full view) shows how close reported earnings per share came to the forecast over up to 20 quarters, about 5 years: 100% less the typical miss. Yahoo keeps no record of companies' own guidance, so the forecast used is the analyst forecast that stood before each result. Hover over a figure for the detail.</li>
+        <li><b>AI picks</b> lists up to ten blue-chips from every index that the agent says Yes to, ranked by confidence score and then by how far the analyst target is above the price. It is rule-based and reads numbers only.</li>
         <li><b>Company status</b>: Growing when forward P/E is at least 10% under trailing, Slowing when 10% over, otherwise Level.</li>
         <li><b>Target buy</b> starts 5% under the current price; <b>Target divest</b> starts at the analyst average target.</li>
         <li><b>Coverage:</b> few blue-chips fall hard, so slider values past the deepest fall show nothing.</li>
@@ -874,7 +913,7 @@ const SORTS = {
   ticker:s=>s.t, name:s=>s.name.toLowerCase(), agent:s=>s.score==null?null:s.score+(s.agent==="yes"?100:0),
   pct:s=>s.pct3m, curr:s=>s.curr, p1m:s=>s.p1m, p3m:s=>s.p3m, p1y:s=>s.p1y, p2y:s=>s.p2y,
   pe:s=>s.stats.pe, sector:s=>s.sector, status:s=>s.status, lev:s=>s.stats.debitda,
-  buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest),
+  buy:s=>num(ed(s.t).buy), divest:s=>num(ed(s.t).divest), fa:s=>s.fa?100-Math.min(100,s.fa.med):null,
 };
 function sortRows(rows){
   const f = SORTS[state.sort.k] || SORTS.pct, d = state.sort.dir;
@@ -885,32 +924,39 @@ function sortRows(rows){
 
 const COLS_FULL = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
+  ["g","@idx",[["pct","% 3M","r"],["agent","Confidence"]]],
   ["g","@ccy",[["curr","Curr","r"],["p1m","1M","r"],["p3m","3M","r"],["p1y","1Y","r"],["p2y","2Y","r"]]],
-  ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"]]],
+  ["g","Company",[["pe","P/E","r"],["sector","Sector"],["status","Status"],["lev","Debt / EBITDA","r"],["fa","Forecast accuracy","r"]]],
   ["g","Position plan",[["buy","Target buy","r"],["shares","No. shares","r"],["total","Total $ invested","r"],["divest","Target divest","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"],["comment","Comment"]]],
   ["g","Links",[["web","Links"]]],
 ];
 const COLS_HIGH = [
   ["g0","",[["caret",""],["ticker","Ticker"],["name","Name"]]],
-  ["g","@idx",[["pct","% 3M","r"],["agent","Agent"]]],
+  ["g","@idx",[["pct","% 3M","r"],["agent","Confidence"]]],
   ["g","@ccy",[["curr","Curr","r"],["pe","P/E","r"],["buy","Target buy","r"]]],
   ["g","Decision",[["approve","Manual approval"],["trade","Buy"],["watch","Watch"]]],
   ["g","Links",[["web","Links"]]],
 ];
 const maxDrop = Math.max(1,...DATA.map(s=>-s.pct3m));
 
-function pickIdx(id){
-  state.idx = id; store.set("bcdf.idx", id);
-  IDX = INDEXES.find(i=>i.id===id) || null;   // null on the All tab
-  POOL = IDX ? DATA.filter(s=>s.idx.includes(id)) : DATA;
+const MAX_PICKS = 10;
+function picks(){   // the agent's best ideas across every index: Yes, highest score, then most room to the analyst target
+  const up = s => s.stats.pt ? s.stats.pt/s.curr : 0;
+  return DATA.filter(s=>s.blue && s.agent==="yes" && !isBought(s.t)).sort((a,b)=> b.score-a.score || up(b)-up(a)).slice(0, MAX_PICKS);
+}
+function applyPool(){
+  if(state.tab==="picks"){ IDX = null; POOL = picks(); BLUE = POOL; return; }
+  IDX = INDEXES.find(i=>i.id===state.idx) || null;   // null on the All tab
+  POOL = IDX ? DATA.filter(s=>s.idx.includes(state.idx)) : DATA;
   BLUE = POOL.filter(s=>s.blue);
 }
+function pickIdx(id){ state.idx = id; store.set("bcdf.idx", id); applyPool(); }
 pickIdx(state.idx);
 function buildIdxTabs(){
   const nav = document.getElementById("idxTabs");
-  if(INDEXES.length<2){ nav.hidden = true; return; }
+  document.getElementById("picksCnt").textContent = picks().length;
+  if(INDEXES.length<2 || state.tab==="picks"){ nav.hidden = true; return; }
   const n = id => DATA.filter(s=>s.blue && !isBought(s.t) && (id==="all" || s.idx.includes(id))).length;
   nav.hidden = false;
   nav.innerHTML = INDEXES.map(i=>`<button type="button" data-idx="${i.id}" aria-pressed="${state.idx===i.id}" title="${esc(i.name)}: ${n(i.id)} blue-chips down ${PAYLOAD.minDrop||10}% or more${i.stale?". Not refreshed in the latest update, so these are the previous figures":""}">${esc(i.name)}<span class="cnt">${n(i.id)}</span>${i.stale?`<span class="old">old</span>`:""}</button>`).join("")
@@ -919,6 +965,8 @@ function buildIdxTabs(){
 document.getElementById("idxTabs").addEventListener("click", e=>{ const b = e.target.closest("[data-idx]"); if(!b || b.dataset.idx===state.idx) return;
   pickIdx(b.dataset.idx); state.open.clear(); buildIdxTabs(); buildHist(); render(); });
 
+const faScore = s => 100 - Math.min(100, s.fa.med);
+const faNote = s => `Reported earnings per share came within ${fmt(s.fa.med,1)}% of the forecast in a typical quarter, over the last ${s.fa.n} quarters (about ${Math.round(s.fa.n/4)} years). Met or beat the forecast ${s.fa.hit} times out of ${s.fa.n}.`;
 function logo(s){ const h=SECTOR_HUE[s.sector]??220; return `<span class="logo" style="background:radial-gradient(circle at 35% 30%,hsl(${h} 70% 62%),hsl(${h} 60% 34%))" role="img" aria-label="${esc(s.name)} badge">${disp(s.t).slice(0,4)}</span>`; }
 
 function cell(s,key){
@@ -932,10 +980,11 @@ function cell(s,key){
     case "p1m": return `<td class="r num">${fmt(s.p1m)}</td>`;
     case "p3m": return `<td class="r num">${fmt(s.p3m)}</td>`;
     case "p1y": return `<td class="r num">${fmt(s.p1y)}</td>`;
-    case "graph": return `<td><button type="button" class="linkbtn" data-chart="${s.t}">5Y chart</button></td>`;
+    case "graph": return `<td><button type="button" class="linkbtn" data-chart="${s.t}">Graph</button></td>`;
     case "pe": return `<td class="r num">${s.stats? (s.stats.pe==null?"n/a":fmt(s.stats.pe,1)) : "—"}</td>`;
     case "sector": return `<td title="${esc(s.sector)}">${SHORT_SECTOR[s.sector]||s.sector}</td>`;
     case "status": return `<td class="status-${s.status}">${s.status}</td>`;
+    case "fa": return s.fa ? `<td class="r num" title="${faNote(s)}">${fmt(faScore(s),0)}%</td>` : `<td class="r num" title="No forecast history from Yahoo for this share">—</td>`;
     case "lev": return `<td class="r num"${s.fin?` title="Not used for banks and financials"`:""}>${s.stats.debitda!=null?fmt(s.stats.debitda,2)+"×":s.fin?"n/a":"—"}</td>`;
     case "p2y": return `<td class="r num">${fmt(s.p2y)}</td>`;
     case "buy": return `<td class="r"><input class="n" id="buy-${s.t}" data-k="buy" data-t="${s.t}" type="number" step="0.01" value="${e.buy}" aria-label="Target buy for ${s.t}"></td>`;
@@ -949,7 +998,7 @@ function cell(s,key){
     case "held": return `<td class="r"><input class="n" id="hd-${s.t}" data-k="held" data-t="${s.t}" type="number" step="0.01" min="0" value="${e.held}" aria-label="Current dollars held in ${s.t}"></td>`;
     case "date": return `<td><input class="d" id="dt-${s.t}" data-k="date" data-t="${s.t}" type="date" value="${e.date}" aria-label="Purchase date for ${s.t}"></td>`;
     case "comment": return `<td><input class="c" id="cm-${s.t}" data-k="comment" data-t="${s.t}" type="text" value="${esc(e.comment)}" placeholder="e.g. wait" aria-label="Comment for ${s.t}"></td>`;
-    case "web": return `<td class="lk">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.url)}">Website ↗</a>`:""}<button type="button" class="linkbtn" data-chart="${s.t}">5Y chart</button></td>`;
+    case "web": return `<td class="lk">${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.url)}">Website ↗</a>`:""}<button type="button" class="linkbtn" data-chart="${s.t}">Graph</button></td>`;
   }
   return "<td></td>";
 }
@@ -1000,7 +1049,7 @@ function detailHTML(s){
     <dt>Revenue (12 months)</dt><dd>${bn(st.rev)}</dd>${st.revg!=null?`<dt>Sales growth (on a year earlier)</dt><dd${neg(st.revg)}>${pct(st.revg)}</dd>`:""}<dt>Operating margin</dt><dd${neg(st.om)}>${st.om==null?"n/a":fmt(st.om,1)+"%"}</dd>
     <dt>Net income</dt><dd${neg(st.ni)}>${bn(st.ni)}</dd><dt>Profit margin</dt><dd${neg(st.pm)}>${st.pm==null?"n/a":fmt(st.pm,1)+"%"}</dd>
     <dt>Earnings per share</dt><dd${neg(st.eps)}>${money(st.eps,s.ccy)}</dd><dt>Free cash flow</dt><dd${neg(st.fcf)}>${bn(st.fcf)}</dd>
-    <dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
+    ${s.fa?`<dt>Forecast accuracy</dt><dd title="${faNote(s)}">${fmt(faScore(s),0)}% · met or beat ${s.fa.hit} of ${s.fa.n}</dd>`:""}<dt>Return on equity</dt><dd>${st.roe==null?"n/a":fmt(st.roe,1)+"%"}</dd><dt>Debt / EBITDA</dt><dd>${st.debitda==null?"n/a":fmt(st.debitda,2)+"×"}</dd>
     <dt>Current ratio</dt><dd>${fmt(st.cr,2)}</dd><dt>Dividend yield</dt><dd>${st.div?fmt(st.div,2)+"%":"none"}</dd>
     ${st.pb!=null?`<dt>Price to book</dt><dd>${fmt(st.pb,2)}×</dd>`:""}<dt>Market value</dt><dd>${bn(st.mcap)}</dd><dt>Analyst view</dt><dd>${st.cons||"—"}${st.analysts?` (${st.analysts})`:""}</dd></dl>${s.statsAsof&&PAYLOAD.asof&&s.statsAsof!==PAYLOAD.asof?`<p class="deephint">Company figures are from ${fmtDate(s.statsAsof)}, because today's update for this share failed.</p>`:""}` : `<p class="muted">Pending.</p>`;
   return `<div class="dd-anim"><div><div class="dd">
@@ -1086,17 +1135,17 @@ function render(animate=true){
   document.querySelectorAll("#segView button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.v===state.view));
   document.querySelectorAll("#segAg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.ag===state.ag));
   moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg"));
-  updateHist(); buildIdxTabs();
+  applyPool(); updateHist(); buildIdxTabs();
   const groups = state.view==="full" ? COLS_FULL : COLS_HIGH;
   const cols = groups.flatMap(g=>g[2].map((c,i)=>({key:c[0],label:c[1],cls:((c[2]||"")+(i===0&&g[0]==="g"?" gl":"")).trim()})));
   const rows = sortRows(filtered());
   updateTallies(rows);
   const deepestBlue = BLUE.length ? BLUE.reduce((a,b)=>a.pct3m<b.pct3m?a:b) : {name:"—",pct3m:null};
-  document.getElementById("summary").innerHTML = `${state.showFail?`Showing <b>${rows.length}</b> of ${POOL.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${POOL.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(POOL.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"agent score":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
+  document.getElementById("summary").innerHTML = `${state.tab==="picks"?`<b>AI picks:</b> the agent's ${MAX_PICKS} highest-confidence blue-chips across every index · `:""}${state.showFail&&state.tab!=="picks"?`Showing <b>${rows.length}</b> of ${POOL.length} shares down ${PAYLOAD.minDrop||10}%+ (${BLUE.length} blue-chips, ${POOL.length-BLUE.length} that fail the test)`:`Showing <b>${rows.length}</b> of ${BLUE.length} blue-chips`}${(n=>n?` · ${n} already bought, in your Portfolio`:"")(POOL.filter(s=>isBought(s.t)).length)} · sorted by ${state.sort.k==="pct"&&state.sort.dir===1?"biggest fall":(state.sort.k==="agent"?"confidence":(cols.find(c=>c.key===state.sort.k)||{label:"biggest fall"}).label.toLowerCase())+(state.sort.dir===1?", low to high":", high to low")}`;
   const key = state.view+"|"+state.idx+"|"+rows.map(s=>s.t).join(",");
   const prevRows = new Set([...document.querySelectorAll("tr.row")].map(r=>r.dataset.row));
   const viewChanged = !lastKey.startsWith(state.view+"|");
-  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}</th>`; }).join("")}</tr></thead><tbody>`;
+  let h = `<thead><tr class="groups">${groups.map(g=>`<th colspan="${g[2].length}" class="${g[0]==="g"?"gl":""}${g[1]==="@idx"?" idx":""}"${g[1]==="@idx"&&IDX?` title="${esc(IDX.name)} index over the same 3 months, for comparison"`:""}>${g[1]==="@idx" ? (IDX ? `${esc(IDX.name)}<b class="${IDX.pct3m<0?"neg":"pos"}">${pct(IDX.pct3m)}</b>` : "3 months") : g[1]==="@ccy" ? `Price · ${IDX?IDX.ccy:"local currency"}` : g[1]}</th>`).join("")}</tr><tr>${cols.map(c=>{ const on = state.sort.k===c.key; return `<th class="${c.cls} c-${c.key}" scope="col"${SORTS[c.key]?` data-sort="${c.key}" title="Sort by ${esc(c.label)}"`:""}${on?` aria-sort="${state.sort.dir===1?"ascending":"descending"}"`:""}>${c.label}${on?`<span class="sa" aria-hidden="true">${state.sort.dir===1?"▲":"▼"}</span>`:""}${c.key==="caret"?"":`<span class="rz" data-rz="${c.key}" title="Drag to resize. Double-click to reset"></span>`}</th>`; }).join("")}</tr></thead><tbody>`;
   if(!rows.length){
     h += `<tr><td colspan="${cols.length}" class="empty">${LOAD_FAILED ? `<div class="e1">No data to show</div>The share data could not be loaded. Reload the page to try again.`
       : (state.q.trim() || state.ag!=="all") && POOL.some(s=>(state.showFail||s.blue) && s.pct3m<=-state.drop && !isBought(s.t)) ? `<div class="e1">Nothing matches these filters</div>Clear the search box or set Agent says to All.`
@@ -1137,7 +1186,21 @@ function toggleRow(tr){
 }
 
 const tbl = document.getElementById("tbl");
-tbl.addEventListener("click", e=>{ const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const wb=e.target.closest("[data-watch]"); if(wb){ toggleWatch(wb.dataset.watch); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
+/* column widths: drag the right edge of a heading; saved in this browser */
+const COLW = store.get("bcdf.colw", {});
+const colStyle = document.head.appendChild(document.createElement("style"));
+function paintColw(){
+  colStyle.textContent = Object.entries(COLW).map(([k,w])=>`#tbl thead th.c-${k},#tbl tr.row td.c-${k}{width:${w}px;min-width:${w}px;max-width:${w}px}#tbl tr.row td.c-${k}{overflow:hidden;text-overflow:ellipsis}#tbl tr.row td.c-${k} input,#tbl tr.row td.c-${k} select{width:100%;min-width:0}`).join("");
+}
+paintColw();
+tbl.addEventListener("pointerdown", e=>{ const h = e.target.closest(".rz"); if(!h) return;
+  e.preventDefault(); const k = h.dataset.rz, x0 = e.clientX, w0 = h.parentElement.getBoundingClientRect().width;
+  h.setPointerCapture(e.pointerId); h.classList.add("on"); document.body.classList.add("resizing");
+  const move = ev => { COLW[k] = Math.round(Math.max(34, w0 + ev.clientX - x0)); paintColw(); };
+  const up = () => { h.removeEventListener("pointermove", move); h.classList.remove("on"); document.body.classList.remove("resizing"); store.set("bcdf.colw", COLW); };
+  h.addEventListener("pointermove", move); h.addEventListener("pointerup", up, {once:true}); h.addEventListener("pointercancel", up, {once:true}); });
+tbl.addEventListener("dblclick", e=>{ const h = e.target.closest(".rz"); if(!h) return; delete COLW[h.dataset.rz]; store.set("bcdf.colw", COLW); paintColw(); });
+tbl.addEventListener("click", e=>{ if(e.target.closest(".rz")) return; const th=e.target.closest("th[data-sort]"); if(th){ const k=th.dataset.sort; state.sort = state.sort.k===k ? {k,dir:-state.sort.dir} : {k,dir:k==="agent"?-1:1}; render(false); return; } const ch=e.target.closest("[data-chart]"); if(ch){ openChart(ch.dataset.chart); return; } const dv=e.target.closest("[data-deep]"); if(dv){ openDeep(dv.dataset.deep); return; } const wb=e.target.closest("[data-watch]"); if(wb){ toggleWatch(wb.dataset.watch); return; } const bb=e.target.closest("[data-buy]"); if(bb){ openBuy(bb.dataset.buy); return; } if(e.target.closest("input,select,a,button,.detail")) return; const tr=e.target.closest("tr.row"); if(tr) toggleRow(tr); });
 tbl.addEventListener("keydown", e=>{ if((e.key==="Enter"||e.key===" ") && e.target.matches("tr.row")){ e.preventDefault(); toggleRow(e.target); }});
 tbl.addEventListener("change", e=>{ const el=e.target; if(!el.dataset.k) return; setEd(el.dataset.t, el.dataset.k, el.value);
   if(el.dataset.k==="approve"){ if(el.value==="yes") snapshot(el.dataset.t); renderPortfolio(); }
@@ -1295,7 +1358,7 @@ function wcell(h,k){
     case "buy": return `<td class="r"><input class="n" data-pk="buy" data-t="${h.t}" type="number" step="0.01" min="0" value="${h.buy??""}" aria-label="Target buy for ${h.t}"></td>`;
     case "gap": return `<td class="r num">${h.gap==null?"—":h.gap<=0?`<span class="pill yes">Reached</span>`:pct(h.gap)+" above"}</td>`;
     case "comment": return `<td><input class="c" data-pk="comment" data-t="${h.t}" type="text" value="${esc(h.comment)}" aria-label="Comment for ${h.t}"></td>`;
-    case "chart": return `<td>${h.s?`<button type="button" class="linkbtn" data-chart="${h.t}">5Y chart</button>`:`<a href="https://finance.yahoo.com/quote/${h.t}/" target="_blank" rel="noopener">Yahoo ↗</a>`}</td>`;
+    case "chart": return `<td>${h.s?`<button type="button" class="linkbtn" data-chart="${h.t}">Graph</button>`:`<a href="https://finance.yahoo.com/quote/${h.t}/" target="_blank" rel="noopener">Yahoo ↗</a>`}</td>`;
     case "trade": return `<td><button class="buybtn" data-buy="${h.t}" aria-label="Buy ${esc(h.name)}">Buy</button></td>`;
     case "rm": return `<td><button class="rm" data-watch="${h.t}" aria-label="Remove ${h.t} from watchlist">Remove</button></td>`;
   }
@@ -1324,11 +1387,15 @@ wtbl.addEventListener("click", e=>{ const c=e.target.closest("[data-chart]"); if
 function setTab(tab){
   state.tab = tab; store.set("bcdf.tab",tab);
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===tab));
-  document.getElementById("finderView").hidden = tab!=="finder";
+  const wasPicks = state.wasPicks; state.wasPicks = tab==="picks";
+  if(tab==="picks" && !wasPicks){ state.sortKeep = state.sort; state.sort = {k:"agent",dir:-1}; }
+  if(tab!=="picks" && wasPicks && state.sortKeep){ state.sort = state.sortKeep; }
+  document.getElementById("finderView").hidden = tab!=="finder" && tab!=="picks";
+  document.querySelector("#finderView .switch").hidden = tab==="picks";
   document.getElementById("portView").hidden = tab!=="portfolio";
   document.getElementById("watchView").hidden = tab!=="watchlist";
   renderPortfolio(); // always: this also keeps the Watchlist and Portfolio tab counts current
-  if(tab==="finder") { render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
+  if(tab==="finder" || tab==="picks") { applyPool(); buildHist(); render(false); moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); }
   if(history.replaceState) history.replaceState(null,"",tab==="finder"?location.pathname+location.search:"#"+tab);
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ setTab(b.dataset.tab); scrollTo({top:0,behavior:RM?"auto":"smooth"}); });
@@ -1527,60 +1594,99 @@ addEventListener("keydown", e=>{ if(e.key==="Escape" && !dp.el.hidden) closeDeep
 
 /* ===== 5-year chart (weekly closes from data.json) ===== */
 const cm = { el: document.getElementById("chartModal") };
-function chartSVG(s){
-  const h = s.h5; if(!h || !h.c || h.c.length<2) return null;
-  const c = h.c, n = c.length, W = 860, H = 320, L = 8, R = 64, T = 14, B = 28;
-  const t0 = new Date(h.start+"T12:00:00Z").getTime(), t1 = new Date(h.end+"T12:00:00Z").getTime();
-  const lo = Math.min(...c), hi = Math.max(...c), pad = (hi-lo)*0.06 || 1, y0 = Math.max(0, lo-pad), y1 = hi+pad;
-  const X = i => L + (W-L-R) * i/(n-1), Y = v => T + (H-T-B) * (1-(v-y0)/(y1-y0));
-  const line = c.map((v,i)=>`${i?"L":"M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join("");
-  const up = c[n-1] >= c[0], col = up ? "var(--good)" : "var(--bad)";
+const RANGES = [["1M",1,"d"],["3M",3,"d"],["6M",6,"d"],["1Y",12,"w"],["5Y",60,"w"],["Max",0,"m"]];
+const cs = { s:null, range: store.get("bcdf.range","1Y"), cmp: !!store.get("bcdf.cmp", false) };
+function histPts(b){   // {start,end,c} -> [[time, close], ...], evenly spaced between the two dates
+  if(!b || !b.c || b.c.length<2) return null;
+  const t0 = Date.parse(b.start+"T12:00:00Z"), t1 = Date.parse(b.end+"T12:00:00Z"), n = b.c.length;
+  return b.c.map((v,i)=>[t0+(t1-t0)*i/(n-1), v]);
+}
+function rangePts(src, range){   // src: {d: daily 6 months, w: weekly 5 years, m: monthly, all years}
+  const r = RANGES.find(x=>x[0]===range); let p = histPts(src[r[2]]);
+  if(!p) return null;
+  if(r[1]){ const d = new Date(p[p.length-1][0]); d.setUTCMonth(d.getUTCMonth()-r[1]); p = p.filter(x=>x[0] >= d.getTime()-864e5); }
+  return p.length>=2 ? p : null;
+}
+const stockHist = s => ({d:s.hd, w:s.h5, m:s.hm});
+function indexFor(s){ return [IDX, ...INDEXES].find(i=>i && i.hist && s.idx.includes(i.id)) || null; }
+function chartSVG(s, range, ix){
+  const p = rangePts(stockHist(s), range); if(!p) return null;
+  const W = 860, H = 320, L = 8, R = 64, T = 14, B = 28, n = p.length, t0 = p[0][0], t1 = p[n-1][0];
+  // the index is rebased to start at the share's first price, so both lines share one scale
+  let q = null, qBase = null;
+  if(ix){ const raw = (rangePts(ix.hist, range)||[]).filter(x=>x[0] >= t0-4*864e5 && x[0] <= t1+4*864e5);
+    if(raw.length>=2){ qBase = raw[0][1]; q = raw.map(x=>[Math.min(t1,Math.max(t0,x[0])), x[1]/qBase*p[0][1]]); } }
+  const all = p.map(x=>x[1]).concat(q?q.map(x=>x[1]):[]);
+  const lo = Math.min(...all), hi = Math.max(...all), pad = (hi-lo)*0.06 || 1, y0 = Math.max(0, lo-pad), y1 = hi+pad;
+  const X = t => L + (W-L-R) * (t-t0)/((t1-t0)||1), Y = v => T + (H-T-B) * (1-(v-y0)/(y1-y0));
+  const path = a => a.map((x,i)=>`${i?"L":"M"}${X(x[0]).toFixed(1)},${Y(x[1]).toFixed(1)}`).join("");
   const ticks = []; for(let k=0;k<=4;k++){ const v = y0 + (y1-y0)*k/4; ticks.push(`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="cg"/><text x="${W-R+6}" y="${Y(v)+4}" class="ct">${fmt(v, v>=100?0:2)}</text>`); }
-  const yrs = []; const ys = new Date(t0).getUTCFullYear()+1, ye = new Date(t1).getUTCFullYear();
-  for(let yr=ys; yr<=ye; yr++){ const tt = Date.UTC(yr,0,1); const i = (tt-t0)/(t1-t0)*(n-1); yrs.push(`<line x1="${X(i)}" x2="${X(i)}" y1="${T}" y2="${H-B}" class="cg"/><text x="${X(i)}" y="${H-8}" class="ct" text-anchor="middle">${yr}</text>`); }
-  const ref = (v,lab,cls) => v ? `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}"/><text x="${L+4}" y="${Y(v)-5}" class="cl ${cls}">${lab} ${money(v,s.ccy)}</text>` : "";
+  const months = (t1-t0)/(30.44*864e5), step = months<=7 ? 1 : months<=26 ? 3 : 12*Math.max(1,Math.ceil(months/12/10));
+  const xs = [], d = new Date(t0); d.setUTCDate(1); d.setUTCHours(12,0,0,0); d.setUTCMonth(d.getUTCMonth()+1);
+  if(step>=12){ d.setUTCMonth(0); d.setUTCFullYear(d.getUTCFullYear()+1); while(step>12 && d.getUTCFullYear()%(step/12)) d.setUTCFullYear(d.getUTCFullYear()+1); }
+  else while(d.getUTCMonth()%step) d.setUTCMonth(d.getUTCMonth()+1);
+  for(; d.getTime()<=t1; d.setUTCMonth(d.getUTCMonth()+step)){ const x = X(d.getTime()); if(x < L+18 || x > W-R-14) continue;
+    const lab = step>=12 ? d.getUTCFullYear() : d.toLocaleDateString("en-AU",{month:"short",timeZone:"UTC"})+(d.getUTCMonth()===0||months>7?" "+String(d.getUTCFullYear()).slice(2):"");
+    xs.push(`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-B}" class="cg"/><text x="${x}" y="${H-8}" class="ct" text-anchor="middle">${lab}</text>`); }
+  const ref = (v,lab,cls) => v && v>=y0 && v<=y1 ? `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="${cls}"/><text x="${L+4}" y="${Y(v)-5}" class="cl ${cls}">${lab} ${money(v,s.ccy)}</text>` : "";
   const e = ed(s.t), pt = s.stats && s.stats.pt;
-  return { n, c, t0, t1, X, Y, W, H, svg: `<svg viewBox="0 0 ${W} ${H}" class="c5" role="img" aria-label="${esc(s.name)} weekly closing price over five years">
-    ${ticks.join("")}${yrs.join("")}
-    <path d="${line} L${X(n-1)},${H-B} L${X(0)},${H-B} Z" fill="${col}" opacity=".07"/>
-    <path d="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
-    ${ref(+e.buy, "Target buy", "rb")}${pt && pt<=y1 ? ref(pt, "Analyst target", "rt") : ""}
-    <circle cx="${X(n-1)}" cy="${Y(c[n-1])}" r="4" fill="${col}"/>
+  return { p, q, qBase, X, Y, W, H, t0, t1, svg: `<svg viewBox="0 0 ${W} ${H}" class="c5" role="img" aria-label="${esc(s.name)} closing price, ${range}${q?`, with the ${esc(ix.name)} overlaid`:""}">
+    ${ticks.join("")}${xs.join("")}
+    <path d="${path(p)} L${X(t1)},${H-B} L${X(t0)},${H-B} Z" class="ca"/>
+    ${q?`<path d="${path(q)}" class="cix"/>`:""}
+    <path d="${path(p)}" class="cln"/>
+    ${ref(+e.buy, "Target buy", "rb")}${ref(pt, "Analyst target", "rt")}
+    <circle cx="${X(t1)}" cy="${Y(p[n-1][1])}" r="4" class="cdot"/>
     <g class="hov" style="display:none"><line class="hl" y1="${T}" y2="${H-B}"/><circle r="4" class="hc"/></g>
   </svg>` };
 }
 function openChart(t){
-  const s = DATA.find(x=>x.t===t); if(!s) return;
-  document.getElementById("chHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="chTitle">${esc(s.name)} · 5 years</h3><div class="sub">${s.t} · weekly closing price, ${s.ccy} · latest ${money(s.curr,s.ccy)}</div></div></div>`;
-  const g = chartSVG(s), body = document.getElementById("chBody");
+  const s = DATA.find(x=>x.t===t); if(!s) return; cs.s = s;
+  document.getElementById("chHead").innerHTML = `<div class="co">${logo(s)}<div><h3 id="chTitle">${esc(s.name)}</h3><div class="sub">${disp(s.t)} · closing price, ${s.ccy} · latest ${money(s.curr,s.ccy)}</div></div></div>`;
+  drawChart();
+  cm.el.hidden = false; document.body.classList.add("modal-open");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>cm.el.classList.add("show")));
+}
+function drawChart(){
+  const s = cs.s, body = document.getElementById("chBody"), src = stockHist(s), ix = indexFor(s);
+  const has = r => !!rangePts(src, r[0]);
+  if(!has(RANGES.find(r=>r[0]===cs.range))) cs.range = (RANGES.find(r=>r[0]==="5Y" && has(r)) || RANGES.find(has) || RANGES[4])[0];
+  const g = chartSVG(s, cs.range, cs.cmp ? ix : null);
+  const ctl = `<div class="cctl"><div class="rng" role="group" aria-label="Time range">${RANGES.map(r=>`<button type="button" data-range="${r[0]}" aria-pressed="${r[0]===cs.range}"${has(r)?"":" disabled title=\"Arrives with the next daily data update\""}>${r[0]}</button>`).join("")}</div>
+    <label class="cmp${ix?"":" off"}"><input type="checkbox" id="chCmp"${cs.cmp&&ix?" checked":""}${ix?"":" disabled"}>Compare with ${ix?esc(ix.name):"the index"}</label></div>`;
   if(!g){
-    body.innerHTML = `<p class="muted">The 5-year price history for ${esc(s.name)} arrives with the next daily data update.</p><p><a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">See the chart on Yahoo Finance ↗</a></p>`;
+    body.innerHTML = ctl + `<p class="muted">The price history for ${esc(s.name)} arrives with the next daily data update.</p><p><a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">See the chart on Yahoo Finance ↗</a></p>`;
   } else {
-    const c = g.c, hi = Math.max(...c), lo = Math.min(...c), ch5 = (c[c.length-1]/c[0]-1)*100, offHi = (s.curr/hi-1)*100;
-    body.innerHTML = `<div class="cstats">
-        <div><span>5-year change</span><b class="num ${ch5>=0?"pos":"neg"}">${pct(ch5)}</b></div>
-        <div><span>5-year high</span><b class="num">${money(hi,s.ccy)}</b></div>
-        <div><span>5-year low</span><b class="num">${money(lo,s.ccy)}</b></div>
-        <div><span>Below 5-year high</span><b class="num neg">${pct(offHi)}</b></div>
+    const c = g.p.map(x=>x[1]), hi = Math.max(...c), lo = Math.min(...c), ch = (c[c.length-1]/c[0]-1)*100;
+    const ich = g.q ? (g.q[g.q.length-1][1]/g.q[0][1]-1)*100 : null;
+    const every = RANGES.find(r=>r[0]===cs.range)[2]==="d" ? "Daily" : RANGES.find(r=>r[0]===cs.range)[2]==="w" ? "Weekly" : "Month-end";
+    body.innerHTML = ctl + `<div class="cstats">
+        <div><span>${cs.range==="Max"?"All-time":cs.range} change</span><b class="num ${ch>=0?"pos":"neg"}">${pct(ch)}</b></div>
+        ${g.q ? `<div><span>${esc(ix.name)}</span><b class="num ${ich>=0?"pos":"neg"}">${pct(ich)}</b></div>` : `<div><span>Below the high</span><b class="num neg">${pct((s.curr/hi-1)*100)}</b></div>`}
+        <div><span>High</span><b class="num">${money(hi,s.ccy)}</b></div>
+        <div><span>Low</span><b class="num">${money(lo,s.ccy)}</b></div>
       </div>
+      <div class="clegend"><span><i class="k1"></i>${esc(disp(s.t))}</span>${g.q?`<span><i class="k2"></i>${esc(ix.name)}, rebased to start at the same price</span>`:""}</div>
       <div class="cwrap">${g.svg}<div class="ctip" hidden></div></div>
-      <p class="fine">Weekly closes from Yahoo Finance, updated every weekday. Dashed lines show your target buy and the analyst average target. <a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">Open on Yahoo Finance ↗</a></p>`;
-    const svg = body.querySelector("svg"), hov = svg.querySelector(".hov"), tip = body.querySelector(".ctip"), wrap = body.querySelector(".cwrap");
+      <p class="fine">${every} closes from Yahoo Finance, updated every weekday. Dashed lines show your target buy and the analyst average target when they fall inside the range. <a href="https://finance.yahoo.com/quote/${s.t}/" target="_blank" rel="noopener">Open on Yahoo Finance ↗</a></p>`;
+    const svg = body.querySelector("svg"), hov = svg.querySelector(".hov"), tip = body.querySelector(".ctip");
     const move = ev => {
       const r = svg.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * g.W;
-      const i = Math.max(0, Math.min(g.n-1, Math.round((x - g.X(0)) / (g.X(1) - g.X(0)))));
-      const cx = g.X(i), cy = g.Y(c[i]);
+      let i = 0, best = 1e9; g.p.forEach((pt,j)=>{ const dx = Math.abs(g.X(pt[0])-x); if(dx<best){ best = dx; i = j; } });
+      const cx = g.X(g.p[i][0]), cy = g.Y(g.p[i][1]);
       hov.style.display = ""; hov.querySelector(".hl").setAttribute("x1", cx); hov.querySelector(".hl").setAttribute("x2", cx);
       hov.querySelector(".hc").setAttribute("cx", cx); hov.querySelector(".hc").setAttribute("cy", cy);
-      const d = new Date(g.t0 + (g.t1-g.t0)*i/(g.n-1));
-      tip.hidden = false; tip.innerHTML = `<b>${money(c[i],s.ccy)}</b><span>${d.toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</span>`;
+      let extra = "";
+      if(g.q){ const k = g.q.reduce((b,pt,j)=>Math.abs(pt[0]-g.p[i][0])<Math.abs(g.q[b][0]-g.p[i][0])?j:b, 0);
+        extra = `<span>${esc(disp(s.t))} ${pct((g.p[i][1]/g.p[0][1]-1)*100)} · ${esc(ix.name)} ${pct((g.q[k][1]/g.q[0][1]-1)*100)}</span>`; }
+      tip.hidden = false; tip.innerHTML = `<b>${money(g.p[i][1],s.ccy)}</b><span>${new Date(g.p[i][0]).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})}</span>${extra}`;
       const px = cx / g.W * r.width; tip.style.left = Math.max(4, Math.min(r.width - tip.offsetWidth - 4, px - tip.offsetWidth/2)) + "px";
     };
     svg.addEventListener("pointermove", move); svg.addEventListener("pointerdown", move);
     svg.addEventListener("pointerleave", ()=>{ hov.style.display = "none"; tip.hidden = true; });
   }
-  cm.el.hidden = false; document.body.classList.add("modal-open");
-  requestAnimationFrame(()=>requestAnimationFrame(()=>cm.el.classList.add("show")));
+  body.querySelectorAll("[data-range]").forEach(b=>b.onclick = ()=>{ cs.range = b.dataset.range; store.set("bcdf.range", cs.range); drawChart(); });
+  const cb = body.querySelector("#chCmp"); if(cb) cb.onchange = ()=>{ cs.cmp = cb.checked; store.set("bcdf.cmp", cs.cmp); drawChart(); };
 }
 function closeChart(){ cm.el.classList.remove("show"); document.body.classList.remove("modal-open"); setTimeout(()=>{ cm.el.hidden = true; }, RM?0:280); }
 cm.el.addEventListener("click", e=>{ if(e.target.closest("[data-cclose]")) closeChart(); });
@@ -1591,8 +1697,12 @@ setTimeout(()=>document.querySelectorAll(".reveal").forEach(el=>el.classList.add
 
 const deck=document.querySelector('.deck'); let deckTop=0; const measure=()=>{deck.classList.remove('compact'); deckTop=deck.getBoundingClientRect().top+scrollY;}; measure();
 addEventListener('scroll',()=>{ if(getComputedStyle(deck).position!=='sticky') return; deck.classList.toggle('compact', scrollY>deckTop+40); },{passive:true});
+{ const bt = document.getElementById("bookToggle"), bk = document.getElementById("book");
+  const set = open => { bk.hidden = !open; bt.setAttribute("aria-expanded", open); bt.querySelector(".bt-a").textContent = open ? "Hide" : "Show"; bt.querySelector(".bt-c").textContent = open ? "▾" : "▸"; };
+  set(store.get("bcdf.book", true));
+  bt.onclick = ()=>{ const open = bk.hidden; store.set("bcdf.book", open); set(open); if(open) bk.querySelectorAll(".reveal").forEach(el=>el.classList.add("in")); }; }
 buildTallies(); buildIdxTabs(); buildHist(); render();
-setTab((t=>["finder","watchlist","portfolio"].includes(t)?t:"finder")(location.hash ? location.hash.slice(1) : store.get("bcdf.tab","finder")));
+setTab((t=>["finder","picks","watchlist","portfolio"].includes(t)?t:"finder")(location.hash ? location.hash.slice(1) : store.get("bcdf.tab","finder")));
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ moveInd(document.getElementById("segView")); moveInd(document.getElementById("segAg")); });
 
 </script>
